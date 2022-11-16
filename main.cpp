@@ -21,19 +21,13 @@ using samples_def = tudb::define_table<
 
 int main()
 {
-    constexpr auto concated_str = tudb::concat(tudb::cstr{"abudffjd"}, tudb::cstr{"abcd"}, tudb::cstr{"zyx"});
-    constexpr auto converted_str = tudb::to_string<-255, 16, true>();
     std::cout << samples_def::name.buf << std::endl;
     constexpr auto id_info = samples_def::get_column_info<samples::ID>();
     constexpr auto name_info = samples_def::get_column_info<samples::NAME>();
     constexpr auto create_at_info = samples_def::get_column_info<samples::CREATE_AT>();
     std::cout << id_info.name.buf << ' '
         << name_info.name.buf << ' '
-        << create_at_info.name.buf << ' '
-        << concated_str.buf << converted_str.buf << std::endl;
-
-    constexpr auto ff = tudb::cstr{"abc"} == tudb::cstr{"abcd"};
-    std::cout << (ff ? "true" : "fals");
+        << create_at_info.name.buf << std::endl;
 
     using types1 = tudb::type_list<int, double, std::string>;
     using types2 = tudb::type_list<std::nullptr_t, std::size_t, char>;
