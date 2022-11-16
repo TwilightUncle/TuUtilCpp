@@ -1,5 +1,4 @@
 #pragma once
-#include <array>
 
 namespace tudb
 {
@@ -10,7 +9,16 @@ namespace tudb
     template <std::size_t N>
     struct cstr
     {
+        // コンストラクタはなくても動くが、エディタ上でエラー表示が多発するのであえて書いてる
+        constexpr cstr() noexcept : buf{} {}
+        constexpr cstr(const char (&str_literal)[N]) noexcept
+        {
+            for (auto i = 0; i < N; i++)
+                buf[i] = str_literal[i];
+        }
+
         char buf[N];
+        constexpr auto view() const noexcept { return std::string_view{buf}; }
         // 終端文字も格納済みであるものとして扱う
         static constexpr auto size = N - 1;
     };
@@ -41,16 +49,35 @@ namespace tudb
 
     /**
      * @fn
-     * @brief 演算子オーバーロード(一致)
+     * @brief OffsetからCountの文字数分を新規文字列として切り出す
+    */
+    template <std::size_t Offset, std::size_t Count, std::size_t N>
+    requires (Offset < cstr<N>::size)
+    constexpr auto substr(const cstr<N>& s)
+    {
+        constexpr auto len = (std::min)(Count, cstr<N>::size - Offset);
+        cstr<len + 1> _s{};
+        _s.buf[len] = '\0';
+        for (auto i = 0; i < len; i++) _s.buf[i] = s.buf[i + Offset];
+        return _s;
+    }
+    // Offsetから文字列の最後尾まで
+    template <std::size_t Offset, std::size_t N>
+    constexpr auto substr(const cstr<N>& s) { return substr<Offset, cstr<N>::size - Offset, N>(s); }
+
+    /**
+     * @fn
+     * @brief 演算子オーバーロード(一致。不一致は導出されるので不要。細かい仕様はc++20の一貫比較で確認すること)
     */
     template <std::size_t N1, std::size_t N2>
-    constexpr bool operator==(const cstr<N1>& s1, const cstr<N2>& s2)
-    {
-        // 同じ要素数の場合、arrayに比較演算子の定義があるのでそれを適用
-        if constexpr (N1 == N2)
-            return std::to_array(s1.buf) == std::to_array(s2.buf);
-        return false;
-    }
+    constexpr bool operator==(const cstr<N1>& s1, const cstr<N2>& s2) { return s1.view() == s2.view(); }
+
+    /**
+     * @fn
+     * @brief 演算子オーバーロード(宇宙船。細かい仕様はc++20の一貫比較で確認すること)
+    */
+    template <std::size_t N1, std::size_t N2>
+    constexpr std::strong_ordering operator<=>(const cstr<N1>& s1, const cstr<N2>& s2) { return s1.view() <=> s2.view(); }
 
     /**
      * @fn

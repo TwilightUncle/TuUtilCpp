@@ -10,15 +10,32 @@ TEST(tudbcpptest, CstrConcatTest)
     ASSERT_STREQ(case2.buf, "abc1234zyxwv");
 }
 
+TEST(tudbcpptest, CstrSubstrTest)
+{
+    constexpr auto case1 = tudb::substr<3>(tudb::cstr{"abcdefg"});
+    constexpr auto case2 = tudb::substr<3, 3>(tudb::cstr{"abcdefg"});
+    constexpr auto case3 = tudb::substr<3, 4>(tudb::cstr{"abcdefg"});
+    constexpr auto case4 = tudb::substr<3, 5>(tudb::cstr{"abcdefg"});
+
+    ASSERT_STREQ(case1.buf, "defg");
+    ASSERT_STREQ(case2.buf, "def");
+    ASSERT_STREQ(case1.buf, case3.buf);
+    ASSERT_STREQ(case3.buf, case4.buf);
+}
+
 TEST(tudbcpptest, CstrOperatorTest)
 {
     constexpr auto case1 = tudb::cstr{"abc"} == tudb::cstr{"abc"};
     constexpr auto case2 = tudb::cstr{"abc"} == tudb::cstr{"adc"};
-    constexpr auto case3 = tudb::cstr{"abc"} == tudb::cstr{"abcd"};
+    constexpr auto case3 = tudb::cstr{"abc"} != tudb::cstr{"abcd"};
+    constexpr auto case4 = tudb::cstr{"abc"} < tudb::cstr{"adc"};
+    constexpr auto case5 = tudb::cstr{"abc"} >= tudb::cstr{"abcd"};
 
     ASSERT_TRUE(case1);
     ASSERT_FALSE(case2);
-    ASSERT_FALSE(case3);
+    ASSERT_TRUE(case3);
+    ASSERT_TRUE(case4);
+    ASSERT_FALSE(case5);
 }
 
 TEST(tudbcpptest, CstrGetDigitTest)

@@ -3,6 +3,7 @@
 /// @brief テンプレート引数操作系のヘルパ群
 ///----------------------------------
 #pragma once
+#include <compare>
 #include <string>
 #include <concepts>
 
