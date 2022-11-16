@@ -66,7 +66,7 @@ namespace tudb
         cstr<len + 1> s;
         s.buf[len] = '\0';
         auto val = V;
-        for (auto i = len; i; val /= Hex) {
+        for (auto i = len; i > 0; val /= Hex) {
             const auto code = static_cast<char>(val % Hex);
             s.buf[--i] = (code < 10)
                 ? '0' + code
