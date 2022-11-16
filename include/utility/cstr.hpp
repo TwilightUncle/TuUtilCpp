@@ -18,7 +18,6 @@ namespace tudb
         {
             for (auto i = 0; i < size; i++)
                 this->data()[i] = str_literal[i];
-            this->data()[size] = '\0';
         }
 
         constexpr auto view() const noexcept { return std::string_view{this->data()}; }
