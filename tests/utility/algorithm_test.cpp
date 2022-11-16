@@ -6,8 +6,8 @@ TEST(tudbcpptest, GetFirstTypeTest)
     // リストのうち最初の型を返す
     constexpr auto case1 = std::is_same_v<tudb::get_first_type_t<int, void, double>, int>;
     constexpr auto case2 = std::is_same_v<tudb::get_first_type_t<void, double, int>, int>;
-    EXPECT_TRUE(case1);
-    EXPECT_FALSE(case2);
+    ASSERT_TRUE(case1);
+    ASSERT_FALSE(case2);
 }
 
 // テスト用メタ関数定義(受け取った二つの引数の内型のサイズが大きいほうを返す)
@@ -28,10 +28,10 @@ TEST(tudbcpptest, FoldByTypeTest)
     constexpr auto case3 = std::is_same_v<r_max, long long>;
     constexpr auto case4 = std::is_same_v<r_min, unsigned short>;
 
-    EXPECT_TRUE(case1);
-    EXPECT_TRUE(case2);
-    EXPECT_TRUE(case3);
-    EXPECT_TRUE(case4);
+    ASSERT_TRUE(case1);
+    ASSERT_TRUE(case2);
+    ASSERT_TRUE(case3);
+    ASSERT_TRUE(case4);
 }
 
 // どの型を渡してもintを返す
@@ -42,7 +42,7 @@ TEST(tudbcpptest, MapTypesTest)
     // メタ関数が全ての型に適用されていること
     using maped = tudb::map_types_t<to_int, void, double, int, char>;
     constexpr auto case1 = std::is_same_v<maped, tudb::type_list<int, int, int, int>>;
-    EXPECT_TRUE(case1);
+    ASSERT_TRUE(case1);
 }
 
 template <int V, class T> struct test_same_value : std::bool_constant<V == T::value> {};
@@ -60,10 +60,10 @@ TEST(tudbcpptest, FindIfTypeTest)
     constexpr auto case3 = std::is_same_v<find_type_1, std::integral_constant<int, 1>>;
     constexpr auto case4 = std::is_same_v<not_find_type2, void>;
 
-    EXPECT_TRUE(case1);
-    EXPECT_TRUE(case2);
-    EXPECT_TRUE(case3);
-    EXPECT_TRUE(case4);
+    ASSERT_TRUE(case1);
+    ASSERT_TRUE(case2);
+    ASSERT_TRUE(case3);
+    ASSERT_TRUE(case4);
 }
 
 TEST(tudbcpptest, EqualValuesTest)
@@ -74,10 +74,10 @@ TEST(tudbcpptest, EqualValuesTest)
     constexpr auto case3 = tudb::equal_values_v<(char)5, (long)5>;
     constexpr auto case4 = tudb::equal_values_v<(char)5, (long)4>;
 
-    EXPECT_TRUE(case1);
-    EXPECT_FALSE(case2);
-    EXPECT_FALSE(case3);
-    EXPECT_FALSE(case4);
+    ASSERT_TRUE(case1);
+    ASSERT_FALSE(case2);
+    ASSERT_FALSE(case3);
+    ASSERT_FALSE(case4);
 }
 
 TEST(tudbcpptest, IncludeTest)
@@ -89,10 +89,10 @@ TEST(tudbcpptest, IncludeTest)
     constexpr auto case3 = tudb::include_value_v<(int)1, (char)1, (long)2, (int)1, (long long)0>;
     constexpr auto case4 = tudb::include_value_v<(int)1, (char)1, (long)2, (unsigned int)1, (long long)0>;
 
-    EXPECT_TRUE(case1);
-    EXPECT_FALSE(case2);
-    EXPECT_TRUE(case3);
-    EXPECT_FALSE(case4);
+    ASSERT_TRUE(case1);
+    ASSERT_FALSE(case2);
+    ASSERT_TRUE(case3);
+    ASSERT_FALSE(case4);
 }
 
 TEST(tudbcpptest, IsUniqueTest)
@@ -103,10 +103,10 @@ TEST(tudbcpptest, IsUniqueTest)
     constexpr auto case3 = tudb::is_unique_values_v<(int)1, (int)2, (short)1, (short)2>;
     constexpr auto case4 = tudb::is_unique_values_v<(int)1, (int)2, (short)1, (int)2>;
 
-    EXPECT_TRUE(case1);
-    EXPECT_FALSE(case2);
-    EXPECT_TRUE(case3);
-    EXPECT_FALSE(case4);
+    ASSERT_TRUE(case1);
+    ASSERT_FALSE(case2);
+    ASSERT_TRUE(case3);
+    ASSERT_FALSE(case4);
 }
 
 TEST(tudbcpptest, IsSameTest)
@@ -119,11 +119,11 @@ TEST(tudbcpptest, IsSameTest)
     constexpr auto case4 = tudb::is_same_value_types_v<(int)1, (int)1, (int)2, (int)1>;
     constexpr auto case5 = tudb::is_same_value_types_v<(int)1, (int)1, (char)1, (int)1>;
 
-    EXPECT_TRUE(case1);
-    EXPECT_FALSE(case2);
-    EXPECT_TRUE(case3);
-    EXPECT_TRUE(case4);
-    EXPECT_FALSE(case5);
+    ASSERT_TRUE(case1);
+    ASSERT_FALSE(case2);
+    ASSERT_TRUE(case3);
+    ASSERT_TRUE(case4);
+    ASSERT_FALSE(case5);
 }
 
 TEST(tudbcpptest, CountTest)
@@ -134,8 +134,8 @@ TEST(tudbcpptest, CountTest)
     constexpr auto case3 = tudb::count_value_parameters_v<1>;
     constexpr auto case4 = tudb::count_value_parameters_v<1, 'c', true, 4>;
 
-    EXPECT_EQ(case1, 1);
-    EXPECT_EQ(case2, 4);
-    EXPECT_EQ(case3, 1);
-    EXPECT_EQ(case4, 4);
+    ASSERT_EQ(case1, 1);
+    ASSERT_EQ(case2, 4);
+    ASSERT_EQ(case3, 1);
+    ASSERT_EQ(case4, 4);
 }
