@@ -21,6 +21,18 @@ namespace tudb
     };
 
     /**
+     * @brief 二つの型引数を受け取り判定するメタ関数であることを制約する
+    */
+    template <template <class, class> class T, class ArgT1, class ArgT2>
+    concept TwoTypeArgsTestable = Testable<T<ArgT1, ArgT2>>;
+
+    /**
+     * @brief 非型引数と型引数を一つずつ受け取り判定するメタ関数であることを制約する
+    */
+    template <template <auto, class> class T, auto ArgV, class ArgT>
+    concept FirstValueSecondTypeArgsTestable = Testable<T<ArgV, ArgT>>;
+
+    /**
      * @brief 型取得メタ関数である制約
     */
     template <typename T>
@@ -33,18 +45,6 @@ namespace tudb
     */
     template <template <class, class> class T, class ArgT1, class ArgT2>
     concept TwoTypeArgsTypeGetable = TypeGetable<T<ArgT1, ArgT2>>;
-
-    /**
-     * @brief 二つの型引数を受け取り判定するメタ関数であることを制約する
-    */
-    template <template <class, class> class T, class ArgT1, class ArgT2>
-    concept TwoTypeArgsTestable = Testable<T<ArgT1, ArgT2>>;
-
-    /**
-     * @brief 非型引数と型引数を一つずつ受け取り判定するメタ関数であることを制約する
-    */
-    template <template <auto, class> class T, auto ArgV, class ArgT>
-    concept FirstValueSecondTypeArgsTestable = Testable<T<ArgV, ArgT>>;
 
     /**
      * @brief 重複なしのパラメータパックをもつ制約
