@@ -86,7 +86,7 @@ namespace tudb
     template <std::integral auto V, std::size_t Hex = 10, bool UsePrefix = false>
     constexpr auto to_string() { return concat(cstr{"-"}, to_string<-V, Hex, UsePrefix>()); }
 
-    template <auto V> struct to_cstr;
+    // template <auto V> struct to_cstr;
 
     /**
      * @fn
@@ -108,9 +108,9 @@ namespace tudb
     template <StringLiteralSpecificable auto... Strs>
     constexpr auto concat_cstr_v = concat_cstr<Strs...>::value;
 
-    template <StringLiteralSpecificable FormatStr, auto... Args>
-    struct format_cstr
-    {
+    // template <StringLiteralSpecificable FormatStr, auto... Args>
+    // struct format_cstr
+    // {
 
-    };
+    // };
 }
