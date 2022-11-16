@@ -6,8 +6,8 @@ TEST(tudbcpptest, CstrConcatTest)
     constexpr auto case1 = tudb::concat(tudb::cstr{"abc"}, tudb::cstr{"defghi"});
     constexpr auto case2 = tudb::concat(tudb::cstr{"abc"}, tudb::cstr{"1234"}, tudb::cstr{"zyxwv"});
 
-    ASSERT_STREQ(case1.buf, "abcdefghi");
-    ASSERT_STREQ(case2.buf, "abc1234zyxwv");
+    ASSERT_STREQ(case1.data(), "abcdefghi");
+    ASSERT_STREQ(case2.data(), "abc1234zyxwv");
 }
 
 TEST(tudbcpptest, CstrSubstrTest)
@@ -17,10 +17,10 @@ TEST(tudbcpptest, CstrSubstrTest)
     constexpr auto case3 = tudb::substr<3, 4>(tudb::cstr{"abcdefg"});
     constexpr auto case4 = tudb::substr<3, 5>(tudb::cstr{"abcdefg"});
 
-    ASSERT_STREQ(case1.buf, "defg");
-    ASSERT_STREQ(case2.buf, "def");
-    ASSERT_STREQ(case1.buf, case3.buf);
-    ASSERT_STREQ(case3.buf, case4.buf);
+    ASSERT_STREQ(case1.data(), "defg");
+    ASSERT_STREQ(case2.data(), "def");
+    ASSERT_STREQ(case1.data(), case3.data());
+    ASSERT_STREQ(case3.data(), case4.data());
 }
 
 TEST(tudbcpptest, CstrOperatorTest)
@@ -71,13 +71,13 @@ TEST(tudbcpptest, CstrIntegralToStringTest)
     constexpr auto case8 = tudb::to_string<077777, 8, true>(); 
     constexpr auto case9 = tudb::to_string<-0xfffff, 16, true>();
 
-    ASSERT_STREQ(case1.buf, "154352");
-    ASSERT_STREQ(case2.buf, "-54362");
-    ASSERT_STREQ(case3.buf, "100");
-    ASSERT_STREQ(case4.buf, "-777");
-    ASSERT_STREQ(case5.buf, "FFFFFFFF");
-    ASSERT_STREQ(case6.buf, "100");
-    ASSERT_STREQ(case7.buf, "-0b1111");
-    ASSERT_STREQ(case8.buf, "077777");
-    ASSERT_STREQ(case9.buf, "-0xFFFFF");
+    ASSERT_STREQ(case1.data(), "154352");
+    ASSERT_STREQ(case2.data(), "-54362");
+    ASSERT_STREQ(case3.data(), "100");
+    ASSERT_STREQ(case4.data(), "-777");
+    ASSERT_STREQ(case5.data(), "FFFFFFFF");
+    ASSERT_STREQ(case6.data(), "100");
+    ASSERT_STREQ(case7.data(), "-0b1111");
+    ASSERT_STREQ(case8.data(), "077777");
+    ASSERT_STREQ(case9.data(), "-0xFFFFF");
 }

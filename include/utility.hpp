@@ -5,6 +5,7 @@
 #pragma once
 #include <compare>
 #include <string>
+#include <array>
 #include <concepts>
 
 #include <utility/concepts.hpp>

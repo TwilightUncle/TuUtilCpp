@@ -21,13 +21,13 @@ using samples_def = tudb::define_table<
 
 int main()
 {
-    std::cout << samples_def::name.buf << std::endl;
+    std::cout << samples_def::name.data() << std::endl;
     constexpr auto id_info = samples_def::get_column_info<samples::ID>();
     constexpr auto name_info = samples_def::get_column_info<samples::NAME>();
     constexpr auto create_at_info = samples_def::get_column_info<samples::CREATE_AT>();
-    std::cout << id_info.name.buf << ' '
-        << name_info.name.buf << ' '
-        << create_at_info.name.buf << std::endl;
+    std::cout << id_info.name.data() << ' '
+        << name_info.name.data() << ' '
+        << create_at_info.name.data() << std::endl;
 
     using types1 = tudb::type_list<int, double, std::string>;
     using types2 = tudb::type_list<std::nullptr_t, std::size_t, char>;

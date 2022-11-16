@@ -7,20 +7,21 @@ namespace tudb
      * @brief パラメータパックで文字列リテラルを使用するための型
     */
     template <std::size_t N>
-    struct cstr
+    struct cstr : public std::array<char, N>
     {
-        // コンストラクタはなくても動くが、エディタ上でエラー表示が多発するのであえて書いてる
-        constexpr cstr() noexcept : buf{} {}
-        constexpr cstr(const char (&str_literal)[N]) noexcept
-        {
-            for (auto i = 0; i < N; i++)
-                buf[i] = str_literal[i];
-        }
-
-        char buf[N];
-        constexpr auto view() const noexcept { return std::string_view{buf}; }
         // 終端文字も格納済みであるものとして扱う
         static constexpr auto size = N - 1;
+
+        constexpr cstr() noexcept : std::array<char, N>{} {}
+        constexpr cstr(const char (&str_literal)[N]) noexcept
+            : std::array<char, N>{}
+        {
+            for (auto i = 0; i < size; i++)
+                this->data()[i] = str_literal[i];
+            this->data()[size] = '\0';
+        }
+
+        constexpr auto view() const noexcept { return std::string_view{this->data()}; }
     };
 
     /**
@@ -32,8 +33,8 @@ namespace tudb
     {
         // s1の終端文字は除去するため、-1
         cstr<N1 + N2 - 1> _s{};
-        for (int i = 0; i < N1 - 1; i++) _s.buf[i] = s1.buf[i];
-        for (int i = 0; i < N2; i++) _s.buf[i + N1 - 1] = s2.buf[i];
+        for (int i = 0; i < N1 - 1; i++) _s[i] = s1[i];
+        for (int i = 0; i < N2; i++) _s[i + N1 - 1] = s2[i];
         return _s;
     }
 
@@ -57,8 +58,7 @@ namespace tudb
     {
         constexpr auto len = (std::min)(Count, cstr<N>::size - Offset);
         cstr<len + 1> _s{};
-        _s.buf[len] = '\0';
-        for (auto i = 0; i < len; i++) _s.buf[i] = s.buf[i + Offset];
+        for (auto i = 0; i < len; i++) _s[i] = s[i + Offset];
         return _s;
     }
     // Offsetから文字列の最後尾まで
@@ -103,12 +103,11 @@ namespace tudb
         // 10進数として桁数を取得
         constexpr auto len = get_digit<V, Hex>();
         // 終端文字の長さも配列の要素数に含める
-        cstr<len + 1> s;
-        s.buf[len] = '\0';
+        cstr<len + 1> s{};
         auto val = V;
         for (auto i = len; i > 0; val /= Hex) {
             const auto code = static_cast<char>(val % Hex);
-            s.buf[--i] = (code < 10)
+            s[--i] = (code < 10)
                 ? '0' + code
                 : 'A' + code - 10;
         }
