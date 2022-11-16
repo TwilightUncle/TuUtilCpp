@@ -15,6 +15,10 @@ namespace tudb
         static constexpr auto size = N - 1;
     };
 
+    /**
+     * @fn
+     * @brief 二つのcstr型文字列を結合する
+    */
     template <std::size_t N1, std::size_t N2>
     constexpr auto concat(const cstr<N1>& s1, const cstr<N2>& s2)
     {
@@ -24,12 +28,21 @@ namespace tudb
         for (int i = 0; i < N2; i++) _s.buf[i + N1 - 1] = s2.buf[i];
         return _s;
     }
+
+    /**
+     * @fn
+     * @brief n個のcstr型文字列を一つに結合する
+    */
     template <std::size_t N1, std::size_t N2, std::size_t... Sizes>
     constexpr auto concat(const cstr<N1>& s1, const cstr<N2>& s2, const cstr<Sizes>&... strs)
     {
         return concat(concat(s1, s2), strs...);
     }
 
+    /**
+     * @fn
+     * @brief 演算子オーバーロード(一致)
+    */
     template <std::size_t N1, std::size_t N2>
     constexpr bool operator==(const cstr<N1>& s1, const cstr<N2>& s2)
     {
@@ -103,10 +116,10 @@ namespace tudb
 
     // 関数でテンプレート引数に指定可能であった場合は不要なので消す
     // 型として文字を保持し続けるコンテナとして残したほうが良いか？
-    template <StringLiteralSpecificable auto... Strs>
-    struct concat_cstr { static constexpr auto value = concat(Strs...); };
-    template <StringLiteralSpecificable auto... Strs>
-    constexpr auto concat_cstr_v = concat_cstr<Strs...>::value;
+    // template <StringLiteralSpecificable auto... Strs>
+    // struct concat_cstr { static constexpr auto value = concat(Strs...); };
+    // template <StringLiteralSpecificable auto... Strs>
+    // constexpr auto concat_cstr_v = concat_cstr<Strs...>::value;
 
     // template <StringLiteralSpecificable FormatStr, auto... Args>
     // struct format_cstr
