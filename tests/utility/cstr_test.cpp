@@ -1,6 +1,31 @@
 #include <gtest/gtest.h>
 #include <utility.hpp>
 
+TEST(tudbcpptest, CstrConstructorTest)
+{
+    constexpr auto case1 = tudb::cstr<5>{};
+    constexpr auto case2 = tudb::cstr{"abcd"};
+    // 最後尾のdは消えること(必ず配列の最後尾は終端文字である必要)
+    constexpr auto case3 = tudb::cstr{{'a', 'b', 'c', 'd'}};
+
+    // リテラルでない者の指定
+    constexpr char str2[] = "abcd\0\0\0";
+    constexpr auto case4 = tudb::cstr{str2};
+
+    ASSERT_EQ(case1.max_size, 4);
+    ASSERT_EQ(case1.size(), 0);
+    ASSERT_STREQ(case1.data(), "");
+    ASSERT_EQ(case2.max_size, 4);
+    ASSERT_EQ(case2.size(), 4);
+    ASSERT_STREQ(case2.data(), "abcd");
+    ASSERT_EQ(case3.max_size, 3);
+    ASSERT_EQ(case3.size(), 3);
+    ASSERT_STREQ(case3.data(), "abc");
+    ASSERT_EQ(case4.max_size, 7);
+    ASSERT_EQ(case4.size(), 4);
+    ASSERT_STREQ(case4.data(), "abcd");
+}
+
 TEST(tudbcpptest, CstrConcatTest)
 {
     constexpr auto case1 = tudb::concat(tudb::cstr{"abc"}, tudb::cstr{"defghi"});
