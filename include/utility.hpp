@@ -9,6 +9,7 @@
 #include <concepts>
 
 #include <utility/concepts.hpp>
+#include <utility/carry_over.hpp>
 #include <utility/cstr.hpp>
 #include <utility/algorithm.hpp>
 #include <utility/type_list.hpp>
