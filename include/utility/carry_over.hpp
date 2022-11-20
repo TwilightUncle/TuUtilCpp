@@ -24,7 +24,7 @@ namespace tudb
          * @param assign_offset 代入先のインデックスにずれがあるとき指定
         */
         template <std::size_t N>
-        constexpr carry_over_container run(CarryOverCallable<T> auto f, const carry_over_container<T, N>& arg, unsigned int assign_offset = 0) const
+        constexpr carry_over_container run(CarryOverCallable<T> auto f, const carry_over_container<T, N>& arg, const unsigned int assign_offset = 0) const
         {
             return run(f, arg, f, assign_offset);
         }
@@ -42,7 +42,7 @@ namespace tudb
             CarryOverCallable<T> auto f,
             const carry_over_container<T, N>& arg,
             CarryOverCallable<T> auto carry_over_process,
-            unsigned int assign_offset = 0
+            const unsigned int assign_offset = 0
         ) const {
             auto result = (*this);
             for (unsigned int i = 0; i < (std::min)(Size, N); i++)
@@ -58,7 +58,7 @@ namespace tudb
          * @param offset 計算対象のインデックスを指定
          * @param assign_offset 代入先のインデックスにずれがあるとき指定
         */
-        constexpr carry_over_container run(CarryOverCallable<T> auto f, const T& arg, unsigned int offset = 0, unsigned int assign_offset = 0) const
+        constexpr carry_over_container run(CarryOverCallable<T> auto f, const T& arg, unsigned int offset = 0, const unsigned int assign_offset = 0) const
         {
             return run(f, arg, f, offset, assign_offset);
         }
@@ -76,18 +76,21 @@ namespace tudb
             CarryOverCallable<T> auto f,
             const T& arg,
             CarryOverCallable<T> auto carry_over_process,
-            unsigned int offset = 0,
-            unsigned int assign_offset = 0
+            const unsigned int offset = 0,
+            const unsigned int assign_offset = 0
         ) const {
             auto result = (*this);
-            auto calclated = f(this->data()[offset], arg);
-            if (assign_offset > 0)
-                return run(carry_over_process, calclated.first[0], offset + assign_offset);
-            else result[offset] = calclated.first[0];
+            if (offset < Size) {
+                if (assign_offset > 0)
+                    return run(carry_over_process, arg, offset + assign_offset);
 
-            for (unsigned int i = offset + 1; i < Size && calclated.second; i++) {
-                calclated = carry_over_process(this->data()[i], calclated.first[1]);
-                result[i] = calclated.first[0];
+                auto calclated = f(this->data()[offset], arg);
+                result[offset] = calclated.first[0];
+
+                for (unsigned int i = offset + 1; i < Size && calclated.second; i++) {
+                    calclated = carry_over_process(this->data()[i], calclated.first[1]);
+                    result[i] = calclated.first[0];
+                }
             }
             return result;
         }
@@ -96,35 +99,60 @@ namespace tudb
          * @fn
          * @brief 自身と同じ型のオブジェクトによるたすき掛け
         */
-        // template <std::size_t N>
-        // constexpr void run_all(CarryOverCallable<T> auto f, const carry_over_container<T, N>& arg)
-        // {
-        //     run_all(f, arg, f);
-        // }
+        template <std::size_t N>
+        constexpr carry_over_container run_all(CarryOverCallable<T> auto f, const carry_over_container<T, N>& arg) const
+        {
+            return run_all(f, arg, f);
+        }
 
-        // template <std::size_t N>
-        // constexpr void run_all(CarryOverCallable<T> auto f, const carry_over_container<T, N>& arg, CarryOverCallable<T> auto carry_over_process)
-        // {
-        //     for (unsigned int i = 0; i < (std::min)(Size, N); i++) run_all(f, arg[i], carry_over_process, i);
-        // }
+        /**
+         * @fn
+         * @brief 自身と同じ型のオブジェクトによるたすき掛け
+        */
+        template <std::size_t N>
+        constexpr carry_over_container run_all(
+            CarryOverCallable<T> auto f,
+            const carry_over_container<T, N>& arg,
+            CarryOverCallable<T> auto carry_over_process
+        ) const {
+            auto result = carry_over_container{};
+            for (unsigned int i = 0; i < (std::min)(Size, N); i++)
+                result = result.run(
+                    carry_over_process,
+                    run_all(f, arg[i], carry_over_process, i)
+                );
+            return result;
+        }
 
-        // /**
-        //  * @fn
-        //  * @brief 引数をすべての要素に適用する
-        // */
-        // constexpr void run_all(CarryOverCallable<T> auto f, const T& arg, unsigned int assign_offset = 0)
-        // {
-        //     run_all(f, arg, f, assign_offset);
-        // }
+        /**
+         * @fn
+         * @brief 引数をすべての要素に適用する
+        */
+        constexpr carry_over_container run_all(CarryOverCallable<T> auto f, const T& arg, const unsigned int assign_offset = 0) const
+        {
+            return run_all(f, arg, f, assign_offset);
+        }
 
-        // /**
-        //  * @fn
-        //  * @brief 引数をすべての要素に適用する
-        // */
-        // constexpr void run_all(CarryOverCallable<T> auto f, const T& arg, CarryOverCallable<T> auto carry_over_process, unsigned int assign_offset = 0)
-        // {
-        //     auto carry_over_temp = carry_over_container{};
-        //     for (unsigned int i = 0; i < Size; i++) run(f, arg, carry_over_process, i, assign_offset);
-        // }
+        /**
+         * @fn
+         * @brief 引数をすべての要素に適用する
+        */
+        constexpr carry_over_container run_all(
+            CarryOverCallable<T> auto f,
+            const T& arg,
+            CarryOverCallable<T> auto carry_over_process,
+            const unsigned int assign_offset = 0
+        ) const {
+            auto result = carry_over_container{};
+            for (unsigned int i = 0; i < Size; i++) {
+                const auto calclated = f(this->data()[i], arg);
+                result = result.run(
+                    carry_over_process,
+                    carry_over_container<T, 2>{calclated.first[0], calclated.first[1]},
+                    i + assign_offset
+                );
+            }
+            return result;
+        }
     };
 }
