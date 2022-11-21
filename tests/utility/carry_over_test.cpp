@@ -47,6 +47,9 @@ TEST(tudbcpptest, CarryOverRunTest)
     inst1 = inst1.run_all(mul, inst3, plus);
     auto case4 = inst_to_string(inst1);
 
+    inst1.set(test_class{(char)5, (char)4, (char)3, (char)2, (char)1});
+    auto case5 = inst_to_string(inst1);
+
     // 12345 + 8 = 12353
     ASSERT_STREQ(case1.data(), "12353");
     // 89746 + 12353 = 102099(最大桁は想定サイズ外の値なので無視される)
@@ -55,4 +58,5 @@ TEST(tudbcpptest, CarryOverRunTest)
     ASSERT_STREQ(case3.data(), "18891");
     // 18891 * 256 = 4836096(上位2桁は想定サイズ外の値なので無視される)
     ASSERT_STREQ(case4.data(), "36096");
+    ASSERT_STREQ(case5.data(), "12345");
 };

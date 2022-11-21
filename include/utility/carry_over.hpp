@@ -17,6 +17,12 @@ namespace tudb
     {
         /**
          * @fn
+         * @brief runメンバの戻り値から、継承先での型キャストがめんどくさそうなので用意
+        */
+        constexpr void set(const carry_over_container& v) { (*this) = v; }
+
+        /**
+         * @fn
          * @brief 同じ型が渡されたとき
          * @param f 目的の処理
          * @param arg 引数
@@ -79,11 +85,11 @@ namespace tudb
         ) const {
             auto result = (*this);
             if (offset < Size) {
-                auto calclated = f(this->data()[offset], arg);
+                auto calclated = f(this->at(offset), arg);
                 result[offset] = calclated.first[0];
 
                 for (unsigned int i = offset + 1; i < Size && calclated.second; i++) {
-                    calclated = carry_over_process(this->data()[i], calclated.first[1]);
+                    calclated = carry_over_process(this->at(i), calclated.first[1]);
                     result[i] = calclated.first[0];
                 }
             }
@@ -140,7 +146,7 @@ namespace tudb
         ) const {
             auto result = carry_over_container{};
             for (unsigned int i = 0; i < Size; i++) {
-                const auto calclated = f(this->data()[i], arg);
+                const auto calclated = f(this->at(i), arg);
                 result = result.run(
                     carry_over_process,
                     carry_over_container<T, 2>{calclated.first[0], calclated.first[1]},
