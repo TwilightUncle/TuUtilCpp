@@ -6,9 +6,6 @@
 
 namespace tudb
 {
-    // template <class T>
-    // concept 
-
     template <std::size_t Size = 2>
     requires (Size > 1)
     struct big_int : public carry_over_container<unsigned long long, Size>
@@ -125,7 +122,6 @@ namespace tudb
     template <std::size_t N1, std::size_t N2>
     constexpr std::strong_ordering operator<=>(const big_int<N1>& l, const big_int<N2>& r)
     {
-        using value_type = big_int<N1>::value_type;
         constexpr auto larger = (std::max)(N1, N2);
 
         // ƒTƒCƒY‚ª‘å‚«‚¢‚Ù‚¤‚ÖŒ^‚ğ“ˆê‚·‚é
