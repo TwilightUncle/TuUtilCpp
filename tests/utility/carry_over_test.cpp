@@ -9,17 +9,14 @@ using test_class = tudb::carry_over_container<char, 5>;
 static auto plus(char l, char r)
 {
     return (l + r >= max_num)
-        ? std::pair{std::array<char, 2>{l + r - max_num, (char)1}, true}
-        : std::pair{std::array<char, 2>{l + r, (char)0}, false};
+        ? std::tuple{(char)(l + r - max_num), (char)1, true}
+        : std::tuple{(char)(l + r), (char)0, false};
 }
 
 constexpr auto mul = [](char l, char r)
 {
     const char res = l * r;
-    return std::pair{
-        std::array<char, 2>{res % max_num, res / max_num},
-        res >= max_num
-    };
+    return std::tuple{(char)(res % max_num), (char)(res / max_num), res >= max_num};
 };
 
 static auto inst_to_string(const test_class& inst)

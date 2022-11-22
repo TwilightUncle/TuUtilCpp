@@ -1,5 +1,5 @@
 ///----------------------------------
-/// @file utility.hpp
+/// @file carry_over.hpp
 /// @brief 二項の引数を受け取る処理に対して繰り上げ処理を適用できるようなコンテナ
 ///----------------------------------
 #pragma once
@@ -7,10 +7,10 @@
 namespace tudb
 {
     /**
-     * @brief 二引数を渡して実行した結果、次のフォーマットで結果が返る -> pair{array{(T)桁上がりしていない部分, (T)桁上がりした部分}, (bool)桁上がりしたかどうか}
+     * @brief 二引数を渡して実行した結果、次のフォーマットで結果が返る -> tuple{(T)桁上がりしていない部分, (T)桁上がりした部分, (bool)桁上がりしたかどうか}
     */
     template <class F, class T>
-    concept CarryOverCallable = std::is_invocable_r_v<std::pair<std::array<T, 2>, bool>, F, T, T>;
+    concept CarryOverCallable = std::is_invocable_r_v<std::tuple<T, T, bool>, F, T, T>;
 
     template <class T, std::size_t Size>
     struct carry_over_container : std::array<T, Size>
@@ -85,13 +85,11 @@ namespace tudb
         ) const {
             auto result = (*this);
             if (offset < Size) {
-                auto calclated = f(this->at(offset), arg);
-                result[offset] = calclated.first[0];
+                auto [lower, upper, is_carry] = f(this->at(offset), arg);
+                result[offset] = lower;
 
-                for (unsigned int i = offset + 1; i < Size && calclated.second; i++) {
-                    calclated = carry_over_process(this->at(i), calclated.first[1]);
-                    result[i] = calclated.first[0];
-                }
+                for (unsigned int i = offset + 1; i < Size && is_carry; i++)
+                    std::tie(result[i], upper, is_carry) = carry_over_process(this->at(i), upper);
             }
             return result;
         }
@@ -146,10 +144,10 @@ namespace tudb
         ) const {
             auto result = carry_over_container{};
             for (unsigned int i = 0; i < Size; i++) {
-                const auto calclated = f(this->at(i), arg);
+                const auto [lower, upper, is_carry] = f(this->at(i), arg);
                 result = result.with_carry_up(
                     carry_over_process,
-                    carry_over_container<T, 2>{calclated.first[0], calclated.first[1]},
+                    carry_over_container<T, 2>{lower, upper},
                     i + offset
                 );
             }

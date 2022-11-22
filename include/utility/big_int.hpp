@@ -38,20 +38,14 @@ namespace tudb
         static constexpr auto plus(value_type l_v, value_type r_v)
         {
             const auto is_carried = (std::numeric_limits<value_type>::max)() - l_v < r_v;
-            return std::pair{
-                std::array{l_v + r_v, (value_type)is_carried},
-                is_carried
-            };
+            return std::tuple{l_v + r_v, (value_type)is_carried, is_carried};
         }
 
         static constexpr auto minus(value_type l_v, value_type r_v)
         {
             const auto is_carried = (value_type)(l_v < r_v);
             const auto low = (std::numeric_limits<value_type>::max)() * is_carried - r_v + l_v + 1 * is_carried;
-            return std::pair{
-                std::array{(value_type)low, is_carried},
-                (bool)is_carried
-            };
+            return std::tuple{(value_type)low, is_carried, (bool)is_carried};
         }
 
         static constexpr auto mul(value_type l_v, value_type r_v)
@@ -67,24 +61,24 @@ namespace tudb
 
             // たすき掛け(足し算する際、桁上がりを考慮する必要がある部分はplusで)
             const auto lowwer = lowwer_l * lowwer_r;
-            const auto [middle, _dust1] = plus(lowwer_l * upper_r, upper_l * lowwer_r);
+            const auto [middle_lower, middle_upper, _dust1] = plus(lowwer_l * upper_r, upper_l * lowwer_r);
             const auto upper = upper_l * upper_r;
 
             // たすき掛けの結果を合計(ビット演算子と加算・減算ではビット演算子のほうが優先度が低いので注意)
-            const auto [lowwer_result, _dust2] = plus(lowwer, middle[0] << harf_digits);
+            const auto [lowwer_lower, lower_upper, _dust2] = plus(lowwer, middle_lower << harf_digits);
             const auto upper_result = upper
-                + (middle[0] >> harf_digits)
-                + (middle[1] << harf_digits)
-                + lowwer_result[1];
+                + (middle_lower >> harf_digits)
+                + (middle_upper << harf_digits)
+                + lower_upper;
 
-            return std::pair{std::array{lowwer_result[0], upper_result}, upper_result > 0};
+            return std::tuple{lowwer_lower, upper_result, upper_result > 0};
         }
 
         static constexpr auto lshift(value_type l_v, value_type r_v)
         {
             const auto high_rshfts = std::numeric_limits<value_type>::digits - r_v;
             const auto upper = l_v >> high_rshfts;
-            return std::pair{std::array{l_v << r_v, upper}, upper > 0};
+            return std::tuple{l_v << r_v, upper, upper > 0};
         }
 
         constexpr big_int operator~() const
