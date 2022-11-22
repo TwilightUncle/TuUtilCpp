@@ -10,6 +10,8 @@ TEST(tudbcpptest, BigIntMethodTest)
     auto case5 = tudb::big_int<2>::mul((std::numeric_limits<unsigned long long>::max)() / 2 + 1, 2);
     auto case6 = tudb::big_int<2>::mul((std::numeric_limits<unsigned long long>::max)(), 2);
     auto case7 = tudb::big_int<2>::lshift(0x8000'0000'8000'0000u, 5u);
+    auto case8 = tudb::big_int<2>::minus(4u, 5u);
+    auto case9 = tudb::big_int<2>::minus(4u, 3u);
 
     ASSERT_EQ(case1.first[0], (std::numeric_limits<unsigned long long>::max)());
     ASSERT_EQ(case1.first[1], 0);
@@ -32,6 +34,12 @@ TEST(tudbcpptest, BigIntMethodTest)
     ASSERT_EQ(case7.first[0], (0x8000'0000ull << 5));
     ASSERT_EQ(case7.first[1], 1ull << 4);
     ASSERT_EQ(case7.second, true);
+    ASSERT_EQ(case8.first[0], ~0ull);
+    ASSERT_EQ(case8.first[1], 1);
+    ASSERT_EQ(case8.second, true);
+    ASSERT_EQ(case9.first[0], 1);
+    ASSERT_EQ(case9.first[1], 0);
+    ASSERT_EQ(case9.second, false);
 }
 
 TEST(tudbcpptest, BigIntOperatorTest)
@@ -63,6 +71,10 @@ TEST(tudbcpptest, BigIntOperatorTest)
     constexpr auto value10 = tudb::big_int<2>{0x4000'0000'0000'0000u, 0x4000'0000'8000'0000u};
     constexpr auto value11 = tudb::big_int<4>{0x8000'0000'8000'0000u, 1u, 0u, 0u} << 135u;
     constexpr auto value12 = tudb::big_int<4>{0u, 0u, 0x8000'0000ull << 7, 0b11ull << 6};
+    constexpr auto value13 = tudb::big_int<4>{0u, 3u, 0u, 0u} - tudb::big_int<3>{1u, 4u, 0u};
+    constexpr auto value14 = tudb::big_int<4>{~0ull, ~0ull - 1, ~0ull, ~0ull};
+    constexpr auto value15 = tudb::big_int<4>{0u, 5u, 0u, 0u} - tudb::big_int<3>{1u, 4u, 0u};
+    constexpr auto value16 = tudb::big_int<4>{~0ull, 0u, 0u, 0u};
 
     ASSERT_TRUE(case1);
     ASSERT_TRUE(case2);
@@ -76,4 +88,6 @@ TEST(tudbcpptest, BigIntOperatorTest)
     ASSERT_EQ(value6, value7);
     ASSERT_EQ(value9, value10);
     ASSERT_EQ(value11, value12);
+    ASSERT_EQ(value13, value14);
+    ASSERT_EQ(value15, value16);
 }

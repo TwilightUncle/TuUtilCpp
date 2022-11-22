@@ -155,5 +155,21 @@ namespace tudb
             }
             return result;
         }
+
+        template <class Derived, class... ArgTypes>
+        requires std::is_base_of_v<carry_over_container, Derived>
+        constexpr Derived& set_with_carry_up(const ArgTypes&... args)
+        {
+            this->set(this->with_carry_up(args...));
+            return static_cast<Derived&>(*this);
+        }
+
+        template <class Derived, class... ArgTypes>
+        requires std::is_base_of_v<carry_over_container, Derived>
+        constexpr Derived& set_with_carry_up_all(const ArgTypes&... args)
+        {
+            this->set(this->with_carry_up_all(args...));
+            return static_cast<Derived&>(*this);
+        }
     };
 }

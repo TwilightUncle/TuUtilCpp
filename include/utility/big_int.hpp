@@ -44,6 +44,16 @@ namespace tudb
             };
         }
 
+        static constexpr auto minus(value_type l_v, value_type r_v)
+        {
+            const auto is_carried = l_v < r_v;
+            const auto low = (std::numeric_limits<value_type>::max)() * (value_type)is_carried - r_v + l_v + 1 * (value_type)is_carried;
+            return std::pair{
+                std::array{(value_type)low, (value_type)is_carried},
+                is_carried
+            };
+        }
+
         static constexpr auto mul(value_type l_v, value_type r_v)
         {
             constexpr auto harf_digits = std::numeric_limits<value_type>::digits / 2;
@@ -84,11 +94,7 @@ namespace tudb
             return _this;
         }
 
-        constexpr big_int& operator++()
-        {
-            this->set(this->with_carry_up(plus, 1));
-            return (*this);
-        }
+        constexpr big_int& operator++() { return this->set_with_carry_up<big_int>(plus, 1); }
 
         constexpr big_int operator~() const
         {
@@ -109,18 +115,13 @@ namespace tudb
         constexpr bool operator!() const noexcept { return !static_cast<bool>(*this); }
 
         template <std::size_t N>
-        constexpr big_int& operator+=(const big_int<N>& v)
-        {
-            this->set(this->with_carry_up(plus, v));
-            return (*this);
-        }
+        constexpr big_int& operator+=(const big_int<N>& v) { return this->set_with_carry_up<big_int>(plus, v); }
 
         template <std::size_t N>
-        constexpr big_int& operator*=(const big_int<N>& v)
-        {
-            this->set(this->with_carry_up_all(mul, v, plus));
-            return (*this);
-        }
+        constexpr big_int& operator-=(const big_int<N>& v) { return this->set_with_carry_up<big_int>(minus, v); }
+
+        template <std::size_t N>
+        constexpr big_int& operator*=(const big_int<N>& v) { return this->set_with_carry_up_all<big_int>(mul, v, plus); }
 
         constexpr big_int& operator<<=(std::unsigned_integral auto v)
         {
@@ -130,8 +131,7 @@ namespace tudb
             // 実際に行うシフト数
             const auto shift_value = v % value_type_max_digits;
 
-            this->set(this->with_carry_up_all(lshift, shift_value, plus, carry_count));
-            return (*this);
+            return this->set_with_carry_up_all<big_int>(lshift, shift_value, plus, carry_count);
         }
     };
 
@@ -154,6 +154,9 @@ namespace tudb
 
     template <std::size_t N1, std::size_t N2>
     constexpr auto operator+(const big_int<N1>& l, const big_int<N2>r) { return big_int<(std::max)(N1, N2)>(l) += r; }
+
+    template <std::size_t N1, std::size_t N2>
+    constexpr auto operator-(const big_int<N1>& l, const big_int<N2>r) { return big_int<(std::max)(N1, N2)>(l) -= r; }
 
     template <std::size_t N1, std::size_t N2>
     constexpr auto operator*(const big_int<N1>& l, const big_int<N2>r) { return big_int<(std::max)(N1, N2)>(l) *= r; }
