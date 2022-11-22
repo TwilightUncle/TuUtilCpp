@@ -46,11 +46,11 @@ namespace tudb
 
         static constexpr auto minus(value_type l_v, value_type r_v)
         {
-            const auto is_carried = l_v < r_v;
-            const auto low = (std::numeric_limits<value_type>::max)() * (value_type)is_carried - r_v + l_v + 1 * (value_type)is_carried;
+            const auto is_carried = (value_type)(l_v < r_v);
+            const auto low = (std::numeric_limits<value_type>::max)() * is_carried - r_v + l_v + 1 * is_carried;
             return std::pair{
-                std::array{(value_type)low, (value_type)is_carried},
-                is_carried
+                std::array{(value_type)low, is_carried},
+                (bool)is_carried
             };
         }
 
