@@ -87,14 +87,14 @@ namespace tudb
             return std::pair{std::array{l_v << r_v, upper}, upper > 0};
         }
 
+        constexpr big_int& operator++() { return this->set_with_carry_up<big_int>(plus, 1); }
+
         constexpr big_int operator++(int)
         {
-            big_int _this{*this};
-            this->set(this->with_carry_up(plus, 1));
-            return _this;
+            big_int result{*this};
+            ++(*this);
+            return result;
         }
-
-        constexpr big_int& operator++() { return this->set_with_carry_up<big_int>(plus, 1); }
 
         constexpr big_int operator~() const
         {
