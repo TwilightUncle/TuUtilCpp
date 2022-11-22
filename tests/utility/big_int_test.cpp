@@ -32,18 +32,42 @@ TEST(tudbcpptest, BigIntMethodTest)
 
 TEST(tudbcpptest, BigIntOperatorTest)
 {
+    // 比較演算子のテスト
     // 上位の桁が0の場合はサイズが異なっていても比較対象として考慮しないものとする(intやshortのサイズが異なる整数型の比較に準拠)
-    constexpr auto case1 = tudb::big_int<5>{~(unsigned)0, (unsigned)1, (unsigned)0, (unsigned)1, (unsigned)0}
-                        == tudb::big_int<4>{~(unsigned)0, (unsigned)1, (unsigned)0, (unsigned)1};
-    constexpr auto case2 = tudb::big_int<4>{~(unsigned)1, (unsigned)1, (unsigned)0, (unsigned)1}
-                        != tudb::big_int<4>{~(unsigned)0, (unsigned)1, (unsigned)0, (unsigned)1};
-    constexpr auto case3 = tudb::big_int<4>{~(unsigned)1, (unsigned)1, (unsigned)0, (unsigned)1}
-                        <  tudb::big_int<5>{~(unsigned)0, (unsigned)1, (unsigned)0, (unsigned)1, (unsigned)0};
-    constexpr auto case4 = tudb::big_int<4>{~(unsigned)1, (unsigned)1, (unsigned)1, (unsigned)1}
-                        >= tudb::big_int<5>{~(unsigned)0, (unsigned)1, (unsigned)0, (unsigned)1, (unsigned)0};
+    constexpr auto case1 = tudb::big_int<5>{~0ull, 1u, 0ull, 1ul, 0ull}
+                        == tudb::big_int<4>{~0ull, 1ull, 0ull, 1ull};
+    constexpr auto case2 = tudb::big_int<4>{~1ull, 1ull, 0ull, 1ull}
+                        != tudb::big_int<4>{~0ull, 1ul, 0ull, 1ull};
+    constexpr auto case3 = tudb::big_int<4>{~1ull, 1ull, 0ull, 1ull}
+                        <  tudb::big_int<5>{~0ull, 1ull, 0ull, 1ull, 0ull};
+    constexpr auto case4 = tudb::big_int<4>{~1ull, 1ull, 1ull, 1u}
+                        >= tudb::big_int<5>{~0ull, 1ull, 0ull, 1ull, 0ull};
+    constexpr auto case5 = !tudb::big_int<2>{};
+    constexpr auto case6 = !tudb::big_int<2>{0u, 1u};
+
+    // 算術等(複合代入は二項演算子の中で利用しているので、そっち動けば問題なし)
+    // const auto value1 = tudb::big_int<2>{}; 
+    auto value1 = tudb::big_int<2>{};
+    auto value2 = value1++;
+    auto value3 = ++value1;
+    // 桁上がりかつ定数式での使用確認
+    constexpr auto value4 = ++tudb::big_int<2>{~0ull, 0ull};
+    constexpr auto value5 = tudb::big_int<2>{0ull, 1ull};
+    constexpr auto value6 = tudb::big_int<3>{~0ull, 0ull, 0ull} + tudb::big_int<2>{1ull, 1ull};
+    constexpr auto value7 = tudb::big_int<2>{0ull, 2ull};
+    constexpr auto value8 = tudb::big_int<2>{0x8000'0000'8000'0000u, 0u};
+    constexpr auto value9 = value8 * tudb::big_int<3>{0x8000'0000'8000'0000u, 0u, 0u};
+    constexpr auto value10 = tudb::big_int<2>{0x4000'0000'0000'0000u, 0x4000'0000'8000'0000u};
 
     ASSERT_TRUE(case1);
     ASSERT_TRUE(case2);
     ASSERT_TRUE(case3);
     ASSERT_TRUE(case4);
+    ASSERT_TRUE(case5);
+    ASSERT_FALSE(case6);
+    ASSERT_EQ(tudb::big_int<2>{}, value2);
+    ASSERT_EQ(value1, value3);
+    ASSERT_EQ(value4, value5);
+    ASSERT_EQ(value6, value7);
+    ASSERT_EQ(value9, value10);
 }

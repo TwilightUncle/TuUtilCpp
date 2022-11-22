@@ -15,8 +15,9 @@ namespace tudb
         // ŽÀŽ¿ŽÀ‘•‚µ‚Ä‚¢‚È‚¢
         bool sign = true;
 
-        constexpr big_int(std::integral auto i)
-            : carry_over_container<unsigned long long, Size>{}
+        constexpr big_int() : carry_over_container<unsigned long long, Size>{} {}
+
+        constexpr big_int(std::integral auto i) : big_int()
         {
             this->at(0) = (i < 0) ? -i : i;
             this->sign = (i >= 0);
@@ -26,14 +27,10 @@ namespace tudb
         requires (sizeof...(Types) == Size)
         constexpr big_int(Types... args)
             : carry_over_container<unsigned long long, Size>{(value_type)args...}
-        {
-            // for (int i = 0; i < Size; i++) this->at(i) = v[i];
-            // auto swallow[] = {}
-        }
+        {}
 
         template <std::size_t N>
-        constexpr big_int(const big_int<N>& v)
-            : carry_over_container<unsigned long long, Size>{}
+        constexpr big_int(const big_int<N>& v) : big_int()
         {
             for (std::size_t i = 0; i < (std::min)(Size, N); i++) this->at(i) = v[i];
         }
@@ -50,7 +47,7 @@ namespace tudb
         static constexpr auto mul(value_type l_v, value_type r_v)
         {
             constexpr auto harf_digits = std::numeric_limits<value_type>::digits / 2;
-            constexpr auto harf_mask = ~(value_type)0 >> harf_digits;
+            constexpr auto harf_mask = ~0ull >> harf_digits;
 
             // ˆø”‚ð‚»‚ê‚¼‚êÅ‘åƒrƒbƒg”‚Ì”¼•ª‚Å•ªŠ„
             const auto upper_l = l_v >> harf_digits;
@@ -73,9 +70,9 @@ namespace tudb
             return std::pair{std::array{lowwer_result[0], upper_result}, upper_result > 0};
         }
 
-        constexpr big_int& operator++(int)
+        constexpr big_int operator++(int)
         {
-            big_int _this = (*this);
+            big_int _this{*this};
             this->set(this->run(plus, 1));
             return _this;
         }
@@ -88,7 +85,7 @@ namespace tudb
 
         constexpr big_int operator~() const
         {
-            big_int result = (*this);
+            big_int result{*this};
             for (auto& v : result) v = ~v;
             return result;
         }
@@ -114,7 +111,7 @@ namespace tudb
         template <std::size_t N>
         constexpr big_int& operator*=(const big_int<N>& v)
         {
-            this->set(this->run(mul, v, plus));
+            this->set(this->run_all(mul, v, plus));
             return (*this);
         }
     };
@@ -138,4 +135,7 @@ namespace tudb
 
     template <std::size_t N1, std::size_t N2>
     constexpr auto operator+(const big_int<N1>& l, const big_int<N2>r) { return big_int<(std::max)(N1, N2)>(l) += r; }
+
+    template <std::size_t N1, std::size_t N2>
+    constexpr auto operator*(const big_int<N1>& l, const big_int<N2>r) { return big_int<(std::max)(N1, N2)>(l) *= r; }
 }
