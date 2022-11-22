@@ -118,6 +118,15 @@ namespace tudb
         constexpr big_int operator++(int) { return std::exchange(*this, ++big_int{*this}); }
     };
 
+    /**
+     * @fn
+     * @brief ˆø”v‚ÌŒ^‚ğA“ñ‚Â‚Ìˆø”‚Ì‚¤‚¿ƒTƒCƒY‚ª‘å‚«‚¢‚Ù‚¤‚ÌŒ^‚É•ÏŠ·‚µ‚Ä•Ô‹p
+    */
+    template <std::size_t N, std::integral T>
+    constexpr auto convert_max_size_type_value(const big_int<N>& v, const T&) { return big_int<N>(v); }
+    template <std::size_t N1, std::size_t N2>
+    constexpr auto convert_max_size_type_value(const big_int<N1>& v, const big_int<N2>&) { return big_int<(std::max)(N1, N2)>(v); }
+
     template <std::size_t N1, std::size_t N2>
     constexpr std::strong_ordering operator<=>(const big_int<N1>& l, const big_int<N2>& r)
     {
@@ -136,25 +145,13 @@ namespace tudb
     }
 
     template <std::size_t N>
-    constexpr auto operator+(const big_int<N>& l, const std::convertible_to<big_int<N>> auto& r) { return big_int<N>(l) += r; }
-
-    template <std::size_t N1, std::size_t N2>
-    requires (N1 < N2)
-    constexpr auto operator+(const big_int<N1>& l, const big_int<N2>& r) { return big_int<N2>{l} + r; }
+    constexpr auto operator+(const big_int<N>& l, const std::convertible_to<big_int<N>> auto& r) { return convert_max_size_type_value(l, r) += r; }
 
     template <std::size_t N>
-    constexpr auto operator-(const big_int<N>& l, const std::convertible_to<big_int<N>> auto& r) { return big_int<N>(l) -= r; }
-
-    template <std::size_t N1, std::size_t N2>
-    requires (N1 < N2)
-    constexpr auto operator-(const big_int<N1>& l, const big_int<N2>& r) { return big_int<N2>{l} - r; }
+    constexpr auto operator-(const big_int<N>& l, const std::convertible_to<big_int<N>> auto& r) { return convert_max_size_type_value(l, r) -= r; }
 
     template <std::size_t N>
-    constexpr auto operator*(const big_int<N>& l, const std::convertible_to<big_int<N>> auto& r) { return big_int<N>(l) *= r; }
-
-    template <std::size_t N1, std::size_t N2>
-    requires (N1 < N2)
-    constexpr auto operator*(const big_int<N1>& l, const big_int<N2>& r) { return big_int<N2>{l} * r; }
+    constexpr auto operator*(const big_int<N>& l, const std::convertible_to<big_int<N>> auto& r) { return convert_max_size_type_value(l, r) *= r; }
 
     template <std::size_t N1>
     constexpr auto operator<<(const big_int<N1>& l, std::unsigned_integral auto r) { return big_int<N1>(l) <<= r; }
