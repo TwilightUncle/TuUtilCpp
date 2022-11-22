@@ -29,9 +29,9 @@ namespace tudb
          * @param offset 代入先のインデックスにずれがあるとき指定
         */
         template <std::size_t N>
-        constexpr carry_over_container run(CarryOverCallable<T> auto f, const carry_over_container<T, N>& arg, const unsigned int offset = 0) const
+        constexpr carry_over_container with_carry_up(CarryOverCallable<T> auto f, const carry_over_container<T, N>& arg, const unsigned int offset = 0) const
         {
-            return run(f, arg, f, offset);
+            return with_carry_up(f, arg, f, offset);
         }
 
         /**
@@ -43,7 +43,7 @@ namespace tudb
          * @param offset 代入先のインデックスにずれがあるとき指定
         */
         template <std::size_t N>
-        constexpr carry_over_container run(
+        constexpr carry_over_container with_carry_up(
             CarryOverCallable<T> auto f,
             const carry_over_container<T, N>& arg,
             CarryOverCallable<T> auto carry_over_process,
@@ -51,7 +51,7 @@ namespace tudb
         ) const {
             auto result = (*this);
             for (unsigned int i = 0; i < (std::min)(Size, N); i++)
-                result = result.run(f, arg[i], carry_over_process, i + offset);
+                result = result.with_carry_up(f, arg[i], carry_over_process, i + offset);
             return result;
         }
 
@@ -63,9 +63,9 @@ namespace tudb
          * @param offset 計算対象のインデックスを指定
          * @param offset 代入先のインデックスにずれがあるとき指定
         */
-        constexpr carry_over_container run(CarryOverCallable<T> auto f, const T& arg, unsigned int offset = 0) const
+        constexpr carry_over_container with_carry_up(CarryOverCallable<T> auto f, const T& arg, unsigned int offset = 0) const
         {
-            return run(f, arg, f, offset);
+            return with_carry_up(f, arg, f, offset);
         }
 
         /**
@@ -77,7 +77,7 @@ namespace tudb
          * @param offset 計算対象のインデックスを指定
          * @param offset 代入先のインデックスにずれがあるとき指定
         */
-        constexpr carry_over_container run(
+        constexpr carry_over_container with_carry_up(
             CarryOverCallable<T> auto f,
             const T& arg,
             CarryOverCallable<T> auto carry_over_process,
@@ -101,9 +101,9 @@ namespace tudb
          * @brief 自身と同じ型のオブジェクトによるたすき掛け
         */
         template <std::size_t N>
-        constexpr carry_over_container run_all(CarryOverCallable<T> auto f, const carry_over_container<T, N>& arg) const
+        constexpr carry_over_container with_carry_up_all(CarryOverCallable<T> auto f, const carry_over_container<T, N>& arg) const
         {
-            return run_all(f, arg, f);
+            return with_carry_up_all(f, arg, f);
         }
 
         /**
@@ -111,16 +111,16 @@ namespace tudb
          * @brief 自身と同じ型のオブジェクトによるたすき掛け
         */
         template <std::size_t N>
-        constexpr carry_over_container run_all(
+        constexpr carry_over_container with_carry_up_all(
             CarryOverCallable<T> auto f,
             const carry_over_container<T, N>& arg,
             CarryOverCallable<T> auto carry_over_process
         ) const {
             auto result = carry_over_container{};
             for (unsigned int i = 0; i < (std::min)(Size, N); i++)
-                result = result.run(
+                result = result.with_carry_up(
                     carry_over_process,
-                    run_all(f, arg[i], carry_over_process, i)
+                    with_carry_up_all(f, arg[i], carry_over_process, i)
                 );
             return result;
         }
@@ -129,16 +129,16 @@ namespace tudb
          * @fn
          * @brief 引数をすべての要素に適用する
         */
-        constexpr carry_over_container run_all(CarryOverCallable<T> auto f, const T& arg, const unsigned int offset = 0) const
+        constexpr carry_over_container with_carry_up_all(CarryOverCallable<T> auto f, const T& arg, const unsigned int offset = 0) const
         {
-            return run_all(f, arg, f, offset);
+            return with_carry_up_all(f, arg, f, offset);
         }
 
         /**
          * @fn
          * @brief 引数をすべての要素に適用する
         */
-        constexpr carry_over_container run_all(
+        constexpr carry_over_container with_carry_up_all(
             CarryOverCallable<T> auto f,
             const T& arg,
             CarryOverCallable<T> auto carry_over_process,
@@ -147,7 +147,7 @@ namespace tudb
             auto result = carry_over_container{};
             for (unsigned int i = 0; i < Size; i++) {
                 const auto calclated = f(this->at(i), arg);
-                result = result.run(
+                result = result.with_carry_up(
                     carry_over_process,
                     carry_over_container<T, 2>{calclated.first[0], calclated.first[1]},
                     i + offset

@@ -80,13 +80,13 @@ namespace tudb
         constexpr big_int operator++(int)
         {
             big_int _this{*this};
-            this->set(this->run(plus, 1));
+            this->set(this->with_carry_up(plus, 1));
             return _this;
         }
 
         constexpr big_int& operator++()
         {
-            this->set(this->run(plus, 1));
+            this->set(this->with_carry_up(plus, 1));
             return (*this);
         }
 
@@ -111,14 +111,14 @@ namespace tudb
         template <std::size_t N>
         constexpr big_int& operator+=(const big_int<N>& v)
         {
-            this->set(this->run(plus, v));
+            this->set(this->with_carry_up(plus, v));
             return (*this);
         }
 
         template <std::size_t N>
         constexpr big_int& operator*=(const big_int<N>& v)
         {
-            this->set(this->run_all(mul, v, plus));
+            this->set(this->with_carry_up_all(mul, v, plus));
             return (*this);
         }
 
@@ -130,7 +130,7 @@ namespace tudb
             // 実際に行うシフト数
             const auto shift_value = v % value_type_max_digits;
 
-            this->set(this->run_all(lshift, shift_value, plus, carry_count));
+            this->set(this->with_carry_up_all(lshift, shift_value, plus, carry_count));
             return (*this);
         }
     };

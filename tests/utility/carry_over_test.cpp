@@ -33,18 +33,18 @@ static auto inst_to_string(const test_class& inst)
 TEST(tudbcpptest, CarryOverRunTest)
 {
     auto inst1 = test_class{(char)5, (char)4, (char)3, (char)2, (char)1};
-    inst1 = inst1.run(plus, (char)8);
+    inst1 = inst1.with_carry_up(plus, (char)8);
     auto case1 = inst_to_string(inst1);
 
     auto inst2 = test_class{(char)6, (char)4, (char)7, (char)9, (char)8};
-    inst1 = inst1.run(plus, inst2);
+    inst1 = inst1.with_carry_up(plus, inst2);
     auto case2 = inst_to_string(inst1);
 
-    inst1 = inst1.run_all(mul, (char)9, plus);
+    inst1 = inst1.with_carry_up_all(mul, (char)9, plus);
     auto case3 = inst_to_string(inst1);
 
     auto inst3 = test_class{(char)6, (char)5, (char)2};
-    inst1 = inst1.run_all(mul, inst3, plus);
+    inst1 = inst1.with_carry_up_all(mul, inst3, plus);
     auto case4 = inst_to_string(inst1);
 
     inst1.set(test_class{(char)5, (char)4, (char)3, (char)2, (char)1});
