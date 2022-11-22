@@ -87,15 +87,6 @@ namespace tudb
             return std::pair{std::array{l_v << r_v, upper}, upper > 0};
         }
 
-        constexpr big_int& operator++() { return this->set_with_carry_up<big_int>(plus, 1); }
-
-        constexpr big_int operator++(int)
-        {
-            big_int result{*this};
-            ++(*this);
-            return result;
-        }
-
         constexpr big_int operator~() const
         {
             big_int result{*this};
@@ -114,14 +105,9 @@ namespace tudb
 
         constexpr bool operator!() const noexcept { return !static_cast<bool>(*this); }
 
-        template <std::size_t N>
-        constexpr big_int& operator+=(const big_int<N>& v) { return this->set_with_carry_up<big_int>(plus, v); }
-
-        template <std::size_t N>
-        constexpr big_int& operator-=(const big_int<N>& v) { return this->set_with_carry_up<big_int>(minus, v); }
-
-        template <std::size_t N>
-        constexpr big_int& operator*=(const big_int<N>& v) { return this->set_with_carry_up_all<big_int>(mul, v, plus); }
+        constexpr big_int& operator+=(const std::convertible_to<big_int> auto& v) { return this->set_with_carry_up<big_int>(plus, v); }
+        constexpr big_int& operator-=(const std::convertible_to<big_int> auto& v) { return this->set_with_carry_up<big_int>(minus, v); }
+        constexpr big_int& operator*=(const std::convertible_to<big_int> auto& v) { return this->set_with_carry_up_all<big_int>(mul, v, plus); }
 
         constexpr big_int& operator<<=(std::unsigned_integral auto v)
         {
@@ -133,6 +119,9 @@ namespace tudb
 
             return this->set_with_carry_up_all<big_int>(lshift, shift_value, plus, carry_count);
         }
+
+        constexpr big_int& operator++() { return (*this) += 1; }
+        constexpr big_int operator++(int) { return std::exchange(*this, ++big_int{*this}); }
     };
 
     template <std::size_t N1, std::size_t N2>
@@ -152,14 +141,26 @@ namespace tudb
         return std::strong_ordering::equal;
     }
 
-    template <std::size_t N1, std::size_t N2>
-    constexpr auto operator+(const big_int<N1>& l, const big_int<N2>r) { return big_int<(std::max)(N1, N2)>(l) += r; }
+    template <std::size_t N>
+    constexpr auto operator+(const big_int<N>& l, const std::convertible_to<big_int<N>> auto& r) { return big_int<N>(l) += r; }
 
     template <std::size_t N1, std::size_t N2>
-    constexpr auto operator-(const big_int<N1>& l, const big_int<N2>r) { return big_int<(std::max)(N1, N2)>(l) -= r; }
+    requires (N1 < N2)
+    constexpr auto operator+(const big_int<N1>& l, const big_int<N2>& r) { return big_int<N2>{l} + r; }
+
+    template <std::size_t N>
+    constexpr auto operator-(const big_int<N>& l, const std::convertible_to<big_int<N>> auto& r) { return big_int<N>(l) -= r; }
 
     template <std::size_t N1, std::size_t N2>
-    constexpr auto operator*(const big_int<N1>& l, const big_int<N2>r) { return big_int<(std::max)(N1, N2)>(l) *= r; }
+    requires (N1 < N2)
+    constexpr auto operator-(const big_int<N1>& l, const big_int<N2>& r) { return big_int<N2>{l} - r; }
+
+    template <std::size_t N>
+    constexpr auto operator*(const big_int<N>& l, const std::convertible_to<big_int<N>> auto& r) { return big_int<N>(l) *= r; }
+
+    template <std::size_t N1, std::size_t N2>
+    requires (N1 < N2)
+    constexpr auto operator*(const big_int<N1>& l, const big_int<N2>& r) { return big_int<N2>{l} * r; }
 
     template <std::size_t N1>
     constexpr auto operator<<(const big_int<N1>& l, std::unsigned_integral auto r) { return big_int<N1>(l) <<= r; }
