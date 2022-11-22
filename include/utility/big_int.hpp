@@ -70,6 +70,13 @@ namespace tudb
             return std::pair{std::array{lowwer_result[0], upper_result}, upper_result > 0};
         }
 
+        static constexpr auto lshift(value_type l_v, value_type r_v)
+        {
+            const auto high_rshfts = std::numeric_limits<value_type>::digits - r_v;
+            const auto upper = l_v >> high_rshfts;
+            return std::pair{std::array{l_v << r_v, upper}, upper > 0};
+        }
+
         constexpr big_int operator++(int)
         {
             big_int _this{*this};
@@ -114,6 +121,18 @@ namespace tudb
             this->set(this->run_all(mul, v, plus));
             return (*this);
         }
+
+        constexpr big_int& operator<<=(std::unsigned_integral auto v)
+        {
+            constexpr auto value_type_max_digits = std::numeric_limits<value_type>::digits;
+            // シフトで桁をまたぐ数
+            const auto carry_count = v / value_type_max_digits;
+            // 実際に行うシフト数
+            const auto shift_value = v % value_type_max_digits;
+
+            this->set(this->run_all(lshift, shift_value, plus, carry_count));
+            return (*this);
+        }
     };
 
     template <std::size_t N1, std::size_t N2>
@@ -138,4 +157,7 @@ namespace tudb
 
     template <std::size_t N1, std::size_t N2>
     constexpr auto operator*(const big_int<N1>& l, const big_int<N2>r) { return big_int<(std::max)(N1, N2)>(l) *= r; }
+
+    template <std::size_t N1>
+    constexpr auto operator<<(const big_int<N1>& l, std::unsigned_integral auto r) { return big_int<N1>(l) <<= r; }
 }
