@@ -76,8 +76,8 @@ namespace tudb
 
         static constexpr auto lshift(value_type l_v, value_type r_v)
         {
-            const auto high_rshfts = std::numeric_limits<value_type>::digits - r_v;
-            const auto upper = l_v >> high_rshfts;
+            const auto high_rshfts = (std::numeric_limits<value_type>::digits - r_v) * (bool)r_v;
+            const auto upper = (l_v >> high_rshfts) * (bool)r_v;
             return std::tuple{l_v << r_v, upper, upper > 0};
         }
 
@@ -112,6 +112,18 @@ namespace tudb
             const auto shift_value = v % value_type_max_digits;
 
             return this->set_with_carry_up_all<big_int>(lshift, shift_value, plus, carry_count);
+        }
+
+        constexpr big_int& operator>>=(std::unsigned_integral auto v)
+        {
+            constexpr auto value_type_max_digits = std::numeric_limits<value_type>::digits;
+            const auto inverse_shift_value = (v % value_type_max_digits);
+            // シフトで桁をまたぐ数
+            const int carry_count = v / value_type_max_digits + 1 * (bool)inverse_shift_value;
+            // 実際に行うシフト数
+            const auto shift_value = (value_type_max_digits - inverse_shift_value) % value_type_max_digits;
+
+            return this->set_with_carry_up_all<big_int>(lshift, shift_value, plus, -carry_count);
         }
 
         constexpr big_int& operator++() { return (*this) += 1; }
@@ -155,4 +167,7 @@ namespace tudb
 
     template <std::size_t N1>
     constexpr auto operator<<(const big_int<N1>& l, std::unsigned_integral auto r) { return big_int<N1>(l) <<= r; }
+
+    template <std::size_t N1>
+    constexpr auto operator>>(const big_int<N1>& l, std::unsigned_integral auto r) { return big_int<N1>(l) >>= r; }
 }

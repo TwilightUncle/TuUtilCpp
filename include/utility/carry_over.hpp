@@ -29,7 +29,7 @@ namespace tudb
          * @param offset 代入先のインデックスにずれがあるとき指定
         */
         template <std::size_t N>
-        constexpr carry_over_container with_carry_up(CarryOverCallable<T> auto f, const carry_over_container<T, N>& arg, const unsigned int offset = 0) const
+        constexpr carry_over_container with_carry_up(CarryOverCallable<T> auto f, const carry_over_container<T, N>& arg, const int offset = 0) const
         {
             return with_carry_up(f, arg, f, offset);
         }
@@ -47,7 +47,7 @@ namespace tudb
             CarryOverCallable<T> auto f,
             const carry_over_container<T, N>& arg,
             CarryOverCallable<T> auto carry_over_process,
-            const unsigned int offset = 0
+            const int offset = 0
         ) const {
             auto result = (*this);
             for (unsigned int i = 0; i < (std::min)(Size, N); i++)
@@ -81,10 +81,10 @@ namespace tudb
             CarryOverCallable<T> auto f,
             const T& arg,
             CarryOverCallable<T> auto carry_over_process,
-            const unsigned int offset = 0
+            const int offset = 0
         ) const {
             auto result = (*this);
-            if (offset < Size) {
+            if (offset < Size && offset >= 0) {
                 auto [lower, upper, is_carry] = f(this->at(offset), arg);
                 result[offset] = lower;
 
@@ -127,7 +127,7 @@ namespace tudb
          * @fn
          * @brief 引数をすべての要素に適用する
         */
-        constexpr carry_over_container with_carry_up_all(CarryOverCallable<T> auto f, const T& arg, const unsigned int offset = 0) const
+        constexpr carry_over_container with_carry_up_all(CarryOverCallable<T> auto f, const T& arg, const int offset = 0) const
         {
             return with_carry_up_all(f, arg, f, offset);
         }
@@ -140,7 +140,7 @@ namespace tudb
             CarryOverCallable<T> auto f,
             const T& arg,
             CarryOverCallable<T> auto carry_over_process,
-            const unsigned int offset = 0
+            const int offset = 0
         ) const {
             auto result = carry_over_container{};
             for (unsigned int i = 0; i < Size; i++) {

@@ -76,6 +76,11 @@ TEST(tudbcpptest, BigIntOperatorTest)
     constexpr auto value15 = tudb::big_int<4>{0u, 5u, 0u, 0u} - tudb::big_int<3>{1u, 4u, 0u};
     constexpr auto value16 = tudb::big_int<4>{~0ull, 0u, 0u, 0u};
     constexpr auto value17 = tudb::big_int<2>{1ull, 1ull} + tudb::big_int<3>{~0ull, 0ull, 0ull};
+    // 右シフトは内部的に左シフトを使用しているので、最終的なビットの桁の位置が等しいかだけ確認できればOK
+    constexpr auto value18 = tudb::big_int<4>{0u, 1u, 0u, 1u} >> 192u;
+    constexpr auto value19 = tudb::big_int<2>{1u, 0u};
+    constexpr auto value20 = tudb::big_int<4>{0u, 1u, 0u, 1u} >> 127u;
+    constexpr auto value21 = tudb::big_int<2>{0u, 0b10u};
 
     ASSERT_TRUE(case1);
     ASSERT_TRUE(case2);
@@ -92,4 +97,6 @@ TEST(tudbcpptest, BigIntOperatorTest)
     ASSERT_EQ(value13, value14);
     ASSERT_EQ(value15, value16);
     ASSERT_EQ(value6, value17);
+    ASSERT_EQ(value18, value19);
+    ASSERT_EQ(value20, value21);
 }
