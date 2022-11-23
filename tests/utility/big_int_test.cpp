@@ -79,8 +79,8 @@ TEST(tudbcpptest, BigIntOperatorTest)
     // 右シフトは内部的に左シフトを使用しているので、最終的なビットの桁の位置が等しいかだけ確認できればOK
     constexpr auto value18 = tudb::big_int<4>{0u, 1u, 0u, 1u} >> 192u;
     constexpr auto value19 = tudb::big_int<2>{1u, 0u};
-    constexpr auto value20 = tudb::big_int<4>{0u, 1u, 0u, 1u} >> 127u;
-    constexpr auto value21 = tudb::big_int<2>{0u, 0b10u};
+    constexpr auto value20 = tudb::big_int<4>{0u, 1u, 0u, 1u} >> 126u;
+    constexpr auto value21 = tudb::big_int<2>{0u, 0b100u};
 
     ASSERT_TRUE(case1);
     ASSERT_TRUE(case2);

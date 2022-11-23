@@ -106,24 +106,26 @@ namespace tudb
         constexpr big_int& operator<<=(std::unsigned_integral auto v)
         {
             constexpr auto value_type_max_digits = std::numeric_limits<value_type>::digits;
-            // シフトで桁をまたぐ数
-            const auto carry_count = v / value_type_max_digits;
-            // 実際に行うシフト数
-            const auto shift_value = v % value_type_max_digits;
-
-            return this->set_with_carry_up_all<big_int>(lshift, shift_value, plus, carry_count);
+            return this->set_with_carry_up_all<big_int>(
+                lshift,
+                v % value_type_max_digits,  // 実際に行うシフト数
+                plus,
+                v / value_type_max_digits   // シフトで桁をまたぐ数
+            );
         }
 
         constexpr big_int& operator>>=(std::unsigned_integral auto v)
         {
             constexpr auto value_type_max_digits = std::numeric_limits<value_type>::digits;
             const auto inverse_shift_value = (v % value_type_max_digits);
-            // シフトで桁をまたぐ数
-            const int carry_count = v / value_type_max_digits + 1 * (bool)inverse_shift_value;
-            // 実際に行うシフト数
-            const auto shift_value = (value_type_max_digits - inverse_shift_value) % value_type_max_digits;
-
-            return this->set_with_carry_up_all<big_int>(lshift, shift_value, plus, -carry_count);
+            return this->set_with_carry_up_all<big_int>(
+                lshift,
+                // 実際に行うシフト数
+                (value_type_max_digits - inverse_shift_value) % value_type_max_digits,
+                plus,
+                // シフトで桁をまたぐ数
+                -(v / value_type_max_digits + 1 * (bool)inverse_shift_value)
+            );
         }
 
         constexpr big_int& operator++() { return (*this) += 1; }
