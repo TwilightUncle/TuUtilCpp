@@ -28,8 +28,8 @@ namespace tudb
          * @param arg 引数
          * @param offset 代入先のインデックスにずれがあるとき指定
         */
-        template <std::size_t N>
-        constexpr carry_over_container with_carry_up(CarryOverCallable<T> auto f, const carry_over_container<T, N>& arg, const int offset = 0) const
+        template <std::size_t N, std::convertible_to<T> Type>
+        constexpr carry_over_container with_carry_up(CarryOverCallable<T> auto f, const carry_over_container<Type, N>& arg, const int offset = 0) const
         {
             return with_carry_up(f, arg, f, offset);
         }
@@ -42,10 +42,10 @@ namespace tudb
          * @param carry_over_process 桁上がりに対して実施される処理
          * @param offset 代入先のインデックスにずれがあるとき指定
         */
-        template <std::size_t N>
+        template <std::size_t N, std::convertible_to<T> Type>
         constexpr carry_over_container with_carry_up(
             CarryOverCallable<T> auto f,
-            const carry_over_container<T, N>& arg,
+            const carry_over_container<Type, N>& arg,
             CarryOverCallable<T> auto carry_over_process,
             const int offset = 0
         ) const {
@@ -98,8 +98,8 @@ namespace tudb
          * @fn
          * @brief 自身と同じ型のオブジェクトによるたすき掛け
         */
-        template <std::size_t N>
-        constexpr carry_over_container with_carry_up_all(CarryOverCallable<T> auto f, const carry_over_container<T, N>& arg) const
+        template <std::size_t N, std::convertible_to<T> Type>
+        constexpr carry_over_container with_carry_up_all(CarryOverCallable<T> auto f, const carry_over_container<Type, N>& arg) const
         {
             return with_carry_up_all(f, arg, f);
         }
@@ -108,10 +108,10 @@ namespace tudb
          * @fn
          * @brief 自身と同じ型のオブジェクトによるたすき掛け
         */
-        template <std::size_t N>
+        template <std::size_t N, std::convertible_to<T> Type>
         constexpr carry_over_container with_carry_up_all(
             CarryOverCallable<T> auto f,
-            const carry_over_container<T, N>& arg,
+            const carry_over_container<Type, N>& arg,
             CarryOverCallable<T> auto carry_over_process
         ) const {
             auto result = carry_over_container{};

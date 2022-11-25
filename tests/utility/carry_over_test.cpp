@@ -5,6 +5,7 @@
 static constexpr char max_num = 10;
 
 using test_class = tudb::carry_over_container<char, 5>;
+using test_class2 = tudb::carry_over_container<int, 5>;
 
 static auto plus(char l, char r)
 {
@@ -19,10 +20,11 @@ constexpr auto mul = [](char l, char r)
     return std::tuple{(char)(res % max_num), (char)(res / max_num), res >= max_num};
 };
 
-static auto inst_to_string(const test_class& inst)
+template <std::convertible_to<char> T>
+static auto inst_to_string(const tudb::carry_over_container<T, 5>& inst)
 {
     char str[6] = {};
-    for (int i = 0; i < 5; i++) str[4-i] = inst[i] + '0';
+    for (int i = 0; i < 5; i++) str[4-i] = (char)(inst[i] + '0');
     return std::string(str);
 }
 
@@ -47,6 +49,10 @@ TEST(tudbcpptest, CarryOverRunTest)
     inst1.set(test_class{(char)5, (char)4, (char)3, (char)2, (char)1});
     auto case5 = inst_to_string(inst1);
 
+    // バッファに格納されている値が、変換可能な型であれば、with_carry_upを呼び出せることの確認
+    inst1.set_with_carry_up<test_class>(plus, test_class2{6, 4, 7, 9, 8});
+    auto case6 = inst_to_string(inst1);
+
     // 12345 + 8 = 12353
     ASSERT_STREQ(case1.data(), "12353");
     // 89746 + 12353 = 102099(最大桁は想定サイズ外の値なので無視される)
@@ -56,4 +62,6 @@ TEST(tudbcpptest, CarryOverRunTest)
     // 18891 * 256 = 4836096(上位2桁は想定サイズ外の値なので無視される)
     ASSERT_STREQ(case4.data(), "36096");
     ASSERT_STREQ(case5.data(), "12345");
+    // 12345 + 89746 = 012091
+    ASSERT_STREQ(case6.data(), "02091");
 };
