@@ -29,7 +29,7 @@ static auto inst_to_string(const tudb::carry_over_container<T, 5>& inst)
 }
 
 // 10進数の足し算・引き算のひっ算を再現
-TEST(tudbcpptest, CarryOverRunTest)
+TEST(tudbcpptest, CarryOverWithTest)
 {
     auto inst1 = test_class{(char)5, (char)4, (char)3, (char)2, (char)1};
     inst1 = inst1.with_carry_up(plus, (char)8);
@@ -65,3 +65,21 @@ TEST(tudbcpptest, CarryOverRunTest)
     // 12345 + 89746 = 012091
     ASSERT_STREQ(case6.data(), "02091");
 };
+
+TEST(tudbcpptest, CarryOverHelperTest)
+{
+    constexpr auto inst1 = tudb::carry_over_container<std::uint32_t, 5>{0u, 1u, 1ul << 16, 0u, 0u};
+    constexpr auto case1 = tudb::count_using_size(tudb::carry_over_container<std::uint16_t, 3>{0u, 0u, 0u});
+    constexpr auto case2 = tudb::count_using_size(inst1);
+    constexpr auto case3 = tudb::count_using_size(tudb::carry_over_container<std::uint32_t, 5>{0u, 1u, 1u, 0u, 1u});
+    constexpr auto case4 = tudb::convert_diff_size_buffer<std::uint32_t>(tudb::convert_diff_size_buffer<std::uint16_t>(inst1));
+    // 16 * 10 bitと、左記を内包可能な64 * 3ビットは異なっているため、最終的なバッファの最大ビット数は増える
+    constexpr auto case5 = tudb::convert_diff_size_buffer<std::uint32_t>(tudb::convert_diff_size_buffer<std::uint64_t>(tudb::convert_diff_size_buffer<std::uint16_t>(inst1)));
+    constexpr auto inst2 = tudb::carry_over_container<std::uint32_t, 6>{0u, 1u, 1ul << 16, 0u, 0u, 0u};
+
+    ASSERT_EQ(case1, 1);
+    ASSERT_EQ(case2, 3);
+    ASSERT_EQ(case3, 5);
+    ASSERT_EQ(inst1, case4);
+    ASSERT_EQ(case5, inst2);
+}

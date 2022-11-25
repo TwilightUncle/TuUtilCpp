@@ -170,4 +170,40 @@ namespace tudb
             return static_cast<Derived&>(*this);
         }
     };
+
+    /**
+     * @fn
+     * @brief 整数型を格納しているものに対して、上位要素の0を未使用とみなし、使用中の要素数を数える。全て0の場合は1
+    */
+    template <std::unsigned_integral T, std::size_t Size>
+    constexpr auto count_using_size(const carry_over_container<T, Size>& v) noexcept
+    {
+        auto result = Size;
+        while (!v[(--result)] && result > 0);
+        return result + 1;
+    }
+
+    /**
+     * @fn
+     * @brief 整数型を格納したcarry_over_containerを情報の精度を失わないようにToBufTのサイズの整数型のcarry_over_containerへ変換する
+    */
+    template <std::unsigned_integral ToBufT, std::unsigned_integral FromBufT, std::size_t Size>
+    constexpr auto convert_diff_size_buffer(const carry_over_container<FromBufT, Size>& from) noexcept
+    {
+        constexpr auto from_buffer_digits = std::numeric_limits<FromBufT>::digits;
+        constexpr auto from_all_digits = from_buffer_digits * Size;
+        constexpr auto to_buffer_digits = std::numeric_limits<ToBufT>::digits;
+        constexpr auto to_buffer_size = from_all_digits / to_buffer_digits + (bool)(from_all_digits % to_buffer_digits);
+
+        auto to =  carry_over_container<ToBufT, to_buffer_size>{};
+        for (auto dig = 0; dig < from_all_digits; dig += (std::min)(from_buffer_digits, to_buffer_digits)) {
+            const auto to_i = dig / to_buffer_digits;
+            const auto from_i = dig / from_buffer_digits;
+            const auto diff_digits = (int)(to_i * to_buffer_digits) - (int)(from_i * from_buffer_digits);
+            // 大きいほうのサイズの型に統一(小さいままだと、シフト数が桁に対して多すぎ、コンパイルできない場合がある)
+            const std::conditional_t<(from_buffer_digits > to_buffer_digits), FromBufT, ToBufT> from_v = from[dig / from_buffer_digits];
+            to[dig / to_buffer_digits] |= (from_v >> (std::max)(0, diff_digits)) << (std::max)(0, -diff_digits);
+        }
+        return to;
+    }
 }
