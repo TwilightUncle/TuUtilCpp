@@ -206,4 +206,9 @@ namespace tudb
         }
         return to;
     }
+    template <std::unsigned_integral ToBufT, std::unsigned_integral FromBufT>
+    constexpr auto convert_diff_size_buffer(const FromBufT& from) noexcept
+    {
+        return convert_diff_size_buffer<ToBufT>(carry_over_container<FromBufT, 1>{from});
+    }
 }

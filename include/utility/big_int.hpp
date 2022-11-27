@@ -7,15 +7,15 @@
 namespace tudb
 {
     template <std::size_t Size = 2>
-    requires (Size > 1)
-    struct big_int : public carry_over_container<unsigned long long, Size>
+    requires (Size > 0)
+    struct big_int : public carry_over_container<std::uint64_t, Size>
     {
-        using value_type = unsigned long long;
+        using value_type = std::uint64_t;
 
         // 実質実装していない
         bool sign = true;
 
-        constexpr big_int() : carry_over_container<unsigned long long, Size>{} {}
+        constexpr big_int() : carry_over_container<std::uint64_t, Size>{} {}
 
         constexpr big_int(std::integral auto i) : big_int()
         {
@@ -26,7 +26,7 @@ namespace tudb
         template <std::unsigned_integral... Types>
         requires (sizeof...(Types) == Size)
         constexpr big_int(Types... args)
-            : carry_over_container<unsigned long long, Size>{(value_type)args...}
+            : carry_over_container<std::uint64_t, Size>{(value_type)args...}
         {}
 
         template <std::size_t N>
@@ -81,6 +81,19 @@ namespace tudb
             return std::tuple{l_v << r_v, upper, upper > 0};
         }
 
+        /**
+         * @fn
+         * @brief 二進数に置ける桁数を取得
+        */
+        constexpr auto get_bit_digits() const noexcept
+        {
+            constexpr auto value_type_max_digits = std::numeric_limits<value_type>::digits;
+            const auto digits64 = (int)count_using_size(*this);
+            // 最上位要素の最上位ビット
+            const auto max_bit = value_type_max_digits - std::countl_zero(this->at(digits64 - 1u));
+            return (std::max)(max_bit + (value_type_max_digits * (digits64 - 1)), 1);
+        }
+
         constexpr big_int operator~() const
         {
             big_int result{*this};
@@ -128,6 +141,36 @@ namespace tudb
             );
         }
 
+        /**
+         * @fn
+         * @brief 引数vで割り算を行い、商と余りの組を返却する。ビット演算により実装
+        */
+        constexpr std::pair<big_int, big_int> div(const std::convertible_to<big_int> auto& v) const
+        {
+            const auto this_clone = big_int{*this};
+            if (this_clone < v) return {big_int{}, this_clone};
+
+            // 引数が0の場合、明示的に0除算を行う(念のため、0/0とn/0を区別する)
+            if (!v) const auto div_0 = (value_type)(bool)this_clone / big_int{v}[0];
+
+            constexpr auto value_type_max_digits = std::numeric_limits<value_type>::digits;
+            auto rem = big_int{this_clone};
+            auto quotient = big_int{};
+            for (auto v_lshifts = this->get_bit_digits() - big_int{v}.get_bit_digits(); v_lshifts >= 0 && rem; v_lshifts--)
+            {
+                const auto shifted_v = (big_int{v} <<= (value_type)v_lshifts);
+                // 小さいときだけ、減算して商を立てる
+                if (rem > shifted_v) {
+                    rem -= shifted_v;
+                    quotient[v_lshifts / value_type_max_digits] |= (1ull << (v_lshifts % value_type_max_digits));
+                }
+            }
+            return {quotient, rem};
+        }
+
+        constexpr big_int& operator/=(const std::convertible_to<big_int> auto& v) { return (*this) = this->div(v).first; }
+        constexpr big_int& operator%=(const std::convertible_to<big_int> auto& v) { return (*this) = this->div(v).second; }
+
         constexpr big_int& operator++() { return (*this) += 1; }
         constexpr big_int operator++(int) { return std::exchange(*this, ++big_int{*this}); }
     };
@@ -166,6 +209,12 @@ namespace tudb
 
     template <std::size_t N>
     constexpr auto operator*(const big_int<N>& l, const std::convertible_to<big_int<N>> auto& r) { return convert_max_size_type_value(l, r) *= r; }
+
+    template <std::size_t N>
+    constexpr auto operator/(const big_int<N>& l, const std::convertible_to<big_int<N>> auto& r) { return convert_max_size_type_value(l, r) /= r; }
+
+    template <std::size_t N>
+    constexpr auto operator%(const big_int<N>& l, const std::convertible_to<big_int<N>> auto& r) { return convert_max_size_type_value(l, r) %= r; }
 
     template <std::size_t N1>
     constexpr auto operator<<(const big_int<N1>& l, std::unsigned_integral auto r) { return big_int<N1>(l) <<= r; }

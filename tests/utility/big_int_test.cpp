@@ -12,6 +12,12 @@ TEST(tudbcpptest, BigIntMethodTest)
     auto case7 = tudb::big_int<2>::lshift(0x8000'0000'8000'0000u, 5u);
     auto case8 = tudb::big_int<2>::minus(4u, 5u);
     auto case9 = tudb::big_int<2>::minus(4u, 3u);
+    constexpr auto case10 = tudb::big_int<2>{~0ull, 0b11u}.get_bit_digits();
+    constexpr auto case11 = tudb::big_int<2>{0u, 0b010u}.get_bit_digits();
+    constexpr auto case12 = tudb::big_int<2>{0b100u, 0u}.get_bit_digits();
+    constexpr auto case13 = tudb::big_int<2>{0u, 0u}.get_bit_digits();
+    constexpr auto case14 = tudb::big_int<2>{1u, 0u}.get_bit_digits();
+    constexpr auto case15 = tudb::big_int<3>{1u, 0u, 0b100u}.get_bit_digits();
 
     ASSERT_EQ(std::get<0>(case1), (std::numeric_limits<unsigned long long>::max)());
     ASSERT_EQ(std::get<1>(case1), 0);
@@ -40,6 +46,12 @@ TEST(tudbcpptest, BigIntMethodTest)
     ASSERT_EQ(std::get<0>(case9), 1);
     ASSERT_EQ(std::get<1>(case9), 0);
     ASSERT_EQ(std::get<2>(case9), false);
+    ASSERT_EQ(case10, 66);
+    ASSERT_EQ(case11, 66);
+    ASSERT_EQ(case12, 3);
+    ASSERT_EQ(case13, 1);
+    ASSERT_EQ(case14, 1);
+    ASSERT_EQ(case15, 131);
 }
 
 TEST(tudbcpptest, BigIntOperatorTest)
@@ -81,6 +93,12 @@ TEST(tudbcpptest, BigIntOperatorTest)
     constexpr auto value19 = tudb::big_int<2>{1u, 0u};
     constexpr auto value20 = tudb::big_int<4>{0u, 1u, 0u, 1u} >> 126u;
     constexpr auto value21 = tudb::big_int<2>{0u, 0b100u};
+    constexpr auto value22 = value19 / value21;
+    constexpr auto value23 = value19 % value21;
+    constexpr auto value24 = tudb::big_int<3>{~0ull, ~0ull, ~0ull} / tudb::big_int<2>{0u, 0b100u};
+    constexpr auto value25 = tudb::big_int<3>{~0ull, ~0ull >> 2, 0u};
+    constexpr auto value26 = tudb::big_int<3>{~0ull, ~0ull, ~0ull} % tudb::big_int<2>{0u, 0b100u};
+    constexpr auto value27 = tudb::big_int<3>{~0ull, 0b11u, 0u};
 
     ASSERT_TRUE(case1);
     ASSERT_TRUE(case2);
@@ -99,4 +117,8 @@ TEST(tudbcpptest, BigIntOperatorTest)
     ASSERT_EQ(value6, value17);
     ASSERT_EQ(value18, value19);
     ASSERT_EQ(value20, value21);
+    ASSERT_EQ(value22, tudb::big_int<2>{});
+    ASSERT_EQ(value23, value19);
+    ASSERT_EQ(value24, value25);
+    ASSERT_EQ(value26, value27);
 }
