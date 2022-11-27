@@ -147,14 +147,11 @@ namespace tudb
         */
         constexpr std::pair<big_int, big_int> div(const std::convertible_to<big_int> auto& v) const
         {
-            const auto this_clone = big_int{*this};
-            if (this_clone < v) return {big_int{}, this_clone};
-
             // ˆø”‚ª0‚Ìê‡A–¾Ž¦“I‚É0œŽZ‚ðs‚¤(”O‚Ì‚½‚ßA0/0‚Æn/0‚ð‹æ•Ê‚·‚é)
-            if (!v) const auto div_0 = (value_type)(bool)this_clone / 0;
+            if (!v) const auto div_0 = (value_type)(bool)(*this) / 0;
 
             constexpr auto value_type_max_digits = std::numeric_limits<value_type>::digits;
-            auto rem = big_int{this_clone};
+            auto rem = big_int{*this};
             auto quotient = big_int{};
             for (auto v_lshifts = this->get_bit_digits() - big_int{v}.get_bit_digits(); v_lshifts >= 0 && rem; v_lshifts--)
             {
