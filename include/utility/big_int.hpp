@@ -151,7 +151,7 @@ namespace tudb
             if (this_clone < v) return {big_int{}, this_clone};
 
             // ˆø”‚ª0‚Ìê‡A–¾Ž¦“I‚É0œŽZ‚ðs‚¤(”O‚Ì‚½‚ßA0/0‚Æn/0‚ð‹æ•Ê‚·‚é)
-            if (!v) const auto div_0 = (value_type)(bool)this_clone / big_int{v}[0];
+            if (!v) const auto div_0 = (value_type)(bool)this_clone / 0;
 
             constexpr auto value_type_max_digits = std::numeric_limits<value_type>::digits;
             auto rem = big_int{this_clone};
