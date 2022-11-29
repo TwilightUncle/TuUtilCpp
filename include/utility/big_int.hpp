@@ -172,6 +172,9 @@ namespace tudb
         constexpr big_int operator++(int) { return std::exchange(*this, ++big_int{*this}); }
     };
 
+    template <class T> struct is_big_int : public std::false_type {};
+    template <std::size_t N> struct is_big_int<big_int<N>> : public std::true_type {};
+
     /**
      * @fn
      * @brief ˆø”v‚ÌŒ^‚ğA“ñ‚Â‚Ìˆø”‚Ì‚¤‚¿ƒTƒCƒY‚ª‘å‚«‚¢‚Ù‚¤‚ÌŒ^‚É•ÏŠ·‚µ‚Ä•Ô‹p

@@ -1,26 +1,41 @@
 #pragma once
+#include <bit>
 
 namespace tudb
 {
     /**
      * @class
-     * @brief パラメータパックで文字列リテラルを使用するための型
+     * @brief 固定長領域の文字列
     */
     template <std::size_t N>
     struct cstr : public std::array<char, N>
     {
-        // 終端文字も格納済みであるものとして扱う
-        static constexpr auto size = N - 1;
+    private:
+        using parent_type = std::array<char, N>;
 
-        constexpr cstr() noexcept : std::array<char, N>{} {}
-        constexpr cstr(const char (&str_literal)[N]) noexcept
-            : std::array<char, N>{}
+    public:
+        // 終端文字も格納済みであるものとして扱う
+        static constexpr auto max_size = N - 1;
+
+        constexpr cstr() : parent_type{} {}
+        constexpr cstr(const char (&str_literal)[N])
+            : parent_type{}
         {
-            for (auto i = 0; i < size; i++)
+            for (auto i = 0; i < max_size; i++)
                 this->data()[i] = str_literal[i];
         }
 
+        /**
+         * @fn
+         * @brief string_viewを取得
+        */
         constexpr auto view() const noexcept { return std::string_view{this->data()}; }
+
+        /**
+         * @fn
+         * @brief 保持している文字列の長さを取得
+        */
+        constexpr auto size() const noexcept { return view().size(); }
     };
 
     /**
@@ -52,17 +67,17 @@ namespace tudb
      * @brief OffsetからCountの文字数分を新規文字列として切り出す
     */
     template <std::size_t Offset, std::size_t Count, std::size_t N>
-    requires (Offset < cstr<N>::size)
+    requires (Offset < cstr<N>::max_size)
     constexpr auto substr(const cstr<N>& s)
     {
-        constexpr auto len = (std::min)(Count, cstr<N>::size - Offset);
+        constexpr auto len = (std::min)(Count, cstr<N>::max_size - Offset);
         cstr<len + 1> _s{};
         for (auto i = 0; i < len; i++) _s[i] = s[i + Offset];
         return _s;
     }
     // Offsetから文字列の最後尾まで
     template <std::size_t Offset, std::size_t N>
-    constexpr auto substr(const cstr<N>& s) { return substr<Offset, cstr<N>::size - Offset, N>(s); }
+    constexpr auto substr(const cstr<N>& s) { return substr<Offset, cstr<N>::max_size - Offset, N>(s); }
 
     /**
      * @fn
@@ -80,23 +95,10 @@ namespace tudb
 
     /**
      * @fn
-     * @brief テンプレート引数で渡した整数値の桁数を取得する。第二引数は任意の進数を指定する
-    */
-    template <std::integral auto V, std::size_t Hex = 10>
-    requires (Hex >= 2)
-    constexpr auto get_digit()
-    {
-        std::size_t digit = 1;
-        for (auto val = V; val /= static_cast<decltype(V)>(Hex); digit++);
-        return digit;
-    }
-
-    /**
-     * @fn
      * @brief テンプレート引数で渡した整数値をcstrに変換する。進数を渡すことで、(2,8,16)進数リテラルのような文字列に変換する
     */
-    template <std::integral auto V, int Hex = 10, bool UsePrefix = false>
-    requires (V >= 0 && Hex >= 2)
+    template <auto V, int Hex = 10, bool UsePrefix = false>
+    requires (V >= 0 && Hex >= 2 && (std::integral<decltype(V)> || tudb::is_big_int<decltype(V)>::value))
     constexpr auto to_string()
     {
         // 10進数として桁数を取得
@@ -124,8 +126,6 @@ namespace tudb
     template <std::integral auto V, std::size_t Hex = 10, bool UsePrefix = false>
     constexpr auto to_string() { return concat(cstr{"-"}, to_string<-V, Hex, UsePrefix>()); }
 
-    // template <auto V> struct to_cstr;
-
     /**
      * @fn
      * @brief cstrであるかのメタ関数
@@ -138,17 +138,4 @@ namespace tudb
     */
     template <class T>
     concept StringLiteralSpecificable = is_cstr<T>::value;
-
-    // 関数でテンプレート引数に指定可能であった場合は不要なので消す
-    // 型として文字を保持し続けるコンテナとして残したほうが良いか？
-    // template <StringLiteralSpecificable auto... Strs>
-    // struct concat_cstr { static constexpr auto value = concat(Strs...); };
-    // template <StringLiteralSpecificable auto... Strs>
-    // constexpr auto concat_cstr_v = concat_cstr<Strs...>::value;
-
-    // template <StringLiteralSpecificable FormatStr, auto... Args>
-    // struct format_cstr
-    // {
-
-    // };
 }

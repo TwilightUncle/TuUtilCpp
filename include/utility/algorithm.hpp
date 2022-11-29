@@ -161,6 +161,26 @@ namespace tudb
     template <auto... Values>
     struct count_value_parameters : public std::integral_constant<std::size_t, sizeof...(Values)> {};
 
+    /**
+     * @fn
+     * @brief 二つの型の領域のサイズが等しいか検証
+    */
+    template <class T1, class T2>
+    struct equal_type_size : public std::bool_constant<sizeof(T1) == sizeof(T2)> {};
+
+    /**
+     * @fn
+     * @brief テンプレート引数で渡した整数値の桁数を取得する。第二引数は任意の進数を指定する
+    */
+    template <auto V, std::size_t Hex = 10>
+    requires (Hex >= 2 && (std::integral<decltype(V)> || is_big_int<decltype(V)>::value))
+    constexpr auto get_digit()
+    {
+        std::size_t digit = 1;
+        for (auto val = V; val /= static_cast<decltype(V)>(Hex); digit++);
+        return digit;
+    }
+
     //-----------------------------------------------------
     // 以下、_t定義
     //-----------------------------------------------------

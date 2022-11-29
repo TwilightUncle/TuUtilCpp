@@ -63,27 +63,6 @@ TEST(tudbcpptest, CstrOperatorTest)
     ASSERT_FALSE(case5);
 }
 
-TEST(tudbcpptest, CstrGetDigitTest)
-{
-    constexpr auto case1 = tudb::get_digit<255>();
-    constexpr auto case2 = tudb::get_digit<255, 2>();
-    constexpr auto case3 = tudb::get_digit<255, 8>();
-    constexpr auto case4 = tudb::get_digit<255, 16>();
-    constexpr auto case5 = tudb::get_digit<-255>();
-    constexpr auto case6 = tudb::get_digit<-255, 2>();
-    constexpr auto case7 = tudb::get_digit<-255, 8>();
-    constexpr auto case8 = tudb::get_digit<-255, 16>();
-
-    ASSERT_EQ(case1, 3);
-    ASSERT_EQ(case2, 8);
-    ASSERT_EQ(case3, 3);
-    ASSERT_EQ(case4, 2);
-    ASSERT_EQ(case5, 3);
-    ASSERT_EQ(case6, 8);
-    ASSERT_EQ(case7, 3);
-    ASSERT_EQ(case8, 2);
-}
-
 TEST(tudbcpptest, CstrIntegralToStringTest)
 {
     constexpr auto case1 = tudb::to_string<(unsigned int)154352>();
@@ -95,6 +74,8 @@ TEST(tudbcpptest, CstrIntegralToStringTest)
     constexpr auto case7 = tudb::to_string<-0b1111, 2, true>(); 
     constexpr auto case8 = tudb::to_string<077777, 8, true>(); 
     constexpr auto case9 = tudb::to_string<-0xfffff, 16, true>();
+    // constexprではステップ数の上限をコンパイラオプションで上げなければいけない(vc++の場合/constexpr:stepsを指定)
+    constexpr auto case10 = tudb::to_string<tudb::big_int<2>{~0ull, 10u}>();
 
     ASSERT_STREQ(case1.data(), "154352");
     ASSERT_STREQ(case2.data(), "-54362");
@@ -105,4 +86,5 @@ TEST(tudbcpptest, CstrIntegralToStringTest)
     ASSERT_STREQ(case7.data(), "-0b1111");
     ASSERT_STREQ(case8.data(), "077777");
     ASSERT_STREQ(case9.data(), "-0xFFFFF");
+    ASSERT_STREQ(case10.data(), "202914184810805067775");
 }
