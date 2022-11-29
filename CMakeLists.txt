@@ -37,6 +37,8 @@ if (TUDBCPP_BUILD_TESTS)
 
     # 単体テストの定義
     add_executable(tudbcpptest ${TUGAMECPP_TESTS})
+    # big_intの定数式評価ステップ数がデフォルトでは足りない(vc++ではそうであった)
+    target_compile_options(tudbcpptest PRIVATE $<$<CXX_COMPILER_ID:MSVC>: /constexpr:steps1500000>)
     target_include_directories(tudbcpptest PUBLIC ${PROJECT_SOURCE_DIR}/include)
     target_link_libraries(tudbcpptest PRIVATE gtest_main)
     target_compile_features(tudbcpptest PRIVATE cxx_std_20)
