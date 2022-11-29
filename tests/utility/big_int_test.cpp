@@ -68,6 +68,8 @@ TEST(tudbcpptest, BigIntOperatorTest)
                         >= tudb::big_int<5>{~0ull, 1ull, 0ull, 1ull, 0ull};
     constexpr auto case5 = !tudb::big_int<2>{};
     constexpr auto case6 = !tudb::big_int<2>{0u, 1u};
+    constexpr auto case7 = tudb::big_int<2>{1u, 0u} <= 1;
+    constexpr auto case8 = 5u > tudb::big_int<2>{4u, 0u};
 
     // Zp“™(•¡‡‘ã“ü‚Í“ñ€‰‰Zq‚Ì’†‚Å—˜—p‚µ‚Ä‚¢‚é‚Ì‚ÅA‚»‚Á‚¿“®‚¯‚Î–â‘è‚È‚µ)
     auto value1 = tudb::big_int<2>{};
@@ -106,6 +108,8 @@ TEST(tudbcpptest, BigIntOperatorTest)
     ASSERT_TRUE(case4);
     ASSERT_TRUE(case5);
     ASSERT_FALSE(case6);
+    ASSERT_TRUE(case7);
+    ASSERT_TRUE(case8);
     ASSERT_EQ(tudb::big_int<2>{}, value2);
     ASSERT_EQ(value1, value3);
     ASSERT_EQ(value4, value5);

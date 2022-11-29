@@ -176,15 +176,20 @@ namespace tudb
      * @fn
      * @brief ˆø”v‚ÌŒ^‚ğA“ñ‚Â‚Ìˆø”‚Ì‚¤‚¿ƒTƒCƒY‚ª‘å‚«‚¢‚Ù‚¤‚ÌŒ^‚É•ÏŠ·‚µ‚Ä•Ô‹p
     */
-    template <std::size_t N, std::integral T>
-    constexpr auto convert_max_size_type_value(const big_int<N>& v, const T&) { return big_int<N>(v); }
+    template <std::size_t N>
+    constexpr auto convert_max_size_type_value(const big_int<N>& v, std::integral auto) { return big_int<N>(v); }
     template <std::size_t N1, std::size_t N2>
     constexpr auto convert_max_size_type_value(const big_int<N1>& v, const big_int<N2>&) { return big_int<(std::max)(N1, N2)>(v); }
 
-    template <std::size_t N1, std::size_t N2>
-    constexpr std::strong_ordering operator<=>(const big_int<N1>& l, const big_int<N2>& r)
+    template <class T1, class T2> struct get_big_int_max_size;
+    template <std::size_t N1, std::size_t N2> struct get_big_int_max_size<big_int<N1>, big_int<N2>> : public std::integral_constant<std::size_t, (std::max)(N1, N2)> {};
+    template <std::size_t N, std::integral T> struct get_big_int_max_size<big_int<N>, T> : public std::integral_constant<std::size_t, N> {};
+    template <std::size_t N, std::integral T> struct get_big_int_max_size<T, big_int<N>> : public std::integral_constant<std::size_t, N> {};
+
+    template <std::size_t N>
+    constexpr std::strong_ordering operator<=>(const big_int<N>& l, const std::convertible_to<big_int<N>> auto& r)
     {
-        constexpr auto larger = (std::max)(N1, N2);
+        constexpr auto larger = get_big_int_max_size<big_int<N>, std::remove_const_t<std::remove_reference_t<decltype(r)>>>::value;
 
         // ƒTƒCƒY‚ª‘å‚«‚¢‚Ù‚¤‚ÖŒ^‚ğ“ˆê‚·‚é
         const auto l_arr = big_int<larger>(l);
@@ -197,6 +202,8 @@ namespace tudb
         }
         return std::strong_ordering::equal;
     }
+    template <std::size_t N>
+    constexpr std::strong_ordering operator<=>(std::integral auto l, const big_int<N>& r) { return big_int<N>{l} <=> r; }
 
     template <std::size_t N>
     constexpr auto operator+(const big_int<N>& l, const std::convertible_to<big_int<N>> auto& r) { return convert_max_size_type_value(l, r) += r; }
