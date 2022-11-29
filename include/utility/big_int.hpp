@@ -157,7 +157,7 @@ namespace tudb
             {
                 const auto shifted_v = (big_int{v} <<= (value_type)v_lshifts);
                 // ¬‚³‚¢‚Æ‚«‚¾‚¯AŒ¸ŽZ‚µ‚Ä¤‚ð—§‚Ä‚é
-                if (rem > shifted_v) {
+                if (rem >= shifted_v) {
                     rem -= shifted_v;
                     quotient[v_lshifts / value_type_max_digits] |= (1ull << (v_lshifts % value_type_max_digits));
                 }

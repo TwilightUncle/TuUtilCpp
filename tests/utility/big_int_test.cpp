@@ -101,6 +101,8 @@ TEST(tudbcpptest, BigIntOperatorTest)
     constexpr auto value25 = tudb::big_int<3>{~0ull, ~0ull >> 2, 0u};
     constexpr auto value26 = tudb::big_int<3>{~0ull, ~0ull, ~0ull} % tudb::big_int<2>{0u, 0b100u};
     constexpr auto value27 = tudb::big_int<3>{~0ull, 0b11u, 0u};
+    constexpr auto value28 = tudb::big_int<3>{~0ull, ~0ull, ~0ull} / tudb::big_int<3>{~0ull, ~0ull, ~0ull};
+    constexpr auto value29 = tudb::big_int<3>{1u, 0u, 0u};
 
     ASSERT_TRUE(case1);
     ASSERT_TRUE(case2);
@@ -125,4 +127,5 @@ TEST(tudbcpptest, BigIntOperatorTest)
     ASSERT_EQ(value23, value19);
     ASSERT_EQ(value24, value25);
     ASSERT_EQ(value26, value27);
+    ASSERT_EQ(value28, value29);
 }
