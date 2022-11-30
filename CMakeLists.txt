@@ -12,6 +12,8 @@ set(TUGAMECPP_TESTS
     ${PROJECT_SOURCE_DIR}/tests/utility/carry_over_test.cpp
     ${PROJECT_SOURCE_DIR}/tests/utility/big_int_test.cpp
     ${PROJECT_SOURCE_DIR}/tests/utility/cstr_test.cpp
+    ${PROJECT_SOURCE_DIR}/tests/utility/type_list_test.cpp
+    ${PROJECT_SOURCE_DIR}/tests/db_definition_test.cpp
 )
 source_group(tests FILES ${TUGAMECPP_TESTS})
 

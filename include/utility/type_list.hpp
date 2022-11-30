@@ -58,6 +58,8 @@ namespace tudb
     template <class T, template <class...> class Container, class... Types>
     struct push_type<Container<Types...>, T> : public std::type_identity<Container<Types..., T>> {};
 
+    template <class T1, class T2> using push_type_t = push_type<T1, T2>::type;
+
     /**
      * @fn
      * @brief 1つ以上のパラメータパックの内容を結合する
