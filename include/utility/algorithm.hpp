@@ -2,8 +2,22 @@
 
 namespace tudb
 {
-    // 前方宣言
+    // type_list関連の前方宣言
+    struct ignore_type;
     template <class... Types> struct type_list;
+    template <class T> struct pass_types;
+    template <class T1, class T2> struct push_type;
+
+    /**
+     * @fn
+     * @brief メタ関数のカリー化
+    */
+    template <template <class...> class F, class... PartialArgs>
+    struct curry
+    {
+        template <class... Args>
+        struct apply : public F<PartialArgs..., Args...> {};
+    };
 
     /**
      * @fn
@@ -87,6 +101,22 @@ namespace tudb
     // 再帰の終点(発見できずvoidを返却)
     template <auto V, template <auto, class> class Cond>
     struct find_if_by_value<V, Cond> : public std::type_identity<void> {};
+
+    /**
+     * @fn
+     * @brief 条件に合致する型を取り除く
+     * @tparam T 比較対象の型
+     * @tparam Cond 条件式(第一引数にはTが入る)
+     * @tparam Parameters 処理対象のパラメータパック
+    */
+    template <class T, template <class, class> class Cond, class... Parameters>
+    struct remove_if_by_type
+        : public foldl_by_type<
+            push_type,
+            type_list<ignore_type>, // init
+            std::conditional_t<Cond<T, Parameters>::value, ignore_type, Parameters>... // 条件に合致するものをignore_typeへ置換
+        >
+    {};
 
     /**
      * @fn
@@ -202,6 +232,9 @@ namespace tudb
 
     template <auto V, template <auto, class> class Cond, class... Parameters>
     using find_if_by_value_t = find_if_by_value<V, Cond, Parameters...>::type;
+
+    template <class T, template <class, class> class Cond, class... Parameters>
+    using remove_if_by_type_t = remove_if_by_type<T, Cond, Parameters...>::type;
 
     //-----------------------------------------------------
     // 以下、_v定義

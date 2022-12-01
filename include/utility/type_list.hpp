@@ -2,6 +2,9 @@
 
 namespace tudb
 {
+    // リストに存在しても無視される型
+    struct ignore_type {};
+
     /**
      * @class
      * @brief 型のコンテナ。パラメータパックにより操作
@@ -10,6 +13,7 @@ namespace tudb
     {
         static constexpr auto size = sizeof...(Types);
     };
+    template <> struct type_list<ignore_type> { static constexpr std::size_t size = 0; };
 
     /**
      * @fn
@@ -30,11 +34,14 @@ namespace tudb
      * @fn
      * @brief Srcのパラメータパックの内容がDestのテンプレート引数として展開される
     */
-    template <class Src, template <class...> class Dest> struct copy_types;
+    template <class Src, template <class...> class... Dests> struct copy_types;
+    template <template <class...> class Src, template <class...> class Head, template <class...> class... Dests, class... Parameters>
+    struct copy_types<Src<Parameters...>, Head, Dests...>
+        : public copy_types<typename copy_types<Src<Parameters...>, Head>::type, Dests...> {};
     template <template <class...> class Src, template <class...> class Dest, class... Parameters>
     struct copy_types<Src<Parameters...>, Dest> : public std::type_identity<Dest<Parameters...>> {};
 
-    template <class Src, template <class...> class Dest> using copy_types_t = copy_types<Src, Dest>::type;
+    template <class Src, template <class...> class... Dests> using copy_types_t = copy_types<Src, Dests...>::type;
 
     /**
      * @fn
@@ -57,6 +64,21 @@ namespace tudb
     // 末尾に追加バージョン
     template <class T, template <class...> class Container, class... Types>
     struct push_type<Container<Types...>, T> : public std::type_identity<Container<Types..., T>> {};
+    // 空のtype_listの場合
+    template <class T,  template <class...> class Container>
+    struct push_type<T, Container<ignore_type>> : public std::type_identity<type_list<T>> {};
+    template <class T,  template <class...> class Container>
+    struct push_type<Container<ignore_type>, T> : public std::type_identity<type_list<T>> {};
+    // ignore_typeをpush使用としたとき
+    template <template <class...> class Container, class... Types>
+    struct push_type<ignore_type, Container<Types...>> : public std::type_identity<Container<Types...>> {};
+    template <template <class...> class Container, class... Types>
+    struct push_type<Container<Types...>, ignore_type> : public std::type_identity<Container<Types...>> {};
+    // 空のlistにignore_typeをpush
+    template <template <class...> class Container>
+    struct push_type<ignore_type, Container<ignore_type>> : public std::type_identity<Container<ignore_type>> {};
+    template <template <class...> class Container>
+    struct push_type<Container<ignore_type>, ignore_type> : public std::type_identity<Container<ignore_type>> {};
 
     template <class T1, class T2> using push_type_t = push_type<T1, T2>::type;
 
@@ -98,6 +120,9 @@ namespace tudb
 
     template <auto V, template <auto, class> class Cond, template <class...> class Container, class... Parameters>
     struct find_if_by_value<V, Cond, pass_types<Container<Parameters...>>> : public find_if_by_value<V, Cond, Parameters...> {};
+
+    template <class T, template <class, class> class Cond, template <class...> class Container, class... Parameters>
+    struct remove_if_by_type<T, Cond, pass_types<Container<Parameters...>>> : public remove_if_by_type<T, Cond, Parameters...> {};
 
     template <template <class...> class Container, class... Parameters>
     struct count_parameters<pass_types<Container<Parameters...>>> : public count_parameters<Parameters...> {};

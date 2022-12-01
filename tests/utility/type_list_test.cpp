@@ -22,7 +22,9 @@ TEST(tudbcpptest, TypeListTest)
     constexpr auto case9 = std::is_same_v<type5, type4>;
     // copy_typesの確認
     using type6 = tudb::copy_types_t<type5, tudb::get_first_type_t>;
+    using type10 = tudb::copy_types_t<type5, tudb::type_list, tudb::get_first_type_t>;
     constexpr auto case10 = std::is_same_v<type3, type6>;
+    constexpr auto case18 = std::is_same_v<type10, type6>;
     // has_type_parametersの確認
     constexpr auto case11 = tudb::has_type_parameters_v<std::vector<int>>;
     constexpr auto case12 = tudb::has_type_parameters_v<std::tuple<int, float, double, char>>;
@@ -54,4 +56,5 @@ TEST(tudbcpptest, TypeListTest)
     EXPECT_TRUE(case15);
     EXPECT_TRUE(case16);
     EXPECT_TRUE(case17);
+    EXPECT_TRUE(case18);
 }

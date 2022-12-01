@@ -66,6 +66,16 @@ TEST(tudbcpptest, FindIfTypeTest)
     ASSERT_TRUE(case4);
 }
 
+TEST(tudbcpptest, RemoveIfByTypeTest)
+{
+    using type1 = tudb::remove_if_by_type_t<int, std::is_same, int, double, int, long long, char, int>; // intがいなくなっていればOK
+    using type2 = tudb::type_list<double, long long, char>;
+
+    constexpr auto case1 = std::is_same_v<type1, type2>;
+
+    ASSERT_TRUE(case1);
+}
+
 TEST(tudbcpptest, EqualValuesTest)
 {
     // 型と値がともに等しい場合のみ真となることを確認
