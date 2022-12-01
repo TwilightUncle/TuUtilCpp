@@ -51,7 +51,7 @@ namespace tudb
     concept ColumnConstraintDefinable = std::is_base_of_v<constraint_c, T> && !std::is_same_v<constraint_c, T>;
 
     template <class T> struct is_constraint_definition
-        : public std::bool_constant<std::is_base_of_v<constraint, T> && !std::is_same_v<constraint, T>> {};
+        : public std::bool_constant<std::is_base_of_v<constraint, T>> {};
 
     template <class T>
     concept ConstraintDefinable = is_constraint_definition<T>::value;
@@ -61,14 +61,16 @@ namespace tudb
         // Tはパラメータパックを持っている
         requires has_type_parameters_v<T>;
 
-        // 同じ定義のカラムが存在してはいけない
+        // 同じ定義が存在してはいけない
         requires copy_types_t<T, is_unique>::value;
 
-        // テンプレート引数が全てカラム定義であること(全てのパラメータがカラム定義であるかをリストとして取得し、論理積で結果を確認)
+        // テンプレート引数が全て制約定義であること(全てのパラメータが制約定義であるかをリストとして取得し、論理積で結果を確認)
         requires copy_types_t<
             map_types_t<is_constraint_definition, pass_types<T>>,
             std::conjunction
         >::value;
+
+        // 複数のprimary_keyが存在してはいけない
     };
 
     /**
@@ -84,4 +86,9 @@ namespace tudb
     
     template <ColumnConstraintDefinable Constraint, enumeration auto ColId>
     using to_table_constraint_t = to_table_constraint<Constraint, ColId>::type;
+
+    /**
+     * テーブルとして制約を未指定であること
+    */
+    using constraint_unspecified = type_list<constraint>;
 }

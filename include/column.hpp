@@ -24,7 +24,11 @@ namespace tudb
         static constexpr auto id = ColID;
         using id_type = decltype(ColID);
         using field_type = FieldType;
-        using constraint_list = type_list<to_table_constraint_t<Constraints, ColID>...>;
+        using constraint_list = std::conditional_t<
+            (sizeof...(Constraints) > 0),
+            type_list<to_table_constraint_t<Constraints, ColID>...>,
+            constraint_unspecified
+        >;
     };
 
     /**
@@ -48,6 +52,17 @@ namespace tudb
     struct get_column_name { static constexpr auto value = T::name; };
 
     /**
+     * @fn
+     * @brief define_columnで指定した制約を取り出す。ほかの任意の型を渡した場合は、constraint_unspecifiedを返す
+    */
+    template <class T> struct get_constraint_list : public std::type_identity<constraint_unspecified>{};
+    template <class T>
+    requires ColumnDefinable<T>
+    struct get_constraint_list<T> : public std::type_identity<typename T::constraint_list> {};
+
+    template <class T> using get_constraint_list_t = get_constraint_list<T>::type;
+
+    /**
      * カラム定義リストであること
     */
     template <class T>
@@ -64,4 +79,20 @@ namespace tudb
             std::conjunction
         >::value;
     };
+
+    /**
+     * @fn
+     * @brief カラムの定義リストから、各カラムに指定された制約情報を抽出する(一つもなければtype_list<ignore_type>が返る)
+    */
+    template <ColumnListDefinitionable T>
+    struct extract_constraints : public remove_if_by_type<
+        constraint,
+        std::is_same,
+        pass_types<copy_types_t<
+            map_types_t<get_constraint_list, pass_types<T>>,
+            concat_type_list_t
+        >>
+    > {};
+
+    template <ColumnListDefinitionable T> using extract_constraints_t = extract_constraints<T>::type;
 }
