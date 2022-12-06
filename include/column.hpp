@@ -11,13 +11,18 @@ namespace tudb
     /**
      * @fn
      * @brief 列定義用メタ関数(同時に定義内容参照用クラス)
+     * @tparam ColID スコープ付き列挙体要素を指定
+     * @tparam Name cstrで包んだ文字列リテラルを渡す。文字列は1文字以上
+     * @tparam FieldType 格納するデータ型
+     * @tparam Constraints 列制約を任意数指定する(指定なしもOK)
     */
     template <
         enumeration auto ColID,
-        StringLiteralSpecificable auto Name,
+        cstr Name,
         class FieldType,
         ColumnConstraintDefinable... Constraints
     >
+    requires (Name.size() > 0)
     struct define_column
     {
         static constexpr auto name = Name;
@@ -36,7 +41,7 @@ namespace tudb
      * @brief column_definition型かどうかを判定するメタ関数
     */
     template <class T> struct is_column_definition : public std::false_type {};
-    template <enumeration auto ColID, StringLiteralSpecificable auto Name, typename FieldType, ColumnConstraintDefinable... Constraints>
+    template <enumeration auto ColID, cstr Name, typename FieldType, ColumnConstraintDefinable... Constraints>
     struct is_column_definition<define_column<ColID, Name, FieldType, Constraints...>> : public std::true_type {};
 
     /**
@@ -46,7 +51,7 @@ namespace tudb
     concept ColumnDefinable = is_column_definition<T>::value;
 
     template <ColumnDefinable T>
-    struct get_column_id : public std::integral_constant<decltype(T::id), T::id> {};
+    struct get_column_id { static constexpr auto value = T::id; };
 
     template <ColumnDefinable T>
     struct get_column_name { static constexpr auto value = T::name; };
@@ -78,6 +83,10 @@ namespace tudb
             map_types_t<is_column_definition, pass_types<T>>,
             std::conjunction
         >::value;
+
+        // nameがかぶってはいけない
+        // idがかぶってはいけない
+        // idの型は全て等しい必要がある
     };
 
     /**

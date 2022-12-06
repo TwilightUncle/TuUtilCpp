@@ -9,16 +9,36 @@ namespace tudb
 {
     /**
      * @fn
+     * @brief テンプレート引数検証用のメタ関数
+    */
+    template <
+        ColumnListDefinitionable ColumnDefinitionList,
+        ConstraintListDefinable ConstraintDefinitionList
+    >
+    struct validate_define_table_constraint_arg : public std::bool_constant<
+        ConstraintListDefinable<
+            concat_type_list_t<
+                ConstraintDefinitionList,
+                extract_constraints_t<ColumnDefinitionList>
+            >
+        >
+    > {};
+
+    /**
+     * @fn
      * @brief テーブル定義用メタ関数
-     * @param ETableType テーブルと列の識別子として定義したスコープ付き列挙型
-     * @param Name cstrで包んで渡した文字列リテラル
-     * @param ColumnDefinitionList define_columnによる列定義を指定する
+     * @tparam ETableType テーブルと列の識別子として定義したスコープ付き列挙型
+     * @tparam Name cstrで包んで渡した文字列リテラル
+     * @tparam ColumnDefinitionList define_columnによる列定義を指定する
+     * @tparam ConstraintDefinitionList define_columnによる列定義を指定する
     */
     template <
         enumeration ETableType,
-        StringLiteralSpecificable auto Name,
-        ColumnListDefinitionable ColumnDefinitionList
+        cstr Name,
+        ColumnListDefinitionable ColumnDefinitionList,
+        ConstraintListDefinable ConstraintDefinitionList = constraint_unspecified
     >
+    requires validate_define_table_constraint_arg<ColumnDefinitionList, ConstraintDefinitionList>::value
     struct define_table
     {
     private:

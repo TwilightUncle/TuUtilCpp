@@ -11,10 +11,10 @@ enum class samples2 {
 
 TEST(tudbcpptest, DbColumnTest)
 {
-    using column_id = tudb::define_column<samples::ID, tudb::cstr{"id"}, tudb::integer, tudb::pk>;
-    using column_id2 = tudb::define_column<samples::ID2, tudb::cstr{"id2"}, tudb::integer, tudb::pk, tudb::fk<samples2::ID>>;
-    using column_na = tudb::define_column<samples::NAME, tudb::cstr{"name"}, tudb::varchar<256>>;
-    using column_ce = tudb::define_column<samples::CREATE_AT, tudb::cstr{"create_at"}, tudb::integer>;
+    using column_id = tudb::define_column<samples::ID, "id", tudb::integer, tudb::pk>;
+    using column_id2 = tudb::define_column<samples::ID2, "id2", tudb::integer, tudb::pk, tudb::fk<samples2::ID>>;
+    using column_na = tudb::define_column<samples::NAME, "name", tudb::varchar<256>>;
+    using column_ce = tudb::define_column<samples::CREATE_AT, "create_at", tudb::integer>;
     using column_definition_list = tudb::type_list<column_id, column_id2, column_na, column_ce>;
 
     // カラムであることの制約のテスト(is_column_definitionも兼ねる)

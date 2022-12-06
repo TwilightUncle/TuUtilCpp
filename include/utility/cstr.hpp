@@ -1,5 +1,4 @@
 #pragma once
-#include <bit>
 
 namespace tudb
 {
@@ -132,10 +131,4 @@ namespace tudb
     */
     template <class T> struct is_cstr : public std::false_type{};
     template <std::size_t N> struct is_cstr<cstr<N>> : public std::true_type{};
-
-    /**
-     * @brief cstrであることを強制するコンセプト
-    */
-    template <class T>
-    concept StringLiteralSpecificable = is_cstr<T>::value;
 }
