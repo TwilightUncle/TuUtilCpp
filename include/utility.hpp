@@ -9,6 +9,8 @@
 #include <concepts>
 #include <numeric>
 #include <ranges>
+#include <optional>
+#include <cassert>
 
 #include <utility/concepts.hpp>
 #include <utility/carry_over.hpp>
@@ -17,3 +19,4 @@
 #include <utility/algorithm.hpp>
 #include <utility/type_list.hpp>
 #include <utility/value_list.hpp>
+#include <utility/regex.hpp>
