@@ -68,13 +68,13 @@ TEST(tudbcpptest, RegexTest)
     EXPECT_EQ(std::get<2>(case18), std::regex_constants::error_collate);
 
     // 文字クラス,バックスラッシュ,文字範囲指定なし
-    constexpr auto case19 = tudb::get_regex_char_range_matcher("-abc.")(".c-aba");
-    constexpr auto case20 = tudb::get_regex_char_range_matcher("abc.-")(".c-aba");
-    constexpr auto case21 = tudb::get_regex_char_range_matcher("-abc.")("b.c-d");
-    constexpr auto case22 = tudb::get_regex_char_range_matcher("-abc.")("def");
-    constexpr auto case23 = tudb::get_regex_char_range_matcher("^-abc")("cab");
-    constexpr auto case24 = tudb::get_regex_char_range_matcher("^-abc")("bcd");
-    constexpr auto case25 = tudb::get_regex_char_range_matcher("^-abc")("def^");
+    constexpr auto case19 = tudb::get_regex_char_range_matcher<"-abc.">()(".c-aba");
+    constexpr auto case20 = tudb::get_regex_char_range_matcher<"abc.-">()(".c-aba");
+    constexpr auto case21 = tudb::get_regex_char_range_matcher<"-abc.">()("b.c-d");
+    constexpr auto case22 = tudb::get_regex_char_range_matcher<"-abc.">()("def");
+    constexpr auto case23 = tudb::get_regex_char_range_matcher<"^-abc">()("cab");
+    constexpr auto case24 = tudb::get_regex_char_range_matcher<"^-abc">()("bcd");
+    constexpr auto case25 = tudb::get_regex_char_range_matcher<"^-abc">()("def^");
     EXPECT_TRUE(case19);
     EXPECT_TRUE(case20);
     EXPECT_FALSE(case21);
@@ -84,14 +84,17 @@ TEST(tudbcpptest, RegexTest)
     EXPECT_TRUE(case25);
 
     // 文字クラス指定あり
-    constexpr auto case26 = tudb::get_regex_char_range_matcher("\\d")("0123456789");
-    constexpr auto case27 = tudb::get_regex_char_range_matcher("\\d")("0123456789a");
-    constexpr auto case28 = tudb::get_regex_char_range_matcher("^\\d")("0aabc_%&\t\\[");
-    constexpr auto case29 = tudb::get_regex_char_range_matcher("^\\d")("abc_%&\t\\[");
-    constexpr auto case30 = tudb::get_regex_char_range_matcher("\\D")("0aabc_%&\t\\[");
-    constexpr auto case31 = tudb::get_regex_char_range_matcher("\\D")("aabc_%&\t\\[");
-    constexpr auto case32 = tudb::get_regex_char_range_matcher("^\\D")("0123456789");
-    constexpr auto case33 = tudb::get_regex_char_range_matcher("^\\D")("0123456789a");
+    constexpr auto case26 = tudb::get_regex_char_range_matcher<"\\d">()("0123456789");
+    constexpr auto case27 = tudb::get_regex_char_range_matcher<"\\d">()("0123456789a");
+    constexpr auto case28 = tudb::get_regex_char_range_matcher<"^\\d">()("0aabc_%&\t\\[");
+    constexpr auto case29 = tudb::get_regex_char_range_matcher<"^\\d">()("abc_%&\t\\[");
+    constexpr auto case30 = tudb::get_regex_char_range_matcher<"\\D">()("0aabc_%&\t\\[");
+    constexpr auto case31 = tudb::get_regex_char_range_matcher<"\\D">()("aabc_%&\t\\[");
+    constexpr auto case32 = tudb::get_regex_char_range_matcher<"^\\D">()("0123456789");
+    constexpr auto case33 = tudb::get_regex_char_range_matcher<"^\\D">()("0123456789a");
+
+    // 生成した関数を保持できるかも確認(レンジのテスト)
+    constexpr auto range_matcher1 = tudb::get_regex_char_range_matcher<"0-5a-dA\\-E">();
 
     EXPECT_TRUE(case26);
     EXPECT_FALSE(case27);
@@ -101,4 +104,6 @@ TEST(tudbcpptest, RegexTest)
     EXPECT_TRUE(case31);
     EXPECT_TRUE(case32);
     EXPECT_FALSE(case33);
+    EXPECT_TRUE(range_matcher1("0123451bcdA-E"));
+    EXPECT_FALSE(range_matcher1("0123451bcdABCDE"));
 }

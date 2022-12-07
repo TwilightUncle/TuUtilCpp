@@ -234,41 +234,110 @@ namespace tudb
             }
             return std::pair{std::string_view{}, std::string_view{}};
         }
+
+        template <char C>
+        static constexpr auto get_const_char_set()
+        {
+            if constexpr (C == 'd') return digits;
+            else if constexpr (C == 'w') return true_words;
+            else if constexpr (C == 's') return true_space;
+            else if constexpr (C == '.') return dot;
+            else if constexpr (C == 'D') return anti_digits;
+            else if constexpr (C == 'W') return anti_words;
+            else if constexpr (C == 'S') return anti_space;
+            else return cstr{{C, '\0'}};
+        }
+
+        template <char C>
+        static constexpr auto get_const_bk_char_set()
+        {
+            if constexpr (C == 'd') return cstr{""};
+            else if constexpr (C == 'w') return cstr{""};
+            else if constexpr (C == 's') return bk_true_space;
+            else if constexpr (C == '.') return bk_dot;
+            else if constexpr (C == 'D') return bk_anti_digits;
+            else if constexpr (C == 'W') return bk_anti_words;
+            else if constexpr (C == 'S') return bk_others;
+            else return cstr{{C, '\0'}};
+        }
+    };
+
+    template <cstr CharRange>
+    requires (CharRange.size() > 0)
+    struct regex_range_parser
+    {
+        static_assert(is_collect_regex_back_slash(CharRange.view()));
+
+        static constexpr auto allow_or_deny = CharRange[0] != '^';
+        static constexpr auto begin_index = int(!allow_or_deny);
+        static constexpr auto size = CharRange.size();
+
+        /**
+         * @fn
+         * @brief 文字集合を構築する
+        */
+        template <int N>
+        static constexpr auto make_regex_char_list()
+        {
+            if constexpr (N >= size) return cstr{""};
+            else return concat(substr<N, 1, CharRange.max_size + 1>(CharRange), make_regex_char_list<N + 1>());
+        }
+        template <int N>
+        requires (CharRange[N] == '-')
+        static constexpr auto make_regex_char_list()
+        {
+            if constexpr (begin_index == N || size - 1 == N)
+                return concat(cstr{"-"}, make_regex_char_list<N + 1>());
+            else {
+                constexpr char begin_char = (std::min)(CharRange[N - 1], CharRange[N + 1]) + 1;
+                constexpr char end_char = (std::max)(CharRange[N - 1], CharRange[N + 1]);
+                cstr<2 + end_char - begin_char> str{};
+                for (char c = 0; c < str.max_size; c++) str[c] = c + begin_char;
+                return concat(str, make_regex_char_list<N + 2>());
+            }
+        }
+        template <int N>
+        requires (CharRange[N] == '\\')
+        static constexpr auto make_regex_char_list()
+        {
+            // 文字範囲の括弧内では「.」は特殊文字ではない
+            if constexpr (CharRange[N + 1] != '.')
+                return concat(regex_char_class::get_const_char_set<CharRange[N + 1]>(), make_regex_char_list<N + 2>());
+            else return concat(cstr{"."}, make_regex_char_list<N + 2>());
+        }
+
+        /**
+         * @fn
+         * @brief バックスラッシュとセットの場合の文字集合を構築する
+        */
+        template <int N>
+        static constexpr auto make_regex_bk_char_list()
+        {
+            if constexpr (N >= size) return cstr{""};
+            else if constexpr (CharRange[N] == '\\' && CharRange[N + 1] != '.')
+                return concat(regex_char_class::get_const_bk_char_set<CharRange[N + 1]>(), make_regex_bk_char_list<N + 2>());
+            else return make_regex_bk_char_list<N + 1>();
+        }
+
+        static constexpr auto value = make_regex_char_list<begin_index>();
+        static constexpr auto bk_value = make_regex_bk_char_list<begin_index>();
     };
 
     /**
      * @fn
      * @brief 渡された文字範囲を許可/拒否リストに展開し、与えられた文字列がマッチするか判定する関数オブジェクトを返却する
     */
-    inline constexpr auto get_regex_char_range_matcher(const std::string_view& target)
+    template <cstr Target>
+    constexpr auto get_regex_char_range_matcher()
     {
-        const auto is_inverse = target[0] == '^';
-        const auto begin_i = int(is_inverse);
-        auto char_set = std::string{};
-        auto bk_char_set = std::string{};
-        for (auto i = begin_i; i < target.size(); i++) {
-            // 文字範囲を展開する
-            if (target[i] == '-' && !eq_before_char(target, i, '\\') && i != begin_i && i != target.size() - 1) {
-                // if (target[i - 1] > target[i + 1]); // std::regex_constants::error_range
-                for (char c = (std::min)(target[i - 1], target[i + 1]) + 1; c <= (std::max)(target[i - 1], target[i + 1]); c++)
-                    char_set += c;
-                i++;
-            }
-            // エスケープ等, 文字クラスの処理
-            else if (target[i] == '\\') {
-                const auto [ch_class, bk_ch_class] = regex_char_class::get_char_set(target[++i]);
-                // 文字範囲の括弧内では「.」は特殊文字ではない
-                if (ch_class.empty() && bk_ch_class.empty() || target[i] == '.') bk_char_set += target[i];
-                else {
-                    char_set += std::string(ch_class);
-                    bk_char_set += std::string(bk_ch_class);
-                }
-            }
-            else char_set += target[i];
-        }
-
-        return [is_inverse, char_set, bk_char_set](const std::string& comp) -> bool {
-            return is_allowed_string(comp, !is_inverse, char_set, bk_char_set);
+        return [](const std::string& comp) -> bool {
+            using range_parser = regex_range_parser<Target>;
+            return is_allowed_string(
+                comp,
+                range_parser::allow_or_deny,
+                range_parser::value.data(),
+                range_parser::bk_value.data()
+            );
         };
     }
 
