@@ -94,7 +94,7 @@ TEST(tudbcpptest, RegexTest)
     constexpr auto case33 = tudb::get_regex_char_range_matcher<"^\\D">()("0123456789a");
 
     // 生成した関数を保持できるかも確認(レンジのテスト)
-    constexpr auto range_matcher1 = tudb::get_regex_char_range_matcher<"0-5a-dA\\-E">();
+    constexpr auto range_matcher1 = tudb::get_regex_char_range_matcher<"0-5a-dA\\-E\\t">();
 
     EXPECT_TRUE(case26);
     EXPECT_FALSE(case27);
@@ -104,6 +104,7 @@ TEST(tudbcpptest, RegexTest)
     EXPECT_TRUE(case31);
     EXPECT_TRUE(case32);
     EXPECT_FALSE(case33);
-    EXPECT_TRUE(range_matcher1("0123451bcdA-E"));
+    EXPECT_TRUE(range_matcher1("0123451bcdA-E\t"));
+    EXPECT_FALSE(range_matcher1("0123451bcdA-Et"));
     EXPECT_FALSE(range_matcher1("0123451bcdABCDE"));
 }

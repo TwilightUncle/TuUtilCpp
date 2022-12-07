@@ -113,7 +113,8 @@ namespace tudb
         const std::string& target,
         bool allow_or_deny,
         const std::string& char_list,
-        const std::string& bk_char_list
+        const std::string& bk_char_list,
+        bool is_bk_escape = true
     ) {
         const auto collate_list = [&allow_or_deny](const std::string& list, char ch)->bool {
             // ‹–‰ÂƒŠƒXƒg‚Ì’†‚©‚ç–¢”­Œ©‚Ì‚à‚Ì‚ª‚ ‚Á‚½ê‡‚Ü‚½‚ÍA
@@ -122,7 +123,7 @@ namespace tudb
         };
 
         for (int i = 0; i < target.size(); i++) {
-            if (target[i] != '\\' && collate_list(char_list, target[i])) return false;
+            if ((target[i] != '\\' || !is_bk_escape) && collate_list(char_list, target[i])) return false;
             else if (target[i] == '\\' && i < target.size() - 1 && collate_list(bk_char_list, target[++i])) return false;
         }
         return true;
@@ -205,7 +206,7 @@ namespace tudb
         static constexpr auto strends = cstr{"\n\r"};
         static constexpr auto bk_space = cstr{"ftv"};
         static constexpr auto bk_strends = cstr{"nr"};
-        static constexpr auto others = cstr{"-!\"#$%&'()=^~|`@{}+;*:,<.>/?\b"};
+        static constexpr auto others = cstr{"-!\"#$%&'()=^~|`@{}+;*:,<.>/?\b\\"};
         static constexpr auto bk_others = cstr{"b0[]\\"};
 
         static constexpr auto true_words = concat(digits, words);
@@ -245,6 +246,12 @@ namespace tudb
             else if constexpr (C == 'D') return anti_digits;
             else if constexpr (C == 'W') return anti_words;
             else if constexpr (C == 'S') return anti_space;
+            else if constexpr (C == 'f') return cstr{"\f"};
+            else if constexpr (C == 't') return cstr{"\t"};
+            else if constexpr (C == 'v') return cstr{"\v"};
+            else if constexpr (C == 'n') return cstr{"\n"};
+            else if constexpr (C == 'r') return cstr{"\r"};
+            else if constexpr (C == 'b') return cstr{"\b"};
             else return cstr{{C, '\0'}};
         }
 
@@ -336,7 +343,8 @@ namespace tudb
                 comp,
                 range_parser::allow_or_deny,
                 range_parser::value.data(),
-                range_parser::bk_value.data()
+                range_parser::bk_value.data(),
+                false
             );
         };
     }
