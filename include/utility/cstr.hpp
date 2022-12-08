@@ -39,6 +39,12 @@ namespace tudb
 
     /**
      * @fn
+     * @brief •¶š‚©‚ç’·‚³1‚Ì•¶š—ñ‚ğì¬
+    */
+    inline constexpr auto char_to_cstr(char ch) { return cstr{{ch, '\0'}}; }
+
+    /**
+     * @fn
      * @brief “ñ‚Â‚ÌcstrŒ^•¶š—ñ‚ğŒ‹‡‚·‚é
     */
     template <std::size_t N1, std::size_t N2>

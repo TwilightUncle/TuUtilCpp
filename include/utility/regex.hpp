@@ -7,7 +7,6 @@
 
 namespace tudb
 {
-
     enum {
         // 通常範囲に置ける特殊文字の性質
         REGEX_SPECIAL       = 0x0001u,  // 特殊文字(バックスラッシュでエスケープ)
@@ -139,63 +138,87 @@ namespace tudb
     }
 
     /**
-     * @fn
-     * @brief 括弧の終了インデックスと対応エラーを取得する
+     * @class
+     * @brief 開始or終了括弧を渡し、対応する括弧の情報とエラー内容を提供する
     */
-    inline constexpr auto get_regex_brancket_index(const std::string_view& target, const int brancket_begin_pos)
+    template <char BrancketChar, bool IsBegin>
+    struct regex_brancket_info
     {
-        const auto brancket_begin = target[brancket_begin_pos];
-
-        // 対応するとじ括弧と、エラー発生時の該当エラーの組を取得
-        const auto [brancket_end, error_value] = [](char ch)->std::pair<char, std::regex_constants::error_type> {
-            switch (ch) {
-                case '[': return {']', std::regex_constants::error_brack};
-                case '(': return {')', std::regex_constants::error_paren};
-                case '{': return {'}', std::regex_constants::error_brace};
-                case '<': return {'>', std::regex_constants::error_collate};
+        // 開始括弧の文字
+        static constexpr auto begin = []() {
+            if (IsBegin) return BrancketChar;
+            switch (BrancketChar) {
+                case ']': return '[';
+                case ')': return '(';
+                case '}': return '{';
+                case '>': return '<';
             }
-            return {(char)-1, std::regex_constants::error_type{}};
-        }(brancket_begin);
+            return char(-1);
+        }(); 
 
-        // 引数の指定が不正
-        assert(brancket_end >= 0);
-
-        const auto brancket_str = target.substr(brancket_begin_pos + 1);
-        auto brancket_end_pos = std::string_view::npos;
-        for (const auto i : std::views::iota((std::size_t)0, brancket_str.size())) {
-            // とじ括弧かつエスケープされていない場合、位置を記録し終了
-            if (brancket_str[i] == brancket_end && !eq_before_char(brancket_str, i, '\\')) {
-                // substrする前のtargetの位置基準
-                brancket_end_pos = i + brancket_begin_pos + 1;
-                break;
+        // 終了括弧の文字
+        static constexpr auto end = []() {
+            if (!IsBegin) return BrancketChar;
+            switch (BrancketChar) {
+                case '[': return ']';
+                case '(': return ')';
+                case '{': return '}';
+                case '<': return '>';
             }
-        }
-        return std::tuple{brancket_end_pos, error_value};
-    }
+            return char(-1);
+        }();
 
-    /**
-     * @fn
-     * @brief 括弧開始の文字インデックスを渡すことで括弧内の文字列、対応するとじ括弧のインデックス、エラーがある場合はエラーの組を返す
-    */
-    inline constexpr auto extract_regex_brancket_inner(const std::string_view& pattern_view, const int brancket_begin_pos)
+        // 引数が不正なので、コンパイルエラーを起こす
+        static_assert(begin != -1, "Invalid template argment [BrancketChar]. Must match one of ']', ')', '}', '>'.");
+        static_assert(end != -1, "Invalid template argment [BrancketChar]. Must match one of '[', '(', '{', '<'.");
+
+        // 関連エラー発生時の識別子
+        static constexpr auto error = []() {
+            switch (begin) {
+                case '[': return std::regex_constants::error_brack;
+                case '(': return std::regex_constants::error_paren;
+                case '{': return std::regex_constants::error_brace;
+                case '<': return std::regex_constants::error_collate;
+            }
+            return std::regex_constants::error_type{};
+        }();
+    };
+
+    template <cstr Pattern, std::size_t BrancketBeginPos>
+    struct regex_brancket_inner
     {
-        const auto [brancket_end_pos, error_value] = get_regex_brancket_index(pattern_view, brancket_begin_pos);
+        using brancket_info = regex_brancket_info<Pattern[BrancketBeginPos], true>;
 
-        if (brancket_end_pos == std::string_view::npos || brancket_end_pos - brancket_begin_pos <= 1)
-            return std::tuple{
-                std::string_view{},
-                brancket_end_pos,
-                std::optional{error_value}
-            };
+        // 開始括弧の位置
+        static constexpr auto begin_pos = BrancketBeginPos;
 
-        // 抽出範囲に括弧は含まない
-        const auto brancket_inner = pattern_view.substr(brancket_begin_pos + 1, brancket_end_pos - brancket_begin_pos - 1);
-        return std::tuple{
-            brancket_inner,
-            brancket_end_pos,
-            std::optional<std::regex_constants::error_type>{}
-        };
-    }
+        // 終わり括弧の位置
+        static constexpr auto end_pos = []() {
+            const auto brancket_str = Pattern.view().substr(begin_pos + 1);
+            auto pos = std::string_view::npos;
+            for (const auto i : std::views::iota((std::size_t)0, brancket_str.size())) {
+                // とじ括弧かつエスケープされていない場合、位置を記録し終了
+                if (brancket_str[i] == brancket_info::end && !eq_before_char(brancket_str, i, '\\')) {
+                    // substrする前のtargetの位置基準
+                    pos = i + begin_pos + 1;
+                    break;
+                }
+            }
+            return pos;
+        }();
+
+        // エラーが発生したかどうか
+        static constexpr auto is_error = end_pos == std::string_view::npos;
+        static_assert(!is_error || brancket_info::error != std::regex_constants::error_brack, "An error has occurred. [std::regex_constants::error_brack]");
+        static_assert(!is_error || brancket_info::error != std::regex_constants::error_paren, "An error has occurred. [std::regex_constants::error_paren]");
+        static_assert(!is_error || brancket_info::error != std::regex_constants::error_brace, "An error has occurred. [std::regex_constants::error_brace]");
+        static_assert(!is_error || brancket_info::error != std::regex_constants::error_collate, "An error has occurred. [std::regex_constants::error_collate]");
+
+        static constexpr auto value = substr<begin_pos + 1, end_pos - begin_pos - 1, Pattern.max_size + 1>(Pattern);
+
+        // 開始、閉じ括弧も含めた文字列
+        static constexpr auto value_with_brancket = concat(char_to_cstr(brancket_info::begin), value, char_to_cstr(brancket_info::end));
+    };
 
     struct regex_char_class
     {
@@ -252,7 +275,7 @@ namespace tudb
             else if constexpr (C == 'n') return cstr{"\n"};
             else if constexpr (C == 'r') return cstr{"\r"};
             else if constexpr (C == 'b') return cstr{"\b"};
-            else return cstr{{C, '\0'}};
+            else return char_to_cstr(C);
         }
 
         template <char C>
@@ -265,7 +288,7 @@ namespace tudb
             else if constexpr (C == 'D') return bk_anti_digits;
             else if constexpr (C == 'W') return bk_anti_words;
             else if constexpr (C == 'S') return bk_others;
-            else return cstr{{C, '\0'}};
+            else return char_to_cstr(C);
         }
     };
 
@@ -417,14 +440,14 @@ namespace tudb
                 }
 
                 // 括弧を検出
-                if (attr & REGEX_BRANCKET_BE) {
-                    const auto [inner, en_pos, br_error] = extract_regex_brancket_inner(pattern_view, i);
-                    if (br_error) return br_error;
-                    // 括弧内部の検証は別関数に委譲のため、とじ括弧までインデックスを進める
-                    if (const auto inner_error = parse_brancket_inner(inner, ch)) return inner_error;
-                    i = en_pos;
-                    continue;
-                }
+                // if (attr & REGEX_BRANCKET_BE) {
+                //     const auto [inner, en_pos, br_error] = extract_regex_brancket_inner(pattern_view, i);
+                //     if (br_error) return br_error;
+                //     // 括弧内部の検証は別関数に委譲のため、とじ括弧までインデックスを進める
+                //     if (const auto inner_error = parse_brancket_inner(inner, ch)) return inner_error;
+                //     i = en_pos;
+                //     continue;
+                // }
             }
             return std::nullopt;
         }

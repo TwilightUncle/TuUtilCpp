@@ -33,40 +33,20 @@ TEST(tudbcpptest, RegexTest)
     ASSERT_FALSE(case10);
 
     // 正常
-    constexpr auto case11 = tudb::extract_regex_brancket_inner("abc[defg{hijk}lm\\](opq)]rs", 3);
-    constexpr auto case12 = tudb::extract_regex_brancket_inner("abc{defg\\{hijk\\}lm](opq)}rs", 3);
-    constexpr auto case13 = tudb::extract_regex_brancket_inner("abc(defg{hijk\\}lm](opq\\))rs", 3);
-    constexpr auto case14 = tudb::extract_regex_brancket_inner("abc<defg{hijk\\}lm](opq\\)>rs", 3);
-    EXPECT_EQ(std::get<0>(case11), "defg{hijk}lm\\](opq)"sv);
-    EXPECT_EQ(std::get<1>(case11), 23);
-    EXPECT_EQ(std::get<2>(case11), std::nullopt);
-    EXPECT_EQ(std::get<0>(case12), "defg\\{hijk\\}lm](opq)"sv);
-    EXPECT_EQ(std::get<1>(case12), 24);
-    EXPECT_EQ(std::get<2>(case12), std::nullopt);
-    EXPECT_EQ(std::get<0>(case13), "defg{hijk\\}lm](opq\\)"sv);
-    EXPECT_EQ(std::get<1>(case13), 24);
-    EXPECT_EQ(std::get<2>(case13), std::nullopt);
-    EXPECT_EQ(std::get<0>(case14), "defg{hijk\\}lm](opq\\)"sv);
-    EXPECT_EQ(std::get<1>(case14), 24);
-    EXPECT_EQ(std::get<2>(case14), std::nullopt);
+    constexpr auto case11 = tudb::regex_brancket_inner<"abc[defg{hijk}lm\\](opq)]rs", 3>::value;
+    constexpr auto case12 = tudb::regex_brancket_inner<"abc{defg\\{hijk\\}lm](opq)}rs", 3>::value;
+    constexpr auto case13 = tudb::regex_brancket_inner<"abc(defg{hijk\\}lm](opq\\))rs", 3>::value;
+    constexpr auto case14 = tudb::regex_brancket_inner<"abc<defg{hijk\\}lm](opq\\)>rs", 3>::value;
+    EXPECT_STREQ(case11.data(), "defg{hijk}lm\\](opq)");
+    EXPECT_STREQ(case12.data(), "defg\\{hijk\\}lm](opq)");
+    EXPECT_STREQ(case13.data(), "defg{hijk\\}lm](opq\\)");
+    EXPECT_STREQ(case14.data(), "defg{hijk\\}lm](opq\\)");
 
-    // 異常(対応する閉じ括弧が存在しない)
-    constexpr auto case15 = tudb::extract_regex_brancket_inner("abc[defg{hijk}lm\\](opq)\\]rs", 3);
-    constexpr auto case16 = tudb::extract_regex_brancket_inner("abc{defg\\{hijk\\}lm](opq)\\}rs", 3);
-    constexpr auto case17 = tudb::extract_regex_brancket_inner("abc(defg{hijk\\}lm](opq\\)\\)rs", 3);
-    constexpr auto case18 = tudb::extract_regex_brancket_inner("abc<defg{hijk\\}lm](opq\\)\\>rs", 3);
-    EXPECT_EQ(std::get<0>(case15), ""sv);
-    EXPECT_EQ(std::get<1>(case15), std::string_view::npos);
-    EXPECT_EQ(std::get<2>(case15), std::regex_constants::error_brack);
-    EXPECT_EQ(std::get<0>(case16), ""sv);
-    EXPECT_EQ(std::get<1>(case16), std::string_view::npos);
-    EXPECT_EQ(std::get<2>(case16), std::regex_constants::error_brace);
-    EXPECT_EQ(std::get<0>(case17), ""sv);
-    EXPECT_EQ(std::get<1>(case17), std::string_view::npos);
-    EXPECT_EQ(std::get<2>(case17), std::regex_constants::error_paren);
-    EXPECT_EQ(std::get<0>(case18), ""sv);
-    EXPECT_EQ(std::get<1>(case18), std::string_view::npos);
-    EXPECT_EQ(std::get<2>(case18), std::regex_constants::error_collate);
+    // 異常(対応する閉じ括弧が存在しない) コメントアウトを外すとコンパイルエラーが発生
+    // constexpr auto case15 = tudb::regex_brancket_inner<"abc[defg{hijk}lm\\](opq)\\]rs", 3>::value;
+    // constexpr auto case16 = tudb::regex_brancket_inner<"abc{defg\\{hijk\\}lm](opq)\\}rs", 3>::value;
+    // constexpr auto case17 = tudb::regex_brancket_inner<"abc(defg{hijk\\}lm](opq\\)\\)rs", 3>::value;
+    // constexpr auto case18 = tudb::regex_brancket_inner<"abc<defg{hijk\\}lm](opq\\)\\>rs", 3>::value;
 
     // 文字クラス,バックスラッシュ,文字範囲指定なし
     constexpr auto case19 = tudb::get_regex_char_range_matcher<"-abc.">()(".c-aba");
