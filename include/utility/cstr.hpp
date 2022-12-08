@@ -29,12 +29,50 @@ namespace tudb
          * @brief string_viewを取得
         */
         constexpr auto view() const noexcept { return std::string_view{this->data()}; }
+        constexpr operator std::string_view() const noexcept { return this->view(); }
 
         /**
          * @fn
          * @brief 保持している文字列の長さを取得
         */
         constexpr auto size() const noexcept { return view().size(); }
+
+        /**
+         * @fn
+         * @brief sの文字列が出現する数をカウント
+        */
+        constexpr auto count(const std::string_view& s) const
+        {
+            const auto sv = this->view();
+            std::size_t cnt = 0;
+            for (int i = 0; i < sv.size(); i++) {
+                if (sv[i] == s[0]) {
+                    for (int j = 1; j < s.size() && i + j < sv.size(); j++) {
+                        if (sv[i + j] != s[j]) break;
+                        if (j == s.size() - 1) cnt++;
+                    }
+                }
+            }
+            return cnt;
+        }
+
+        /**
+         * @fn
+         * @brief 文字列が最初に出現する場所を検索する
+        */
+        constexpr auto find(const std::string_view& s, std::size_t offset = 0) const
+        {
+            const auto sv = this->view();
+            for (std::size_t i = offset; i < sv.size(); i++) {
+                if (sv[i] == s[0]) {
+                    for (std::size_t j = 1; j < s.size() && i + j < sv.size(); j++) {
+                        if (sv[i + j] != s[j]) break;
+                        if (j == s.size() - 1) return i;
+                    }
+                }
+            }
+            return std::string_view::npos;
+        }
     };
 
     /**
@@ -83,6 +121,25 @@ namespace tudb
     // Offsetから文字列の最後尾まで
     template <std::size_t Offset, std::size_t N>
     constexpr auto substr(const cstr<N>& s) { return substr<Offset, cstr<N>::max_size - Offset, N>(s); }
+
+    /**
+     * @fn
+     * @brief targetを区切り文字で分割した結果をviewの配列で返却
+    */
+    template <cstr target, cstr delimiter>
+    constexpr auto devide_by_delimiter()
+    {
+        constexpr auto size = target.count(delimiter);
+        auto res = std::array<std::string_view, size + 1>{};
+        auto sv = target.view();
+
+        for (std::size_t pos{}, prev{}, i{}; (pos = target.find(delimiter, pos)) != std::string_view::npos; prev = pos) {
+            res[i++] = sv.substr(0, pos - prev);
+            sv = sv.substr((pos += delimiter.size()) - prev);
+        }
+        res[size] = sv;
+        return res;
+    }
 
     /**
      * @fn

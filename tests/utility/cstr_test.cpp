@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include <utility.hpp>
 
+using namespace std::string_view_literals;
+
 TEST(tudbcpptest, CstrConstructorTest)
 {
     constexpr auto case1 = tudb::cstr<5>{};
@@ -87,4 +89,23 @@ TEST(tudbcpptest, CstrIntegralToStringTest)
     ASSERT_STREQ(case8.data(), "077777");
     ASSERT_STREQ(case9.data(), "-0xFFFFF");
     ASSERT_STREQ(case10.data(), "202914184810805067775");
+}
+
+TEST(tudbcpptest, CstrDevideByDelimiterTest)
+{
+    constexpr auto inst1 = tudb::cstr{"abc, abcd, abc,abcde, a"};
+
+    EXPECT_EQ(inst1.count(", "), 3);
+    EXPECT_EQ(inst1.count("abcd"), 2);
+    EXPECT_EQ(inst1.count("abcdef"), 0);
+    EXPECT_EQ(inst1.find(", "), 3);
+    EXPECT_EQ(inst1.find("abcd", 6), 15);
+    EXPECT_EQ(inst1.find("abcdef"), std::string_view::npos);
+
+    constexpr auto case1 = tudb::devide_by_delimiter<"abc, abcd, abc,abcde, a", ", ">();
+    ASSERT_EQ(case1.size(), 4);
+    EXPECT_EQ(case1[0], "abc"sv);
+    EXPECT_EQ(case1[1], "abcd"sv);
+    EXPECT_EQ(case1[2], "abc,abcde"sv);
+    EXPECT_EQ(case1[3], "a"sv);
 }
