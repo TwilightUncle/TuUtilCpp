@@ -11,11 +11,11 @@ enum class samples2 {
 
 using samples_def = tudb::define_table<
     samples,
-    tudb::cstr{"samples"},
+    "samples",
     tudb::type_list<
-        tudb::define_column<samples::ID, tudb::cstr{"id"}, tudb::integer, tudb::pk>,
-        tudb::define_column<samples::NAME, tudb::cstr{"name"}, tudb::varchar<256>, tudb::fk<samples2::NAME>>,
-        tudb::define_column<samples::CREATE_AT, tudb::cstr{"create_at"}, tudb::integer>
+        tudb::define_column<samples::ID, "id", tudb::integer, tudb::pk>,
+        tudb::define_column<samples::NAME, "name", tudb::varchar<256>, tudb::fk<samples2::NAME>>,
+        tudb::define_column<samples::CREATE_AT, "create_at", tudb::integer>
     >
 >;
 
