@@ -214,6 +214,7 @@ namespace tudb
         static_assert(!is_error || bracket_info::error != std::regex_constants::error_brace, "An error has occurred. [std::regex_constants::error_brace]");
         static_assert(!is_error || bracket_info::error != std::regex_constants::error_collate, "An error has occurred. [std::regex_constants::error_collate]");
 
+        // 括弧の中身
         static constexpr auto value = substr<begin_pos + 1, end_pos - begin_pos - 2, Pattern.max_size + 1>(Pattern);
 
         // 開始、閉じ括弧も含めた文字列
@@ -298,6 +299,7 @@ namespace tudb
     {
         static_assert(is_allowed_string(std::string{Pattern[Pos]}, true, "*+?{", "", false), "Invalied template argment [Pattern, Pos]. Must specified of '*', '+', '?', '{'.");
 
+        // 数量子の開始位置
         static constexpr auto begin_pos = Pos;
 
         template <char C> requires (C == '{')
@@ -320,15 +322,20 @@ namespace tudb
         }
         template <char C> requires (C != '{')
         static constexpr auto extract_quantifier() { return char_to_cstr(C); }
+
+        // 数量子の文字列を抽出したもの
         static constexpr auto quantifier = extract_quantifier<Pattern[Pos]>();
 
+        // 非貪欲の場合真
         static constexpr bool negative = []() {
             const auto check_pos = Pos + quantifier.size();
             return check_pos < Pattern.size() && Pattern[check_pos] == '?';
         }();
 
+        // 数量子の末尾の次の位置
         static constexpr auto end_pos = quantifier.size() + std::size_t(negative);
 
+        // 最小繰り返し回数
         static constexpr auto min_count = []()->std::size_t {
             switch (quantifier[0]) {
                 case '*':
@@ -338,6 +345,7 @@ namespace tudb
             return quantifier[1] - '0';
         }();
 
+        // 最大繰り返し回数
         static constexpr auto max_count = []()->std::size_t {
             if (quantifier[0] == '?') return 1;
             switch (quantifier.size()) {
@@ -405,7 +413,10 @@ namespace tudb
             else return make_regex_bk_char_list<N + 1>();
         }
 
+        // 文字集合
         static constexpr auto value = make_regex_char_list<begin_index>();
+
+        // エスケープされた文字に合致する文字集合
         static constexpr auto bk_value = make_regex_bk_char_list<begin_index>();
     };
 
