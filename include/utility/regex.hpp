@@ -142,7 +142,7 @@ namespace tudb
      * @brief 開始or終了括弧を渡し、対応する括弧の情報とエラー内容を提供する
     */
     template <char BrancketChar, bool IsBegin>
-    struct regex_brancket_info
+    struct regex_bracket_info
     {
         // 開始括弧の文字
         static constexpr auto begin = []() {
@@ -185,22 +185,22 @@ namespace tudb
     };
 
     template <cstr Pattern, std::size_t BrancketBeginPos>
-    struct regex_brancket_inner
+    struct regex_bracket_inner
     {
-        using brancket_info = regex_brancket_info<Pattern[BrancketBeginPos], true>;
+        using bracket_info = regex_bracket_info<Pattern[BrancketBeginPos], true>;
 
         // 開始括弧の位置
         static constexpr auto begin_pos = BrancketBeginPos;
 
         // 終わり括弧の位置
         static constexpr auto end_pos = []() {
-            const auto brancket_str = Pattern.view().substr(begin_pos + 1);
+            const auto bracket_str = Pattern.view().substr(begin_pos + 1);
             auto pos = std::string_view::npos;
-            for (const auto i : std::views::iota((std::size_t)0, brancket_str.size())) {
+            for (const auto i : std::views::iota((std::size_t)0, bracket_str.size())) {
                 // とじ括弧かつエスケープされていない場合、位置を記録し終了
-                if (brancket_str[i] == brancket_info::end && !eq_before_char(brancket_str, i, '\\')) {
+                if (bracket_str[i] == bracket_info::end && !eq_before_char(bracket_str, i, '\\')) {
                     // substrする前のtargetの位置基準
-                    pos = i + begin_pos + 1;
+                    pos = i + begin_pos + 2;
                     break;
                 }
             }
@@ -209,15 +209,15 @@ namespace tudb
 
         // エラーが発生したかどうか
         static constexpr auto is_error = end_pos == std::string_view::npos;
-        static_assert(!is_error || brancket_info::error != std::regex_constants::error_brack, "An error has occurred. [std::regex_constants::error_brack]");
-        static_assert(!is_error || brancket_info::error != std::regex_constants::error_paren, "An error has occurred. [std::regex_constants::error_paren]");
-        static_assert(!is_error || brancket_info::error != std::regex_constants::error_brace, "An error has occurred. [std::regex_constants::error_brace]");
-        static_assert(!is_error || brancket_info::error != std::regex_constants::error_collate, "An error has occurred. [std::regex_constants::error_collate]");
+        static_assert(!is_error || bracket_info::error != std::regex_constants::error_brack, "An error has occurred. [std::regex_constants::error_brack]");
+        static_assert(!is_error || bracket_info::error != std::regex_constants::error_paren, "An error has occurred. [std::regex_constants::error_paren]");
+        static_assert(!is_error || bracket_info::error != std::regex_constants::error_brace, "An error has occurred. [std::regex_constants::error_brace]");
+        static_assert(!is_error || bracket_info::error != std::regex_constants::error_collate, "An error has occurred. [std::regex_constants::error_collate]");
 
-        static constexpr auto value = substr<begin_pos + 1, end_pos - begin_pos - 1, Pattern.max_size + 1>(Pattern);
+        static constexpr auto value = substr<begin_pos + 1, end_pos - begin_pos - 2, Pattern.max_size + 1>(Pattern);
 
         // 開始、閉じ括弧も含めた文字列
-        static constexpr auto value_with_brancket = concat(char_to_cstr(brancket_info::begin), value, char_to_cstr(brancket_info::end));
+        static constexpr auto value_with_bracket = concat(char_to_cstr(bracket_info::begin), value, char_to_cstr(bracket_info::end));
     };
 
     struct regex_char_class
@@ -290,6 +290,62 @@ namespace tudb
             else if constexpr (C == 'S') return bk_others;
             else return char_to_cstr(C);
         }
+    };
+
+    template <cstr Pattern, std::size_t Pos>
+    requires (Pos > 0)
+    struct regex_quantifier_perser
+    {
+        static_assert(is_allowed_string(std::string{Pattern[Pos]}, true, "*+?{", "", false), "Invalied template argment [Pattern, Pos]. Must specified of '*', '+', '?', '{'.");
+
+        static constexpr auto begin_pos = Pos;
+
+        template <char C> requires (C == '{')
+        static constexpr auto extract_quantifier()
+        {
+            constexpr auto str = regex_bracket_inner<Pattern, Pos>::value_with_bracket;
+            constexpr auto digits_char_class = regex_char_class::get_const_char_set<'d'>();
+            static_assert(
+                is_allowed_string(std::string{str[1]}, true, digits_char_class.data(), "", false),
+                "An error has occurred. [regex_quantifier_perser]"
+            );
+            if constexpr (str.size() > 3)
+                static_assert(str[2] == ',', "An error has occurred. [regex_quantifier_perser]");
+            if constexpr (str.size() > 4)
+                static_assert(
+                    is_allowed_string(std::string{str[3]}, true, digits_char_class.data(), "", false) && str[1] <= str[3],
+                    "An error has occurred. [regex_quantifier_perser]"
+                );
+            return str;
+        }
+        template <char C> requires (C != '{')
+        static constexpr auto extract_quantifier() { return char_to_cstr(C); }
+        static constexpr auto quantifier = extract_quantifier<Pattern[Pos]>();
+
+        static constexpr bool negative = []() {
+            const auto check_pos = Pos + quantifier.size();
+            return check_pos < Pattern.size() && Pattern[check_pos] == '?';
+        }();
+
+        static constexpr auto end_pos = quantifier.size() + std::size_t(negative);
+
+        static constexpr auto min_count = []()->std::size_t {
+            switch (quantifier[0]) {
+                case '*':
+                case '?': return 0;
+                case '+': return 1;
+            }
+            return quantifier[1] - '0';
+        }();
+
+        static constexpr auto max_count = []()->std::size_t {
+            if (quantifier[0] == '?') return 1;
+            switch (quantifier.size()) {
+                case 3: return quantifier[1] - '0';
+                case 5: return quantifier[3] - '0';
+            }
+            return std::string_view::npos;
+        }();
     };
 
     template <cstr CharRange>
@@ -387,20 +443,20 @@ namespace tudb
          * @fn
          * @brief 括弧内の正規表現検証
         */
-        static constexpr std::optional<std::regex_constants::error_type> parse_brancket_inner(const std::string_view& brancket_inner, const char brancket_be)
+        static constexpr std::optional<std::regex_constants::error_type> parse_bracket_inner(const std::string_view& bracket_inner, const char bracket_be)
         {
-            switch (brancket_be) {
+            switch (bracket_be) {
                 case '[':
                     // 再帰的な括弧は存在しないため、拒否リストに開始括弧が含まれていたらアウト
-                    if (!is_allowed_string(std::string(brancket_inner), false, "[", "")) return std::regex_constants::error_brack;
+                    if (!is_allowed_string(std::string(bracket_inner), false, "[", "")) return std::regex_constants::error_brack;
                     break;
                 case '(':
                     // キャプチャリストは再帰的に
-                    if (const auto error = parse_pattern(brancket_inner)) return error;
+                    if (const auto error = parse_pattern(bracket_inner)) return error;
                     break;
                 case '{':
                     // 数量詞とユニコードの指定のみのため、許可リストで確認
-                    if (!is_allowed_string(std::string(brancket_inner), true, ",0123456789abcdef", "")) return std::regex_constants::error_brack;
+                    if (!is_allowed_string(std::string(bracket_inner), true, ",0123456789abcdef", "")) return std::regex_constants::error_brack;
                     break;
             }
             return std::nullopt;
@@ -441,10 +497,10 @@ namespace tudb
 
                 // 括弧を検出
                 // if (attr & REGEX_BRANCKET_BE) {
-                //     const auto [inner, en_pos, br_error] = extract_regex_brancket_inner(pattern_view, i);
+                //     const auto [inner, en_pos, br_error] = extract_regex_bracket_inner(pattern_view, i);
                 //     if (br_error) return br_error;
                 //     // 括弧内部の検証は別関数に委譲のため、とじ括弧までインデックスを進める
-                //     if (const auto inner_error = parse_brancket_inner(inner, ch)) return inner_error;
+                //     if (const auto inner_error = parse_bracket_inner(inner, ch)) return inner_error;
                 //     i = en_pos;
                 //     continue;
                 // }

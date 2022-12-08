@@ -3,7 +3,7 @@
 
 
 using namespace std::string_view_literals;
-TEST(tudbcpptest, RegexTest)
+TEST(tudbcpptest, RegexFunctionTest)
 {
     using test_type = tudb::regex<"abcdef">;
     constexpr auto empty_inst = tudb::empty_regex{};
@@ -31,23 +31,29 @@ TEST(tudbcpptest, RegexTest)
     ASSERT_TRUE(case8);
     ASSERT_FALSE(case9);
     ASSERT_FALSE(case10);
+}
 
+TEST(tudbcpptest, RegexExtractBrancketTest)
+{
     // 正常
-    constexpr auto case11 = tudb::regex_brancket_inner<"abc[defg{hijk}lm\\](opq)]rs", 3>::value;
-    constexpr auto case12 = tudb::regex_brancket_inner<"abc{defg\\{hijk\\}lm](opq)}rs", 3>::value;
-    constexpr auto case13 = tudb::regex_brancket_inner<"abc(defg{hijk\\}lm](opq\\))rs", 3>::value;
-    constexpr auto case14 = tudb::regex_brancket_inner<"abc<defg{hijk\\}lm](opq\\)>rs", 3>::value;
+    constexpr auto case11 = tudb::regex_bracket_inner<"abc[defg{hijk}lm\\](opq)]rs", 3>::value;
+    constexpr auto case12 = tudb::regex_bracket_inner<"abc{defg\\{hijk\\}lm](opq)}rs", 3>::value;
+    constexpr auto case13 = tudb::regex_bracket_inner<"abc(defg{hijk\\}lm](opq\\))rs", 3>::value;
+    constexpr auto case14 = tudb::regex_bracket_inner<"abc<defg{hijk\\}lm](opq\\)>rs", 3>::value;
     EXPECT_STREQ(case11.data(), "defg{hijk}lm\\](opq)");
     EXPECT_STREQ(case12.data(), "defg\\{hijk\\}lm](opq)");
     EXPECT_STREQ(case13.data(), "defg{hijk\\}lm](opq\\)");
     EXPECT_STREQ(case14.data(), "defg{hijk\\}lm](opq\\)");
 
     // 異常(対応する閉じ括弧が存在しない) コメントアウトを外すとコンパイルエラーが発生
-    // constexpr auto case15 = tudb::regex_brancket_inner<"abc[defg{hijk}lm\\](opq)\\]rs", 3>::value;
-    // constexpr auto case16 = tudb::regex_brancket_inner<"abc{defg\\{hijk\\}lm](opq)\\}rs", 3>::value;
-    // constexpr auto case17 = tudb::regex_brancket_inner<"abc(defg{hijk\\}lm](opq\\)\\)rs", 3>::value;
-    // constexpr auto case18 = tudb::regex_brancket_inner<"abc<defg{hijk\\}lm](opq\\)\\>rs", 3>::value;
+    // constexpr auto case15 = tudb::regex_bracket_inner<"abc[defg{hijk}lm\\](opq)\\]rs", 3>::value;
+    // constexpr auto case16 = tudb::regex_bracket_inner<"abc{defg\\{hijk\\}lm](opq)\\}rs", 3>::value;
+    // constexpr auto case17 = tudb::regex_bracket_inner<"abc(defg{hijk\\}lm](opq\\)\\)rs", 3>::value;
+    // constexpr auto case18 = tudb::regex_bracket_inner<"abc<defg{hijk\\}lm](opq\\)\\>rs", 3>::value;
+}
 
+TEST(tudbcpptest, RegexCharRangeParseTest)
+{
     // 文字クラス,バックスラッシュ,文字範囲指定なし
     constexpr auto case19 = tudb::get_regex_char_range_matcher<"-abc.">()(".c-aba");
     constexpr auto case20 = tudb::get_regex_char_range_matcher<"abc.-">()(".c-aba");
@@ -88,4 +94,44 @@ TEST(tudbcpptest, RegexTest)
     EXPECT_TRUE(range_matcher1("0123451bcdA-E\t"));
     EXPECT_FALSE(range_matcher1("0123451bcdA-Et"));
     EXPECT_FALSE(range_matcher1("0123451bcdABCDE"));
+}
+
+TEST(tudbcpptest, RegexQuantifierParseTest)
+{
+    using type1 = tudb::regex_quantifier_perser<"abcd*e", 4>;
+    using type2 = tudb::regex_quantifier_perser<"abcd*", 4>;
+    using type3 = tudb::regex_quantifier_perser<"abcd*?", 4>;
+    using type4 = tudb::regex_quantifier_perser<"abcd+", 4>;
+    using type5 = tudb::regex_quantifier_perser<"abcd?", 4>;
+    using type6 = tudb::regex_quantifier_perser<"abcd{2}e", 4>;
+    using type7 = tudb::regex_quantifier_perser<"abcd{2,}", 4>;
+    using type8 = tudb::regex_quantifier_perser<"abcd{2,5}", 4>;
+    using type9 = tudb::regex_quantifier_perser<"abcd{2}?e", 4>;
+    using type10 = tudb::regex_quantifier_perser<"abcd{2,}?", 4>;
+    using type11 = tudb::regex_quantifier_perser<"abcd{2,5}?", 4>;
+    EXPECT_FALSE(type1::negative);
+    EXPECT_FALSE(type2::negative);
+    EXPECT_TRUE(type3::negative);
+    EXPECT_FALSE(type4::negative);
+    EXPECT_FALSE(type5::negative);
+    EXPECT_FALSE(type6::negative);
+    EXPECT_FALSE(type7::negative);
+    EXPECT_FALSE(type8::negative);
+    EXPECT_TRUE(type9::negative);
+    EXPECT_TRUE(type10::negative);
+    EXPECT_TRUE(type11::negative);
+    EXPECT_EQ(type1::min_count, 0);
+    EXPECT_EQ(type1::max_count, std::string_view::npos);
+    EXPECT_EQ(type2::min_count, 0);
+    EXPECT_EQ(type3::max_count, std::string_view::npos);
+    EXPECT_EQ(type4::min_count, 1);
+    EXPECT_EQ(type4::max_count, std::string_view::npos);
+    EXPECT_EQ(type5::min_count, 0);
+    EXPECT_EQ(type5::max_count, 1);
+    EXPECT_EQ(type6::min_count, 2);
+    EXPECT_EQ(type6::max_count, 2);
+    EXPECT_EQ(type7::min_count, 2);
+    EXPECT_EQ(type7::max_count, std::string_view::npos);
+    EXPECT_EQ(type8::min_count, 2);
+    EXPECT_EQ(type8::max_count, 5);
 }
