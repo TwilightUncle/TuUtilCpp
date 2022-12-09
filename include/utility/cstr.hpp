@@ -30,6 +30,7 @@ namespace tudb
         */
         constexpr auto view() const noexcept { return std::string_view{this->data()}; }
         constexpr operator std::string_view() const noexcept { return this->view(); }
+        constexpr operator std::string() const noexcept { return std::string(this->data()); }
 
         /**
          * @fn
