@@ -10,13 +10,22 @@ namespace tudb
 
     /**
      * @fn
-     * @brief メタ関数のカリー化
+     * @brief メタ関数の引数部分適用。bindで前から順に引数を渡し、callで残りの引数を渡すことで実行
     */
     template <template <class...> class F, class... PartialArgs>
-    struct curry
+    struct bind
     {
         template <class... Args>
-        struct apply : public F<PartialArgs..., Args...> {};
+        requires (Testable<F<PartialArgs..., Args...>> || TypeGetable<F<PartialArgs..., Args...>>)
+        struct call : public F<PartialArgs..., Args...> {};
+
+        template <class... Args>
+        requires TypeGetable<F<PartialArgs..., Args...>>
+        using call_t = typename call<Args...>::type;
+
+        template <class... Args>
+        requires Testable<F<PartialArgs..., Args...>>
+        static constexpr auto call_v = call<Args...>::value;
     };
 
     /**

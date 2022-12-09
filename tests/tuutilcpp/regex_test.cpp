@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <utility.hpp>
+#include <tuutilcpp/utility.hpp>
 
 
 using namespace std::string_view_literals;
@@ -55,13 +55,13 @@ TEST(tudbcpptest, RegexExtractBrancketTest)
 TEST(tudbcpptest, RegexCharRangeParseTest)
 {
     // 文字クラス,バックスラッシュ,文字範囲指定なし
-    constexpr auto case19 = tudb::get_regex_char_range_matcher<"-abc.">()(".c-aba");
-    constexpr auto case20 = tudb::get_regex_char_range_matcher<"abc.-">()(".c-aba");
-    constexpr auto case21 = tudb::get_regex_char_range_matcher<"-abc.">()("b.c-d");
-    constexpr auto case22 = tudb::get_regex_char_range_matcher<"-abc.">()("def");
-    constexpr auto case23 = tudb::get_regex_char_range_matcher<"^-abc">()("cab");
-    constexpr auto case24 = tudb::get_regex_char_range_matcher<"^-abc">()("bcd");
-    constexpr auto case25 = tudb::get_regex_char_range_matcher<"^-abc">()("def^");
+    constexpr auto case19 = tudb::get_regex_char_range_matcher<"ab[-abc.]", 2>()(".c-aba");
+    constexpr auto case20 = tudb::get_regex_char_range_matcher<"[abc.-]", 0>()(".c-aba");
+    constexpr auto case21 = tudb::get_regex_char_range_matcher<"[-abc.]", 0>()("b.c-d");
+    constexpr auto case22 = tudb::get_regex_char_range_matcher<"[-abc.]", 0>()("def");
+    constexpr auto case23 = tudb::get_regex_char_range_matcher<"[^-abc]", 0>()("cab");
+    constexpr auto case24 = tudb::get_regex_char_range_matcher<"[^-abc]", 0>()("bcd");
+    constexpr auto case25 = tudb::get_regex_char_range_matcher<"[^-abc]", 0>()("def^");
     EXPECT_TRUE(case19);
     EXPECT_TRUE(case20);
     EXPECT_FALSE(case21);
@@ -71,17 +71,17 @@ TEST(tudbcpptest, RegexCharRangeParseTest)
     EXPECT_TRUE(case25);
 
     // 文字クラス指定あり
-    constexpr auto case26 = tudb::get_regex_char_range_matcher<"\\d">()("0123456789");
-    constexpr auto case27 = tudb::get_regex_char_range_matcher<"\\d">()("0123456789a");
-    constexpr auto case28 = tudb::get_regex_char_range_matcher<"^\\d">()("0aabc_%&\t\\[");
-    constexpr auto case29 = tudb::get_regex_char_range_matcher<"^\\d">()("abc_%&\t\\[");
-    constexpr auto case30 = tudb::get_regex_char_range_matcher<"\\D">()("0aabc_%&\t\\[");
-    constexpr auto case31 = tudb::get_regex_char_range_matcher<"\\D">()("aabc_%&\t\\[");
-    constexpr auto case32 = tudb::get_regex_char_range_matcher<"^\\D">()("0123456789");
-    constexpr auto case33 = tudb::get_regex_char_range_matcher<"^\\D">()("0123456789a");
+    constexpr auto case26 = tudb::get_regex_char_range_matcher<"[\\d]", 0>()("0123456789");
+    constexpr auto case27 = tudb::get_regex_char_range_matcher<"[\\d]", 0>()("0123456789a");
+    constexpr auto case28 = tudb::get_regex_char_range_matcher<"[^\\d]", 0>()("0aabc_%&\t\\[");
+    constexpr auto case29 = tudb::get_regex_char_range_matcher<"[^\\d]", 0>()("abc_%&\t\\[");
+    constexpr auto case30 = tudb::get_regex_char_range_matcher<"[\\D]", 0>()("0aabc_%&\t\\[");
+    constexpr auto case31 = tudb::get_regex_char_range_matcher<"[\\D]", 0>()("aabc_%&\t\\[");
+    constexpr auto case32 = tudb::get_regex_char_range_matcher<"[^\\D]", 0>()("0123456789");
+    constexpr auto case33 = tudb::get_regex_char_range_matcher<"[^\\D]", 0>()("0123456789a");
 
     // 生成した関数を保持できるかも確認(レンジのテスト)
-    constexpr auto range_matcher1 = tudb::get_regex_char_range_matcher<"0-5a-dA\\-E\\t">();
+    constexpr auto range_matcher1 = tudb::get_regex_char_range_matcher<"[0-5a-dA\\-E\\t]", 0>();
 
     EXPECT_TRUE(case26);
     EXPECT_FALSE(case27);
@@ -103,12 +103,12 @@ TEST(tudbcpptest, RegexQuantifierParseTest)
     using type3 = tudb::regex_quantifier_perser<"abcd*?", 4>;
     using type4 = tudb::regex_quantifier_perser<"abcd+", 4>;
     using type5 = tudb::regex_quantifier_perser<"abcd?", 4>;
-    using type6 = tudb::regex_quantifier_perser<"abcd{2}e", 4>;
+    using type6 = tudb::regex_quantifier_perser<"abcd{20}e", 4>;
     using type7 = tudb::regex_quantifier_perser<"abcd{2,}", 4>;
-    using type8 = tudb::regex_quantifier_perser<"abcd{2,5}", 4>;
-    using type9 = tudb::regex_quantifier_perser<"abcd{2}?e", 4>;
+    using type8 = tudb::regex_quantifier_perser<"abcd{25,512}", 4>;
+    using type9 = tudb::regex_quantifier_perser<"abcd{20}?e", 4>;
     using type10 = tudb::regex_quantifier_perser<"abcd{2,}?", 4>;
-    using type11 = tudb::regex_quantifier_perser<"abcd{2,5}?", 4>;
+    using type11 = tudb::regex_quantifier_perser<"abcd{25,512}?", 4>;
     EXPECT_FALSE(type1::negative);
     EXPECT_FALSE(type2::negative);
     EXPECT_TRUE(type3::negative);
@@ -128,10 +128,10 @@ TEST(tudbcpptest, RegexQuantifierParseTest)
     EXPECT_EQ(type4::max_count, std::string_view::npos);
     EXPECT_EQ(type5::min_count, 0);
     EXPECT_EQ(type5::max_count, 1);
-    EXPECT_EQ(type6::min_count, 2);
-    EXPECT_EQ(type6::max_count, 2);
+    EXPECT_EQ(type6::min_count, 20);
+    EXPECT_EQ(type6::max_count, 20);
     EXPECT_EQ(type7::min_count, 2);
     EXPECT_EQ(type7::max_count, std::string_view::npos);
-    EXPECT_EQ(type8::min_count, 2);
-    EXPECT_EQ(type8::max_count, 5);
+    EXPECT_EQ(type8::min_count, 25);
+    EXPECT_EQ(type8::max_count, 512);
 }

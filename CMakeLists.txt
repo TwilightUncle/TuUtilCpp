@@ -8,12 +8,12 @@ target_include_directories(tudbcpp PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 # テストを追加していく
 set(TUGAMECPP_TESTS
-    ${PROJECT_SOURCE_DIR}/tests/utility/algorithm_test.cpp
-    ${PROJECT_SOURCE_DIR}/tests/utility/carry_over_test.cpp
-    ${PROJECT_SOURCE_DIR}/tests/utility/big_int_test.cpp
-    ${PROJECT_SOURCE_DIR}/tests/utility/cstr_test.cpp
-    ${PROJECT_SOURCE_DIR}/tests/utility/type_list_test.cpp
-    ${PROJECT_SOURCE_DIR}/tests/utility/regex_test.cpp
+    ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/algorithm_test.cpp
+    ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/carry_over_test.cpp
+    ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/big_int_test.cpp
+    ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/cstr_test.cpp
+    ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/type_list_test.cpp
+    ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/regex_test.cpp
     ${PROJECT_SOURCE_DIR}/tests/column_test.cpp
     ${PROJECT_SOURCE_DIR}/tests/db_definition_test.cpp
 )

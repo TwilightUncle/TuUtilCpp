@@ -89,6 +89,32 @@ namespace tudb
         return attrs[ch];
     }
 
+    struct regex_char_attribute
+    {
+        // 数量子の起点
+        static constexpr auto quantifier_chars = cstr{"*+?{"};
+
+        // アンカーの起点
+        static constexpr auto anchor_chars = cstr{"^$("};
+        static constexpr auto bk_anchor_chars = cstr{"bB"};
+
+        // 文字クラス
+        static constexpr auto class_chars = cstr{"."};
+        static constexpr auto bk_class_chars = cstr{"dDwWsStrnvf0\\"};
+
+        // (キャプチャ/非キャプチャ)グループ
+        static constexpr auto capture_chars = cstr{"("};
+
+        // or
+        static constexpr auto or_match_chars = cstr{"|"};
+
+        // 文字集合
+        static constexpr auto char_set = cstr{"["};
+
+        // キャプチャグループ参照
+        static constexpr auto bk_reference_chars = cstr{"123456789"};
+    };
+
     /**
      * @fn
      * @brief 正しくない書き方がされているバックスラッシュが存在する場合偽が返る
@@ -215,7 +241,7 @@ namespace tudb
         static_assert(!is_error || bracket_info::error != std::regex_constants::error_collate, "An error has occurred. [std::regex_constants::error_collate]");
 
         // 括弧の中身
-        static constexpr auto value = substr<begin_pos + 1, end_pos - begin_pos - 2, Pattern.max_size + 1>(Pattern);
+        static constexpr auto value = Pattern.substr<begin_pos + 1, end_pos - begin_pos - 2>();
 
         // 開始、閉じ括弧も含めた文字列
         static constexpr auto value_with_bracket = concat(char_to_cstr(bracket_info::begin), value, char_to_cstr(bracket_info::end));
@@ -296,29 +322,36 @@ namespace tudb
     template <cstr Pattern, std::size_t Pos>
     requires (Pos > 0)
     struct regex_quantifier_perser
+        : public regex_char_attribute
     {
-        static_assert(is_allowed_string(std::string{Pattern[Pos]}, true, "*+?{", "", false), "Invalied template argment [Pattern, Pos]. Must specified of '*', '+', '?', '{'.");
+        static_assert(
+            is_allowed_string(std::string{Pattern[Pos]}, true, quantifier_chars, "", false),
+            "Invalied template argment [Pattern, Pos]. Must specified of '*', '+', '?', '{'."
+        );
 
         // 数量子の開始位置
         static constexpr auto begin_pos = Pos;
 
+        /**
+         * @fn
+         * @brief 数量子を示す文字列を抽出
+        */
         template <char C> requires (C == '{')
         static constexpr auto extract_quantifier()
         {
-            constexpr auto str = regex_bracket_inner<Pattern, Pos>::value_with_bracket;
-            constexpr auto digits_char_class = regex_char_class::get_const_char_set<'d'>();
+            using bracket_inner = regex_bracket_inner<Pattern, Pos>;
+            constexpr auto inner_str = bracket_inner::value;
+
+            // 数量子の構文チェック
+            // {n}, {n,}, {n,m}のいずれかの構文に合致していることを確認(n, mは数値であること)
             static_assert(
-                is_allowed_string(std::string{str[1]}, true, digits_char_class.data(), "", false),
+                inner_str[0] != ','
+                && is_allowed_string(inner_str.data(), true, "0123456789,", "", false)
+                && std::ranges::count(inner_str, ',') <= 1,
                 "An error has occurred. [regex_quantifier_perser]"
             );
-            if constexpr (str.size() > 3)
-                static_assert(str[2] == ',', "An error has occurred. [regex_quantifier_perser]");
-            if constexpr (str.size() > 4)
-                static_assert(
-                    is_allowed_string(std::string{str[3]}, true, digits_char_class.data(), "", false) && str[1] <= str[3],
-                    "An error has occurred. [regex_quantifier_perser]"
-                );
-            return str;
+
+            return bracket_inner::value_with_bracket;
         }
         template <char C> requires (C != '{')
         static constexpr auto extract_quantifier() { return char_to_cstr(C); }
@@ -337,34 +370,41 @@ namespace tudb
 
         // 最小繰り返し回数
         static constexpr auto min_count = []()->std::size_t {
-            switch (quantifier[0]) {
-                case '*':
-                case '?': return 0;
-                case '+': return 1;
+            if constexpr (quantifier[0] == '{') {
+                constexpr auto inner_str = quantifier.remove_prefix_suffix<1, 1>();
+                return to_int<std::size_t>(split<inner_str, ",">()[0]);
             }
-            return quantifier[1] - '0';
+            else {
+                if (quantifier[0] == '+') return 1;
+                return 0;
+            }
         }();
 
         // 最大繰り返し回数
         static constexpr auto max_count = []()->std::size_t {
-            if (quantifier[0] == '?') return 1;
-            switch (quantifier.size()) {
-                case 3: return quantifier[1] - '0';
-                case 5: return quantifier[3] - '0';
+            if constexpr (quantifier[0] == '?') return 1;
+            else if constexpr (quantifier[0] == '{') {
+                constexpr auto devides = split<quantifier.remove_prefix_suffix<1, 1>(), ",">();
+                if (devides.size() == 1) return to_int<std::size_t>(devides[0]);
+                else if (!devides[1].empty()) return to_int<std::size_t>(devides[1]);
             }
             return std::string_view::npos;
         }();
     };
 
-    template <cstr CharRange>
-    requires (CharRange.size() > 0)
+    template <cstr Pattern, std::size_t Pos>
     struct regex_range_parser
     {
-        static_assert(is_collect_regex_back_slash(CharRange.view()));
+        using brancket_inner = regex_bracket_inner<Pattern, Pos>;
+        static constexpr auto char_range = brancket_inner::value;
 
-        static constexpr auto allow_or_deny = CharRange[0] != '^';
+        static_assert(char_range.size() > 0 && is_collect_regex_back_slash(char_range.view()));
+
+        static constexpr auto allow_or_deny = char_range[0] != '^';
         static constexpr auto begin_index = int(!allow_or_deny);
-        static constexpr auto size = CharRange.size();
+        static constexpr auto size = char_range.size();
+        static constexpr auto begin_pos = Pos;
+        static constexpr auto end_pos = brancket_inner::end_pos;
 
         /**
          * @fn
@@ -374,29 +414,29 @@ namespace tudb
         static constexpr auto make_regex_char_list()
         {
             if constexpr (N >= size) return cstr{""};
-            else return concat(substr<N, 1, CharRange.max_size + 1>(CharRange), make_regex_char_list<N + 1>());
+            else return concat(char_range.substr<N, 1>(), make_regex_char_list<N + 1>());
         }
         template <int N>
-        requires (CharRange[N] == '-')
+        requires (char_range[N] == '-')
         static constexpr auto make_regex_char_list()
         {
             if constexpr (begin_index == N || size - 1 == N)
                 return concat(cstr{"-"}, make_regex_char_list<N + 1>());
             else {
-                constexpr char begin_char = (std::min)(CharRange[N - 1], CharRange[N + 1]) + 1;
-                constexpr char end_char = (std::max)(CharRange[N - 1], CharRange[N + 1]);
+                constexpr char begin_char = (std::min)(char_range[N - 1], char_range[N + 1]) + 1;
+                constexpr char end_char = (std::max)(char_range[N - 1], char_range[N + 1]);
                 cstr<2 + end_char - begin_char> str{};
                 for (char c = 0; c < str.max_size; c++) str[c] = c + begin_char;
                 return concat(str, make_regex_char_list<N + 2>());
             }
         }
         template <int N>
-        requires (CharRange[N] == '\\')
+        requires (char_range[N] == '\\')
         static constexpr auto make_regex_char_list()
         {
             // 文字範囲の括弧内では「.」は特殊文字ではない
-            if constexpr (CharRange[N + 1] != '.')
-                return concat(regex_char_class::get_const_char_set<CharRange[N + 1]>(), make_regex_char_list<N + 2>());
+            if constexpr (char_range[N + 1] != '.')
+                return concat(regex_char_class::get_const_char_set<char_range[N + 1]>(), make_regex_char_list<N + 2>());
             else return concat(cstr{"."}, make_regex_char_list<N + 2>());
         }
 
@@ -408,8 +448,8 @@ namespace tudb
         static constexpr auto make_regex_bk_char_list()
         {
             if constexpr (N >= size) return cstr{""};
-            else if constexpr (CharRange[N] == '\\' && CharRange[N + 1] != '.')
-                return concat(regex_char_class::get_const_bk_char_set<CharRange[N + 1]>(), make_regex_bk_char_list<N + 2>());
+            else if constexpr (char_range[N] == '\\' && char_range[N + 1] != '.')
+                return concat(regex_char_class::get_const_bk_char_set<char_range[N + 1]>(), make_regex_bk_char_list<N + 2>());
             else return make_regex_bk_char_list<N + 1>();
         }
 
@@ -424,11 +464,11 @@ namespace tudb
      * @fn
      * @brief 渡された文字範囲を許可/拒否リストに展開し、与えられた文字列がマッチするか判定する関数オブジェクトを返却する
     */
-    template <cstr Target>
+    template <cstr Pattern, std::size_t Pos>
     constexpr auto get_regex_char_range_matcher()
     {
         return [](const std::string& comp) -> bool {
-            using range_parser = regex_range_parser<Target>;
+            using range_parser = regex_range_parser<Pattern, Pos>;
             return is_allowed_string(
                 comp,
                 range_parser::allow_or_deny,
