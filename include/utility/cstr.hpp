@@ -73,6 +73,76 @@ namespace tudb
             }
             return std::string_view::npos;
         }
+
+        /**
+         * @fn
+         * @brief 文字集合を検索し、最初に見つけた文字の位置と、そこから連続して合致し続けた数のペアを返す
+         * @param char_set 文字集合
+         * @param offset 開始位置
+         * @param is_allow falseを指定すると文字集合にマッチしないときの範囲を返す
+         * @return 見つからない場合、位置がstd::string_view::npos
+        */
+        constexpr auto get_charset_match_range(const std::string_view& char_set, std::size_t offset = 0, bool is_allow = true) const
+        {
+            std::size_t s_pos = std::string_view::npos, cnt{};
+            for (std::size_t i = 0; i < this->size(); i++) {
+                const auto is_find = char_set.find_first_of(this->data()[i]) != std::string_view::npos;
+                if (is_allow != is_find) break;
+                s_pos = (std::min)(s_pos, i);
+                cnt++;
+            }
+            return std::array{s_pos, cnt};
+        }
+
+        /**
+         * @fn
+         * @brief 文字集合を検索し、最初に見つからなかった文字の位置と、そこから連続して合致し続けなかった数のペアを返す
+         * @param char_set 文字集合
+         * @param offset 開始位置
+        */
+        constexpr auto get_charset_unmatch_range(const std::string_view& char_set, std::size_t offset = 0) const
+        {
+            return this->get_charset_match_range(char_set, offset, false);
+        }
+
+        /**
+         * @fn
+         * @brief 部分文字列を取得する
+        */
+        template <std::size_t Offset, std::size_t Count = max_size>
+        requires (Offset <= max_size)
+        constexpr auto substr() const
+        {
+            constexpr auto len = (std::min)(Count, max_size - Offset);
+            cstr<len + 1> _s{};
+            for (auto i = 0; i < len; i++) _s[i] = this->data()[i + Offset];
+            return _s;
+        }
+
+        /**
+         * @fn
+         * @brief 指定文字数、文字列の前後から削る
+        */
+        template <std::size_t Prefix, std::size_t Suffix>
+        requires (Prefix + Suffix <= max_size)
+        constexpr auto remove_prefix_suffix() const
+        {
+            return this->substr<Prefix, max_size - Prefix - Suffix>();
+        }
+
+        /**
+         * @fn
+         * @brief 先頭のN文字を削除する
+        */
+        template <std::size_t Prefix>
+        constexpr auto remove_prefix() const { return this->remove_prefix_suffix<Prefix, 0>(); }
+
+        /**
+         * @fn
+         * @brief 末尾のN文字を削除する
+        */
+        template <std::size_t Suffix>
+        constexpr auto remove_suffix() const { return this->remove_prefix_suffix<0, Suffix>(); }
     };
 
     /**
@@ -110,24 +180,17 @@ namespace tudb
      * @brief OffsetからCountの文字数分を新規文字列として切り出す
     */
     template <std::size_t Offset, std::size_t Count, std::size_t N>
-    requires (Offset < cstr<N>::max_size)
-    constexpr auto substr(const cstr<N>& s)
-    {
-        constexpr auto len = (std::min)(Count, cstr<N>::max_size - Offset);
-        cstr<len + 1> _s{};
-        for (auto i = 0; i < len; i++) _s[i] = s[i + Offset];
-        return _s;
-    }
+    constexpr auto substr(const cstr<N>& s) { return s.substr<Offset, Count>(); }
     // Offsetから文字列の最後尾まで
     template <std::size_t Offset, std::size_t N>
-    constexpr auto substr(const cstr<N>& s) { return substr<Offset, cstr<N>::max_size - Offset, N>(s); }
+    constexpr auto substr(const cstr<N>& s) { return s.substr<Offset>(); }
 
     /**
      * @fn
      * @brief targetを区切り文字で分割した結果をviewの配列で返却
     */
     template <cstr target, cstr delimiter>
-    constexpr auto devide_by_delimiter()
+    constexpr auto split()
     {
         constexpr auto size = target.count(delimiter);
         auto res = std::array<std::string_view, size + 1>{};
