@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <utility.hpp>
+#include <tudbcpp/utility.hpp>
 
 // 5桁の10進数の想定で考える(コンテナの一要素に入る最大値は9)
 static constexpr char max_num = 10;

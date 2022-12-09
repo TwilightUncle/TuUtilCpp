@@ -3,7 +3,7 @@
 /// @brief DBテーブル定義
 ///----------------------------------
 #pragma once
-#include <column.hpp>
+#include <tudbcpp/column.hpp>
 
 namespace tudb
 {

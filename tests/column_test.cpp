@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include <type.hpp>
-#include <column.hpp>
+#include <tudbcpp/type.hpp>
+#include <tudbcpp/column.hpp>
 
 enum class samples {
     ID, ID2, NAME, CREATE_AT

@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <utility.hpp>
+#include <tudbcpp/utility.hpp>
 
 TEST(tudbcpptest, GetFirstTypeTest)
 {
