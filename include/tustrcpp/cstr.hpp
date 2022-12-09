@@ -1,6 +1,11 @@
+///----------------------------------
+/// @file cstr.hpp 
+/// @brief 定数式に置ける文字列
+///----------------------------------
 #pragma once
+#include <tuutilcpp/utility.hpp>
 
-namespace tudb
+namespace tustr
 {
     /**
      * @class
@@ -228,7 +233,7 @@ namespace tudb
     constexpr auto to_string()
     {
         // 10進数として桁数を取得
-        constexpr auto len = get_digit<V, Hex>();
+        constexpr auto len = tudb::get_digit<V, Hex>();
         // 終端文字の長さも配列の要素数に含める
         cstr<len + 1> s{};
         auto val = V;

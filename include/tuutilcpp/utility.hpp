@@ -15,8 +15,6 @@
 #include <tuutilcpp/concepts.hpp>
 #include <tuutilcpp/carry_over.hpp>
 #include <tuutilcpp/big_int.hpp>
-#include <tuutilcpp/cstr.hpp>
 #include <tuutilcpp/algorithm.hpp>
 #include <tuutilcpp/type_list.hpp>
 #include <tuutilcpp/value_list.hpp>
-#include <tuutilcpp/regex.hpp>

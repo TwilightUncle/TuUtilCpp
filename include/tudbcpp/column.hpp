@@ -5,6 +5,7 @@
 #pragma once
 #include <tudbcpp/constraint.hpp>
 #include <tudbcpp/type.hpp>
+#include <tustrcpp/cstr.hpp>
 
 namespace tudb
 {
@@ -12,13 +13,13 @@ namespace tudb
      * @fn
      * @brief 列定義用メタ関数(同時に定義内容参照用クラス)
      * @tparam ColID スコープ付き列挙体要素を指定
-     * @tparam Name cstrで包んだ文字列リテラルを渡す。文字列は1文字以上
+     * @tparam Name tustr::cstrで包んだ文字列リテラルを渡す。文字列は1文字以上
      * @tparam FieldType 格納するデータ型
      * @tparam Constraints 列制約を任意数指定する(指定なしもOK)
     */
     template <
         enumeration auto ColID,
-        cstr Name,
+        tustr::cstr Name,
         class FieldType,
         ColumnConstraintDefinable... Constraints
     >
@@ -41,7 +42,7 @@ namespace tudb
      * @brief column_definition型かどうかを判定するメタ関数
     */
     template <class T> struct is_column_definition : public std::false_type {};
-    template <enumeration auto ColID, cstr Name, typename FieldType, ColumnConstraintDefinable... Constraints>
+    template <enumeration auto ColID, tustr::cstr Name, typename FieldType, ColumnConstraintDefinable... Constraints>
     struct is_column_definition<define_column<ColID, Name, FieldType, Constraints...>> : public std::true_type {};
 
     /**

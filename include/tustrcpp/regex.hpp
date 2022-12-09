@@ -4,8 +4,9 @@
 ///----------------------------------
 #pragma once
 #include <regex>
+#include <tustrcpp/cstr.hpp>
 
-namespace tudb
+namespace tustr
 {
     enum {
         // ’Êí”ÍˆÍ‚É’u‚¯‚é“Áê•¶š‚Ì«¿
