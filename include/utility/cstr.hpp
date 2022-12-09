@@ -47,7 +47,7 @@ namespace tudb
             std::size_t cnt = 0;
             for (int i = 0; i < sv.size(); i++) {
                 if (sv[i] == s[0]) {
-                    for (int j = 1; j < s.size() && i + j < sv.size(); j++) {
+                    for (int j = 0; j < s.size() && i + j < sv.size(); j++) {
                         if (sv[i + j] != s[j]) break;
                         if (j == s.size() - 1) cnt++;
                     }
@@ -65,7 +65,7 @@ namespace tudb
             const auto sv = this->view();
             for (std::size_t i = offset; i < sv.size(); i++) {
                 if (sv[i] == s[0]) {
-                    for (std::size_t j = 1; j < s.size() && i + j < sv.size(); j++) {
+                    for (std::size_t j = 0; j < s.size() && i + j < sv.size(); j++) {
                         if (sv[i + j] != s[j]) break;
                         if (j == s.size() - 1) return i;
                     }
@@ -187,6 +187,23 @@ namespace tudb
     // •‰”‚Ìê‡
     template <std::integral auto V, std::size_t Hex = 10, bool UsePrefix = false>
     constexpr auto to_string() { return concat(cstr{"-"}, to_string<-V, Hex, UsePrefix>()); }
+
+    /**
+     * @fn
+     * @brief •¶š—ñ‚ğ®”Œ^‚É•ÏŠ·
+    */
+    template <std::integral T>
+    constexpr T to_int(const std::string& s)
+    {
+        T val{};
+        for (const auto c: s) {
+            val *= 10;
+            val += (c - '0');
+        }
+        return val;
+    }
+    template <std::integral T>
+    constexpr T to_int(const std::string_view& s) { return to_int<T>(std::string(s)); }
 
     /**
      * @fn

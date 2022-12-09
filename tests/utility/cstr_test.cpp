@@ -98,9 +98,11 @@ TEST(tudbcpptest, CstrDevideByDelimiterTest)
     EXPECT_EQ(inst1.count(", "), 3);
     EXPECT_EQ(inst1.count("abcd"), 2);
     EXPECT_EQ(inst1.count("abcdef"), 0);
+    EXPECT_EQ(inst1.count("a"), 5);
     EXPECT_EQ(inst1.find(", "), 3);
     EXPECT_EQ(inst1.find("abcd", 6), 15);
     EXPECT_EQ(inst1.find("abcdef"), std::string_view::npos);
+    EXPECT_EQ(inst1.find("a"), 0);
 
     constexpr auto case1 = tudb::devide_by_delimiter<"abc, abcd, abc,abcde, a", ", ">();
     ASSERT_EQ(case1.size(), 4);
@@ -108,4 +110,13 @@ TEST(tudbcpptest, CstrDevideByDelimiterTest)
     EXPECT_EQ(case1[1], "abcd"sv);
     EXPECT_EQ(case1[2], "abc,abcde"sv);
     EXPECT_EQ(case1[3], "a"sv);
+
+    constexpr auto case2 = tudb::devide_by_delimiter<"abc, abcd, abc,abcde, a", "a">();
+    ASSERT_EQ(case2.size(), 6);
+    EXPECT_EQ(case2[0], ""sv);
+    EXPECT_EQ(case2[1], "bc, "sv);
+    EXPECT_EQ(case2[2], "bcd, "sv);
+    EXPECT_EQ(case2[3], "bc,"sv);
+    EXPECT_EQ(case2[4], "bcde, "sv);
+    EXPECT_EQ(case2[5], ""sv);
 }
