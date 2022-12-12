@@ -10,25 +10,25 @@ namespace tustr
     struct regex_char_class
     {
     private:
-        static constexpr auto digits = cstr{"0123456789"};
-        static constexpr auto words = cstr{"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_"};
-        static constexpr auto space = cstr{"\f\t\v"};
-        static constexpr auto strends = cstr{"\n\r"};
-        static constexpr auto bk_space = cstr{"ftv"};
-        static constexpr auto bk_strends = cstr{"nr"};
-        static constexpr auto others = cstr{"-!\"#$%&'()=^~|`@{}+;*:,<.>/?\b\\"};
-        static constexpr auto bk_others = cstr{"b0[]\\"};
+        static constexpr auto digits            = cstr{"0123456789"};
+        static constexpr auto words             = cstr{"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_"};
+        static constexpr auto space             = cstr{"\f\t\v"};
+        static constexpr auto strends           = cstr{"\n\r"};
+        static constexpr auto bk_space          = cstr{"ftv"};
+        static constexpr auto bk_strends        = cstr{"nr"};
+        static constexpr auto others            = cstr{"-!\"#$%&'()=^~|`@{}+;*:,<.>/?\b\\"};
+        static constexpr auto bk_others         = cstr{"b0[]\\"};
 
-        static constexpr auto true_words = concat(digits, words);
-        static constexpr auto true_space = concat(space, strends);
-        static constexpr auto bk_true_space = concat(bk_space, bk_strends);
-        static constexpr auto dot = concat(digits, words, space, others);
-        static constexpr auto bk_dot = concat(bk_space, bk_others);
-        static constexpr auto anti_digits = concat(words, space, strends, others);
-        static constexpr auto bk_anti_digits = concat(bk_space, bk_strends, bk_others);
-        static constexpr auto anti_words = concat(space, strends, others);
-        static constexpr auto bk_anti_words = concat(bk_space, bk_others, bk_others);
-        static constexpr auto anti_space = concat(digits, words, others);
+        static constexpr auto true_words        = concat(digits, words);
+        static constexpr auto true_space        = concat(space, strends);
+        static constexpr auto bk_true_space     = concat(bk_space, bk_strends);
+        static constexpr auto dot               = concat(digits, words, space, others);
+        static constexpr auto bk_dot            = concat(bk_space, bk_others);
+        static constexpr auto anti_digits       = concat(words, space, strends, others);
+        static constexpr auto bk_anti_digits    = concat(bk_space, bk_strends, bk_others);
+        static constexpr auto anti_words        = concat(space, strends, others);
+        static constexpr auto bk_anti_words     = concat(bk_space, bk_others, bk_others);
+        static constexpr auto anti_space        = concat(digits, words, others);
 
     public:
         // ì¡éÍï∂éöÇ…äYìñÇ∑ÇÈï∂éöèWçáÇéÊìæÇ∑ÇÈ
