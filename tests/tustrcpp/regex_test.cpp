@@ -135,3 +135,23 @@ TEST(tustrcpptest, RegexQuantifierParseTest)
     EXPECT_EQ(type8::min_count, 25);
     EXPECT_EQ(type8::max_count, 512);
 }
+
+TEST(tustrcpptest, RegexCaptureParserTest)
+{
+    using type1 = tustr::regex_capture_parser<"ab(cdefg)", 2>;
+    using type2 = tustr::regex_capture_parser<"ab(?:cdefg)", 2>;
+    using type3 = tustr::regex_capture_parser<"ab(?<a_1>cdefg)", 2>;
+
+    EXPECT_TRUE(type1::is_capture);
+    EXPECT_FALSE(type2::is_capture);
+    EXPECT_TRUE(type3::is_capture);
+    EXPECT_STREQ(type1::name.data(), "");
+    EXPECT_STREQ(type2::name.data(), "");
+    EXPECT_STREQ(type3::name.data(), "a_1");
+    EXPECT_FALSE(type1::is_named);
+    EXPECT_FALSE(type2::is_named);
+    EXPECT_TRUE(type3::is_named);
+    EXPECT_STREQ(type1::capture_pattern.data(), "cdefg");
+    EXPECT_STREQ(type2::capture_pattern.data(), "cdefg");
+    EXPECT_STREQ(type3::capture_pattern.data(), "cdefg");
+}

@@ -113,6 +113,22 @@ namespace tustr
 
         /**
          * @fn
+         * @brief 全ての要素が指定された文字集合に含まれているとき真
+        */
+        constexpr auto match_all_charset(const std::string_view& char_set, bool is_allow = true) const
+        {
+            auto [s_pos, cnt] = this->get_charset_match_range(char_set, 0, is_allow);
+            return s_pos == 0 && cnt == this->size();
+        }
+
+        /**
+         * @fn
+         * @brief 全ての要素が指定した文字集合に含まれていないとき真
+        */
+        constexpr auto unmatch_all_charset(const std::string_view& char_set) const { return this->match_all_charset(char_set, false); }
+
+        /**
+         * @fn
          * @brief 部分文字列を取得する
         */
         template <std::size_t Offset, std::size_t Count = max_size>
