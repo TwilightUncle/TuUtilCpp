@@ -17,7 +17,7 @@ namespace tustr
         : public regex_char_attribute
     {
         static_assert(
-            is_allowed_string(std::string{Pattern[Pos]}, true, quantifier_chars, "", false),
+            quantifier_chars.contains(char_to_cstr(Pattern[Pos])),
             "Invalied template argment [Pattern, Pos]. Must specified of '*', '+', '?', '{'."
         );
 
@@ -38,7 +38,7 @@ namespace tustr
             // {n}, {n,}, {n,m}のいずれかの構文に合致していることを確認(n, mは数値であること)
             static_assert(
                 inner_str[0] != ','
-                && is_allowed_string(inner_str.data(), true, "0123456789,", "", false)
+                && inner_str.match_all_charset("0123456789,")
                 && std::ranges::count(inner_str, ',') <= 1,
                 "An error has occurred. [regex_quantifier_perser]"
             );
