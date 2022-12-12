@@ -14,6 +14,7 @@
 #include <tustrcpp/regex/quantifier.hpp>
 #include <tustrcpp/regex/char_set.hpp>
 #include <tustrcpp/regex/capture.hpp>
+#include <tustrcpp/regex/general.hpp>
 
 namespace tustr
 {

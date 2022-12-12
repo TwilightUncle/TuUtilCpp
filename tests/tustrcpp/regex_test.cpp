@@ -155,3 +155,9 @@ TEST(tustrcpptest, RegexCaptureParserTest)
     EXPECT_STREQ(type2::capture_pattern.data(), "cdefg");
     EXPECT_STREQ(type3::capture_pattern.data(), "cdefg");
 }
+
+TEST(tustrcpptest, RegexGeneralTest)
+{
+    using type1 = tustr::regex_general<"abcdef[g", 0>;
+    EXPECT_STREQ(type1::value.data(), "abcdef");
+}
