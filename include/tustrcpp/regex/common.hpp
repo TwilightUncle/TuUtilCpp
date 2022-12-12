@@ -23,33 +23,25 @@ namespace tustr
         };
 
         // 数量子の起点
-        static constexpr auto quantifier_chars = cstr{"*+?{"};
-
+        static constexpr auto quantifier_chars      = cstr{"*+?{"};
         // アンカーの起点
-        static constexpr auto anchor_chars = cstr{"^$("};
-        static constexpr auto bk_anchor_chars = cstr{"bB"};
-
+        static constexpr auto anchor_chars          = cstr{"^$("};
+        static constexpr auto bk_anchor_chars       = cstr{"bB"};
         // 文字クラス
-        static constexpr auto class_chars = cstr{"."};
-        static constexpr auto bk_class_chars = cstr{"dDwWsStrnvf0\\"};
-
+        static constexpr auto class_chars           = cstr{"."};
+        static constexpr auto bk_class_chars        = cstr{"dDwWsStrnvf0\\"};
         // (キャプチャ/非キャプチャ)グループ
-        static constexpr auto capture_chars = cstr{"("};
-
+        static constexpr auto capture_chars         = cstr{"("};
         // or
-        static constexpr auto or_match_chars = cstr{"|"};
-
+        static constexpr auto or_match_chars        = cstr{"|"};
         // 文字集合
-        static constexpr auto char_set = cstr{"["};
-        static constexpr auto char_set_inner = cstr{"^-"};
-        static constexpr auto bk_char_set_inner = cstr{"b"};
-
+        static constexpr auto char_set              = cstr{"["};
+        static constexpr auto char_set_inner        = cstr{"^-"};
+        static constexpr auto bk_char_set_inner     = cstr{"b"};
         // キャプチャグループ参照
-        static constexpr auto bk_reference_chars = cstr{"123456789"};
-
+        static constexpr auto bk_reference_chars    = cstr{"123456789"};
         // 単体で出てきてはいけないもの
-        static constexpr auto deny_chars = cstr{"})]"};
-
+        static constexpr auto deny_chars            = cstr{"})]"};
         // 上記全てを含む
         static constexpr auto special_chars = concat(
             quantifier_chars,
