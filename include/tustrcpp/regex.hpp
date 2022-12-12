@@ -2,7 +2,9 @@
 /// @file regex.hpp 
 /// @brief 定数式に置ける正規表現(ユニコード未対応)
 ///----------------------------------
-#pragma once
+#ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_HPP
+#define TUSTRCPP_INCLUDE_GUARD_REGEX_HPP
+
 #include <regex>
 #include <tustrcpp/cstr.hpp>
 
@@ -162,3 +164,5 @@ namespace tustr
 
     using empty_regex = regex<"">;
 }
+
+#endif // TUSTRCPP_INCLUDE_GUARD_REGEX_HPP

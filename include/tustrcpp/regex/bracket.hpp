@@ -2,7 +2,8 @@
 /// @file bracket.hpp 
 /// @brief regex.hppŠÖ˜A
 ///----------------------------------
-#pragma once
+#ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_BRACKET_HPP
+#define TUSTRCPP_INCLUDE_GUARD_REGEX_BRACKET_HPP
 
 namespace tustr
 {
@@ -90,3 +91,5 @@ namespace tustr
         static constexpr auto value_with_bracket = concat(char_to_cstr(bracket_info::begin), value, char_to_cstr(bracket_info::end));
     };
 }
+
+#endif // TUSTRCPP_INCLUDE_GUARD_REGEX_BRACKET_HPP

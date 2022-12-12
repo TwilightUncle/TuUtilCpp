@@ -1,4 +1,9 @@
-#pragma once
+///----------------------------------
+/// @file type_list.hpp
+/// @brief îƒópÇÃêßñÒíËã`
+///----------------------------------
+#ifndef TUUTILCPP_INCLUDE_GUARD_TYPE_LIST_HPP
+#define TUUTILCPP_INCLUDE_GUARD_TYPE_LIST_HPP
 
 namespace tudb
 {
@@ -133,3 +138,5 @@ namespace tudb
     template <template <class...> class Container, class... Parameters>
     struct is_same_types<pass_types<Container<Parameters...>>> : public is_same_types<Parameters...> {};
 }
+
+#endif // TUUTILCPP_INCLUDE_GUARD_TYPE_LIST_HPP

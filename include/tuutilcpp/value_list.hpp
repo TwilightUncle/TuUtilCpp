@@ -1,4 +1,9 @@
-#pragma once
+///----------------------------------
+/// @file tuutilcpp/value_list.hpp
+/// @brief テンプレート引数操作系のヘルパ群
+///----------------------------------
+#ifndef TUUTILCPP_INCLUDE_GUARD_VALUE_LIST_HPP
+#define TUUTILCPP_INCLUDE_GUARD_VALUE_LIST_HPP
 
 namespace tudb
 {
@@ -62,3 +67,5 @@ namespace tudb
     template <template <auto...> class Container, auto... Parameters>
     struct is_same_types<pass_values<Container<Parameters...>>> : public is_same_value_types<Parameters...> {};
 }
+
+#endif // TUUTILCPP_INCLUDE_GUARD_VALUE_LIST_HPP

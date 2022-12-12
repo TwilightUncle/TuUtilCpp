@@ -2,7 +2,9 @@
 /// @file carry_over.hpp
 /// @brief 二項の引数を受け取る処理に対して繰り上げ処理を適用できるようなコンテナ
 ///----------------------------------
-#pragma once
+#ifndef TUUTILCPP_INCLUDE_GUARD_CARRY_OVER_HPP
+#define TUUTILCPP_INCLUDE_GUARD_CARRY_OVER_HPP
+
 
 namespace tudb
 {
@@ -212,3 +214,5 @@ namespace tudb
         return convert_diff_size_buffer<ToBufT>(carry_over_container<FromBufT, 1>{from});
     }
 }
+
+#endif // TUUTILCPP_INCLUDE_GUARD_CARRY_OVER_HPP

@@ -2,7 +2,9 @@
 /// @file column.hpp
 /// @brief DB—ñ’è‹`
 ///----------------------------------
-#pragma once
+#ifndef TUDBCPP_INCLUDE_GUARD_COLUMN_HPP
+#define TUDBCPP_INCLUDE_GUARD_COLUMN_HPP
+
 #include <tudbcpp/constraint.hpp>
 #include <tudbcpp/type.hpp>
 #include <tustrcpp/cstr.hpp>
@@ -106,3 +108,5 @@ namespace tudb
 
     template <ColumnListDefinitionable T> using extract_constraints_t = extract_constraints<T>::type;
 }
+
+#endif // TUDBCPP_INCLUDE_GUARD_COLUMN_HPP

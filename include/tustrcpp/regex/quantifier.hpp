@@ -2,7 +2,8 @@
 /// @file quantifier.hpp 
 /// @brief regex.hppŠÖ˜A
 ///----------------------------------
-#pragma once
+#ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_QUANTIFIER_HPP
+#define TUSTRCPP_INCLUDE_GUARD_REGEX_QUANTIFIER_HPP
 
 namespace tustr
 {
@@ -83,3 +84,5 @@ namespace tustr
         }();
     };
 }
+
+#endif // TUSTRCPP_INCLUDE_GUARD_REGEX_QUANTIFIER_HPP

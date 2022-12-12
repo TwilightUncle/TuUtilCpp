@@ -2,7 +2,9 @@
 /// @file table.hpp
 /// @brief DBテーブル定義
 ///----------------------------------
-#pragma once
+#ifndef TUDBCPP_INCLUDE_GUARD_TABLE_HPP
+#define TUDBCPP_INCLUDE_GUARD_TABLE_HPP
+
 #include <tudbcpp/column.hpp>
 
 namespace tudb
@@ -67,3 +69,5 @@ namespace tudb
         }
     };
 }
+
+#endif // TUDBCPP_INCLUDE_GUARD_TABLE_HPP

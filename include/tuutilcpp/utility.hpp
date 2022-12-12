@@ -1,8 +1,10 @@
 ///----------------------------------
-/// @file tuutilcpp/utility\.hpp
+/// @file tuutilcpp/utility.hpp
 /// @brief テンプレート引数操作系のヘルパ群
 ///----------------------------------
-#pragma once
+#ifndef TUUTILCPP_INCLUDE_GUARD_UTILITY_HPP
+#define TUUTILCPP_INCLUDE_GUARD_UTILITY_HPP
+
 #include <compare>
 #include <string>
 #include <array>
@@ -18,3 +20,5 @@
 #include <tuutilcpp/algorithm.hpp>
 #include <tuutilcpp/type_list.hpp>
 #include <tuutilcpp/value_list.hpp>
+
+#endif // TUUTILCPP_INCLUDE_GUARD_UTILITY_HPP

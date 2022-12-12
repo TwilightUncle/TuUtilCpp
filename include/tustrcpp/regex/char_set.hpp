@@ -2,7 +2,8 @@
 /// @file char_set.hpp 
 /// @brief regex.hppŠÖ˜A
 ///----------------------------------
-#pragma once
+#ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_CHAR_SET_HPP
+#define TUSTRCPP_INCLUDE_GUARD_REGEX_CHAR_SET_HPP
 
 namespace tustr
 {
@@ -78,3 +79,5 @@ namespace tustr
         static constexpr auto bk_value = make_regex_bk_char_list<begin_index>();
     };
 }
+
+#endif // TUSTRCPP_INCLUDE_GUARD_REGEX_CHAR_SET_HPP

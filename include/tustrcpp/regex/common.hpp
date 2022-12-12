@@ -2,7 +2,8 @@
 /// @file regex/common.hpp 
 /// @brief regex.hpp�̊֘A
 ///----------------------------------
-#pragma once
+#ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_COMMON_HPP
+#define TUSTRCPP_INCLUDE_GUARD_REGEX_COMMON_HPP
 
 namespace tustr
 {
@@ -162,3 +163,5 @@ namespace tustr
         return index > 0 && target[(std::max)(index - 1, 0)] == ch;
     }
 }
+
+#endif // TUSTRCPP_INCLUDE_GUARD_REGEX_COMMON_HPP

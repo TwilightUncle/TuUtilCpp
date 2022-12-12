@@ -2,7 +2,9 @@
 /// @file constraint.hpp
 /// @brief óÒêßñÒíËã`
 ///----------------------------------
-#pragma once
+#ifndef TUDBCPP_INCLUDE_GUARD_CONSTRAINT_HPP
+#define TUDBCPP_INCLUDE_GUARD_CONSTRAINT_HPP
+
 #include <tuutilcpp/utility.hpp>
 
 namespace tudb
@@ -92,3 +94,5 @@ namespace tudb
     */
     using constraint_unspecified = type_list<constraint>;
 }
+
+#endif // TUDBCPP_INCLUDE_GUARD_CONSTRAINT_HPP

@@ -1,4 +1,9 @@
-#pragma once
+///----------------------------------
+/// @file concepts.hpp
+/// @brief îƒópÇÃêßñÒíËã`
+///----------------------------------
+#ifndef TUUTILCPP_INCLUDE_GUARD_CONCEPTS_HPP
+#define TUUTILCPP_INCLUDE_GUARD_CONCEPTS_HPP
 
 namespace tudb
 {
@@ -55,3 +60,5 @@ namespace tudb
         requires is_unique<Types...>::value;
     };
 }
+
+#endif // TUUTILCPP_INCLUDE_GUARD_CONCEPTS_HPP

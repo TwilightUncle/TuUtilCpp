@@ -1,4 +1,9 @@
-#pragma once
+///----------------------------------
+/// @file algorithm.hpp 
+/// @brief îƒópÉÅÉ^ä÷êîíËã`
+///----------------------------------
+#ifndef TUUTILCPP_INCLUDE_GUARD_ALGORITHM_HPP
+#define TUUTILCPP_INCLUDE_GUARD_ALGORITHM_HPP
 
 namespace tudb
 {
@@ -276,3 +281,5 @@ namespace tudb
     template <auto... Values>
     constexpr auto count_value_parameters_v = count_value_parameters<Values...>::value;
 }
+
+#endif // TUUTILCPP_INCLUDE_GUARD_ALGORITHM_HPP

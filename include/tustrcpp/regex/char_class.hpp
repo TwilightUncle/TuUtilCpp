@@ -2,7 +2,8 @@
 /// @file char_class.hpp 
 /// @brief regex.hppŠÖ˜A
 ///----------------------------------
-#pragma once
+#ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_CHAR_CLASS_HPP
+#define TUSTRCPP_INCLUDE_GUARD_REGEX_CHAR_CLASS_HPP
 
 namespace tustr
 {
@@ -78,3 +79,5 @@ namespace tustr
         }
     };
 }
+
+#endif

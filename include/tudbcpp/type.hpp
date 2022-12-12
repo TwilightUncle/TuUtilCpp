@@ -2,7 +2,9 @@
 /// @file type.hpp
 /// @brief DBフィールド用の型定義
 ///----------------------------------
-#pragma once
+#ifndef TUDBCPP_INCLUDE_GUARD_TYPE_HPP
+#define TUDBCPP_INCLUDE_GUARD_TYPE_HPP
+
 #include <string>
 
 namespace tudb
@@ -34,3 +36,5 @@ namespace tudb
     */
     template <class T> constexpr std::size_t get_maxlength(const T& v) { return get_maxlength_t<T>::size; } 
 }
+
+#endif // TUDBCPP_INCLUDE_GUARD_TYPE_HPP

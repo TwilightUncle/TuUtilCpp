@@ -2,7 +2,8 @@
 /// @file big_int.hpp
 /// @brief 64 Å~ SizeÉrÉbÉgÇÃêÆêî
 ///----------------------------------
-#pragma once
+#ifndef TUUTILCPP_INCLUDE_GUARD_BIG_INT_HPP
+#define TUUTILCPP_INCLUDE_GUARD_BIG_INT_HPP
 
 namespace tudb
 {
@@ -229,3 +230,5 @@ namespace tudb
     template <std::size_t N1>
     constexpr auto operator>>(const big_int<N1>& l, std::unsigned_integral auto r) { return big_int<N1>(l) >>= r; }
 }
+
+#endif // TUUTILCPP_INCLUDE_GUARD_BIG_INT_HPP

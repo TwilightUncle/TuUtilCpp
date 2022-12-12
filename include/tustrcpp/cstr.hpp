@@ -2,7 +2,9 @@
 /// @file cstr.hpp 
 /// @brief ’è”®‚É’u‚¯‚é•¶š—ñ
 ///----------------------------------
-#pragma once
+#ifndef TUSTRCPP_INCLUDE_GUARD_CSTR_HPP
+#define TUSTRCPP_INCLUDE_GUARD_CSTR_HPP
+
 #include <tuutilcpp/utility.hpp>
 
 namespace tustr
@@ -297,3 +299,5 @@ namespace tustr
     template <class T> struct is_cstr : public std::false_type{};
     template <std::size_t N> struct is_cstr<cstr<N>> : public std::true_type{};
 }
+
+#endif // TUSTRCPP_INCLUDE_GUARD_CSTR_HPP
