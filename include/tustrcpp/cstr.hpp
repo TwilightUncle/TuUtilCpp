@@ -84,6 +84,12 @@ namespace tustr
 
         /**
          * @fn
+         * @brief 指定の文字、文字列が含まれるとき真
+        */
+        constexpr auto contains(const std::string_view& s) const { return this->find(s) != std::string_view::npos; }
+
+        /**
+         * @fn
          * @brief 文字集合を検索し、最初に見つけた文字の位置と、そこから連続して合致し続けた数のペアを返す
          * @param char_set 文字集合
          * @param offset 開始位置

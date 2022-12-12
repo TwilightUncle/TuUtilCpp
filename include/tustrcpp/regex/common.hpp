@@ -7,90 +7,21 @@
 
 namespace tustr
 {
-    enum {
-        // 通常範囲に置ける特殊文字の性質
-        REGEX_SPECIAL       = 0x0001u,  // 特殊文字(バックスラッシュでエスケープ)
-        REGEX_BK_SPECIAL     = 0x0002u,  // 特殊文字(バックスラッシュを付与した場合)
-        REGEX_BRANCKET_BE   = 0x0004u,  // 括弧始まり
-        REGEX_BRANCKET_EN   = 0x0008u,  // 括弧終わり
-        REGEX_PREV_REF      = 0x0010u,  // 前の文字を参照する
-        REGEX_NEXT_REF      = 0x0020u,  // 次の文字を参照する
-        REGEX_BEGIN         = 0x0040u,  // 先頭にしか指定できない
-        REGEX_END           = 0x0080u,  // 末尾にしか指定できない
-
-        // []内における特殊文字の性質
-        // REGEX_CLASSES_SPECIAL以外にビットがったていなければバックスラッシュでエスケープが必要、
-        // REGEX_CLASSES_SPECIAL以外にビットが立っている場合、該当する全てを満たしていない場合では特殊文字として認識してはいけない
-        REGEX_CLASSES_SPECIAL       = 0x0100u,  // 特殊文字([]内における)
-        REGEX_CLASSES_BK_SPECIAL    = 0x0200u,
-        REGEX_CLASSES_PREV_REF      = 0x0400u,
-        REGEX_CLASSES_NEXT_REF      = 0x0800u,
-        REGEX_CLASSES_BEGIN         = 0x1000u,  // 先頭
-        REGEX_CLASSES_END           = 0x2000u,
-
-        // 特殊文字かどうかの判定用マスク
-        REGEX_SPECIAL_MASK = REGEX_SPECIAL | REGEX_BK_SPECIAL | REGEX_CLASSES_SPECIAL | REGEX_CLASSES_BK_SPECIAL,
-    };
-
-    /**
-     * @fn
-     * @brief 指定した文字の正規表現としての文法的な性質を示す属性のビット列を取得する
-     * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions/Cheatsheet
-    */
-    inline constexpr auto get_regex_character_attribute(char ch)
-    {
-        std::uint32_t attrs[(std::numeric_limits<char>::max)() + 1] = {};
-        // Character classes
-        attrs['['] |= REGEX_SPECIAL | REGEX_BRANCKET_BE | REGEX_CLASSES_SPECIAL;
-        attrs[']'] |= REGEX_SPECIAL | REGEX_BRANCKET_EN | REGEX_CLASSES_SPECIAL;
-        attrs['-'] |= REGEX_CLASSES_SPECIAL | REGEX_CLASSES_PREV_REF | REGEX_CLASSES_NEXT_REF;
-        attrs['^'] |= REGEX_CLASSES_SPECIAL | REGEX_CLASSES_BEGIN;
-        attrs['.'] |= REGEX_SPECIAL;
-        attrs['d'] |= REGEX_BK_SPECIAL;
-        attrs['D'] |= REGEX_BK_SPECIAL;
-        attrs['w'] |= REGEX_BK_SPECIAL;
-        attrs['W'] |= REGEX_BK_SPECIAL;
-        attrs['s'] |= REGEX_BK_SPECIAL;
-        attrs['S'] |= REGEX_BK_SPECIAL;
-        attrs['t'] |= REGEX_BK_SPECIAL;
-        attrs['r'] |= REGEX_BK_SPECIAL;
-        attrs['n'] |= REGEX_BK_SPECIAL;
-        attrs['v'] |= REGEX_BK_SPECIAL;
-        attrs['f'] |= REGEX_BK_SPECIAL;
-        attrs['b'] |= REGEX_CLASSES_BK_SPECIAL;
-        attrs['0'] |= REGEX_BK_SPECIAL;
-        attrs['c'] |= REGEX_BK_SPECIAL | REGEX_NEXT_REF;
-        attrs['x'] |= REGEX_BK_SPECIAL | REGEX_NEXT_REF;
-        attrs['u'] |= REGEX_BK_SPECIAL | REGEX_NEXT_REF;
-        attrs['\\'] |= REGEX_SPECIAL | REGEX_NEXT_REF | REGEX_CLASSES_SPECIAL | REGEX_CLASSES_NEXT_REF;
-        attrs['|'] |= REGEX_SPECIAL | REGEX_PREV_REF | REGEX_NEXT_REF;
-        // Assertions
-        attrs['^'] |= REGEX_SPECIAL | REGEX_BEGIN;
-        attrs['$'] |= REGEX_SPECIAL | REGEX_END;
-        attrs['b'] |= REGEX_BK_SPECIAL | REGEX_PREV_REF | REGEX_NEXT_REF;
-        attrs['B'] |= REGEX_BK_SPECIAL | REGEX_PREV_REF | REGEX_NEXT_REF;
-        attrs['?'] |= REGEX_SPECIAL | REGEX_PREV_REF | REGEX_NEXT_REF;
-        // Groups and backreferences
-        attrs['('] |= REGEX_SPECIAL | REGEX_BRANCKET_BE;
-        attrs[')'] |= REGEX_SPECIAL | REGEX_BRANCKET_BE;
-        for (const auto c : std::views::iota('1', '9'))
-            attrs[c] |= REGEX_BK_SPECIAL;
-        attrs['k'] |= REGEX_BK_SPECIAL | REGEX_NEXT_REF;
-        // Quantifiers
-        attrs['*'] |= REGEX_SPECIAL | REGEX_PREV_REF;
-        attrs['+'] |= REGEX_SPECIAL | REGEX_PREV_REF;
-        attrs['?'] |= REGEX_SPECIAL | REGEX_PREV_REF;
-        attrs['{'] |= REGEX_SPECIAL | REGEX_BRANCKET_BE;
-        attrs['}'] |= REGEX_SPECIAL | REGEX_BRANCKET_EN;
-        // Unicode property escapes
-        attrs['p'] |= REGEX_BK_SPECIAL | REGEX_NEXT_REF;
-        attrs['P'] |= REGEX_BK_SPECIAL | REGEX_NEXT_REF;
-
-        return attrs[ch];
-    }
-
     struct regex_char_attribute
     {
+        enum {
+            QUANTIFIER      = 0x0001u,
+            ANCHOR          = 0x0002u,
+            CLASS           = 0x0004u,
+            CAPTURE         = 0x0008u,
+            OR_MATCH        = 0x0010u,
+            CHARSET         = 0x0020u,
+            CHARSET_INNER   = 0x0040u,
+            REFERENCE       = 0x0080u,
+            DENY            = 0x0100u,
+            BK              = 0x0200u,
+        };
+
         // 数量子の起点
         static constexpr auto quantifier_chars = cstr{"*+?{"};
 
@@ -110,9 +41,48 @@ namespace tustr
 
         // 文字集合
         static constexpr auto char_set = cstr{"["};
+        static constexpr auto char_set_inner = cstr{"^-"};
+        static constexpr auto bk_char_set_inner = cstr{"b"};
 
         // キャプチャグループ参照
         static constexpr auto bk_reference_chars = cstr{"123456789"};
+
+        // 単体で出てきてはいけないもの
+        static constexpr auto deny_chars = cstr{"})]"};
+
+        // 上記全てを含む
+        static constexpr auto special_chars = concat(
+            quantifier_chars,
+            anchor_chars,
+            bk_anchor_chars,
+            class_chars,
+            bk_class_chars,
+            capture_chars,
+            or_match_chars,
+            char_set,
+            char_set_inner,
+            bk_char_set_inner,
+            bk_reference_chars,
+            deny_chars
+        );
+
+        // 属性リスト
+        static constexpr auto attributes = []() {
+            std::uint32_t attrs[(std::numeric_limits<char>::max)() + 1] = {};
+            for (const auto c : quantifier_chars.view())    attrs[c] |= QUANTIFIER;
+            for (const auto c : anchor_chars.view())        attrs[c] |= ANCHOR;
+            for (const auto c : bk_anchor_chars.view())     attrs[c] |= ANCHOR          | BK;
+            for (const auto c : class_chars.view())         attrs[c] |= CLASS;
+            for (const auto c : bk_class_chars.view())      attrs[c] |= CLASS           | BK;
+            for (const auto c : capture_chars.view())       attrs[c] |= CAPTURE;
+            for (const auto c : or_match_chars.view())      attrs[c] |= OR_MATCH;
+            for (const auto c : char_set.view())            attrs[c] |= CHARSET;
+            for (const auto c : char_set_inner.view())      attrs[c] |= CHARSET_INNER;
+            for (const auto c : bk_char_set_inner.view())   attrs[c] |= CHARSET_INNER   | BK;
+            for (const auto c : bk_reference_chars.view())  attrs[c] |= REFERENCE       | BK;
+            for (const auto c : deny_chars.view())          attrs[c] |= DENY;
+            return std::to_array(attrs);
+        }();
     };
 
     /**
@@ -122,7 +92,7 @@ namespace tustr
     inline constexpr bool is_collect_regex_back_slash(const std::string_view& target)
     {
         for (int i = 0; i < target.size(); i++)
-            if (target[i] == '\\' && (i == target.size() - 1 || !get_regex_character_attribute(target[++i])))
+            if (target[i] == '\\' && (i == target.size() - 1 || !regex_char_attribute::attributes[target[++i]]))
                 return false;
         return true;
     }
