@@ -12,6 +12,7 @@ set(TUGAMECPP_TESTS
     ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/carry_over_test.cpp
     ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/big_int_test.cpp
     ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/type_list_test.cpp
+    ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/value_type_pair_test.cpp
     ${PROJECT_SOURCE_DIR}/tests/tustrcpp/cstr_test.cpp
     ${PROJECT_SOURCE_DIR}/tests/tustrcpp/regex_test.cpp
     ${PROJECT_SOURCE_DIR}/tests/column_test.cpp
