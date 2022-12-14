@@ -10,6 +10,29 @@
 namespace tustr
 {
     /**
+     * @fn
+     * @brief subjectの中にsearchが含まれているか検索する
+     * @param search 検索する文字列
+     * @param subject 対象文字列
+     * @param offset 検索開始位置
+    */
+    inline constexpr auto find_substr(
+        const std::string_view& search,
+        const std::string_view& subject,
+        std::size_t offset = 0
+    ) {
+        for (std::size_t i = offset; i < subject.size(); i++) {
+            if (subject[i] == search[0]) {
+                for (std::size_t j = 0; j < search.size() && i + j < subject.size(); j++) {
+                    if (subject[i + j] != search[j]) break;
+                    if (j == search.size() - 1) return i;
+                }
+            }
+        }
+        return std::string_view::npos;
+    }
+
+    /**
      * @class
      * @brief 固定長領域の文字列
     */
@@ -68,19 +91,7 @@ namespace tustr
          * @fn
          * @brief 文字列が最初に出現する場所を検索する
         */
-        constexpr auto find(const std::string_view& s, std::size_t offset = 0) const
-        {
-            const auto sv = this->view();
-            for (std::size_t i = offset; i < sv.size(); i++) {
-                if (sv[i] == s[0]) {
-                    for (std::size_t j = 0; j < s.size() && i + j < sv.size(); j++) {
-                        if (sv[i + j] != s[j]) break;
-                        if (j == s.size() - 1) return i;
-                    }
-                }
-            }
-            return std::string_view::npos;
-        }
+        constexpr auto find(const std::string_view& s, std::size_t offset = 0) const { return find_substr(s, this->view(), offset); }
 
         /**
          * @fn
