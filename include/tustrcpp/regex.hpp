@@ -38,13 +38,56 @@ namespace tustr
     }
 
     /**
+     * @fn
+     * @brief どの機能の解析を行っているか、部分特殊化で条件分岐。デフォルト
+    */
+    template <cstr Pattern, std::size_t Pos>
+    struct regex_parser : public regex_general<Pattern, Pos> {};
+
+    /**
+     * @fn
+     * @brief 文字集合の場合
+    */
+    template <cstr Pattern, std::size_t Pos>
+    requires (bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::CHARSET))
+    struct regex_parser<Pattern, Pos> : public regex_char_set_parser<Pattern, Pos> {};
+
+    /**
      * @class
      * @brief 正規表現格納オブジェクト。動的に生成されたパターンについては考慮しない
     */
     template <cstr Pattern>
     struct regex
     {
+    private:
         static_assert(is_collect_regex_back_slash(Pattern.view()));
+
+        /**
+         * @fn
+         * @brief 正規表現の解析。特殊文字を含まない個所の担当
+        */
+        template <std::size_t Pos, std::size_t N>
+        static consteval auto parse()
+        {
+            using parser = regex_parser<Pattern, Pos>;
+            auto parse_result = parse<parser::end_pos, N + 1>();
+            parse_result[N] = parser::generated_func;
+            return parse_result;
+        }
+
+        /**
+         * @fn
+         * @brief 再帰の終端
+        */
+        template <std::size_t Pos, std::size_t N>
+        requires (Pattern.size() <= Pos)
+        static consteval auto parse()
+        {
+            return std::array<std::size_t(*)(const std::string_view&, std::size_t), N>{nullptr};
+        }
+
+    public:
+        static constexpr auto parse_result = parse<0, 0>();
     };
 
     using empty_regex = regex<"">;

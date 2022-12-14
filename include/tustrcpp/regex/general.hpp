@@ -24,11 +24,22 @@ namespace tustr
         }();
 
         static_assert(
-            end_pos == Pattern.size() || !deny_chars.contains(char_to_cstr(Pattern[end_pos])),
+            end_pos == Pattern.size() || !(attributes[Pattern[end_pos]] & DENY),
             "Invalied template argment [Pattern, Pos]. Must not specified of '}', ')', ']'."
         );
 
         static constexpr auto value = Pattern.substr<Pos, end_pos - Pos>();
+
+        /**
+         * @fn
+         * @brief ‰ğÍŒ‹‰Ê¶¬‚³‚ê‚½ˆ—
+        */
+        static constexpr std::size_t generated_func(const std::string_view& s, std::size_t offset)
+        {
+            auto pos = find_substr(value, s, offset);
+            if (pos != std::string_view::npos) pos += value.size();
+            return pos;
+        }
     };
 }
 

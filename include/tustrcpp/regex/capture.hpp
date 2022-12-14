@@ -27,6 +27,7 @@ namespace tustr
 
         static constexpr auto is_capture = !(inner_pattern.find("?:") == 0);
 
+    private:
         /**
          * @fn
          * @brief ƒLƒƒƒvƒ`ƒƒ‚Ì–¼Ì‚ğæ“¾
@@ -47,6 +48,7 @@ namespace tustr
         template <char C>
         static constexpr auto extract_capture_name() { return cstr{""}; }
 
+    public:
         static constexpr auto name = extract_capture_name<inner_pattern[0]>();
         static constexpr auto is_named = name.size() > 0;
 

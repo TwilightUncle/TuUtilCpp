@@ -25,6 +25,7 @@ namespace tustr
         static constexpr auto begin_pos = Pos;
         static constexpr auto end_pos = brancket_inner::end_pos;
 
+    private:
         /**
          * @fn
          * @brief 文字集合を構築する
@@ -72,11 +73,24 @@ namespace tustr
             else return make_regex_bk_char_list<N + 1>();
         }
 
+    public:
         // 文字集合
         static constexpr auto value = make_regex_char_list<begin_index>();
 
         // エスケープされた文字に合致する文字集合
         static constexpr auto bk_value = make_regex_bk_char_list<begin_index>();
+
+        /**
+         * @fn
+         * @brief 解析結果生成された処理
+        */
+        static constexpr std::size_t generated_func(const std::string_view& s, std::size_t offset)
+        {
+            const auto is_contains = value.contains(char_to_cstr(s[offset]));
+            return allow_or_deny == is_contains
+                ? offset + 1
+                : std::string_view::npos;
+        }
     };
 }
 

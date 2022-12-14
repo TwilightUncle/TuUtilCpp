@@ -24,6 +24,7 @@ namespace tustr
         // 数量子の開始位置
         static constexpr auto begin_pos = Pos;
 
+    private:
         /**
          * @fn
          * @brief 数量子を示す文字列を抽出
@@ -48,6 +49,7 @@ namespace tustr
         template <char C> requires (C != '{')
         static constexpr auto extract_quantifier() { return char_to_cstr(C); }
 
+    public:
         // 数量子の文字列を抽出したもの
         static constexpr auto quantifier = extract_quantifier<Pattern[Pos]>();
 

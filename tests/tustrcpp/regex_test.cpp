@@ -5,12 +5,6 @@
 using namespace std::string_view_literals;
 TEST(tustrcpptest, RegexFunctionTest)
 {
-    using test_type = tustr::regex<"abcdef">;
-    constexpr auto empty_inst = tustr::empty_regex{};
-    // // どの文法を使用するか指定がなかった場合、ECMAScriptのビットが含まれているか確認
-    // constexpr auto inst1 = tustr::regex{"abcde", std::regex_constants::syntax_option_type::icase};
-
-    // EXPECT_EQ(inst1.syntax, std::regex_constants::syntax_option_type::ECMAScript | std::regex_constants::syntax_option_type::icase);
     constexpr auto case1 = tustr::is_collect_regex_back_slash("a\\0\\\\a\\\\");
     constexpr auto case2 = tustr::is_collect_regex_back_slash("a\\0\\\\a\\");
     constexpr auto case3 = tustr::is_collect_regex_back_slash("\\a\\0\\\\a\\\\");
@@ -160,4 +154,16 @@ TEST(tustrcpptest, RegexGeneralTest)
 {
     using type1 = tustr::regex_general<"abcdef[g", 0>;
     EXPECT_STREQ(type1::value.data(), "abcdef");
+}
+
+TEST(tustrcpptest, RegexParseTest)
+{
+    constexpr auto f_arr = tustr::regex<"abcdef[ghi]az[$%&_1]">::parse_result;
+    constexpr auto case1 = f_arr[0]("abgbzabcdefrrr", 0);
+    constexpr auto case2 = f_arr[1]("abgbzabcdefrrr", 0);
+    constexpr auto case3 = f_arr[1]("abgbzabcdefrrr", 2);
+    EXPECT_EQ(f_arr.size(), 4);
+    EXPECT_EQ(case1, 5 + tustr::cstr{"abcdef"}.size());
+    EXPECT_EQ(case2, std::string_view::npos);
+    EXPECT_EQ(case3, 2 + 1);
 }
