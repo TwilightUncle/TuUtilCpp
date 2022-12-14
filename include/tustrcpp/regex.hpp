@@ -82,6 +82,7 @@ namespace tustr
     template <cstr Pattern>
     struct regex
     {
+        using generated_function_type = std::size_t(*)(const std::string_view&, std::size_t);
     private:
         static_assert(is_collect_regex_back_slash(Pattern.view()));
 
@@ -110,12 +111,24 @@ namespace tustr
         {
             // 各perserで以下関数ポインタに格納可能な関数を定義することで、
             // 解析結果を関数ポインタの配列として保持できるようにする
-            using generated_function_type = std::size_t(*)(const std::string_view&, std::size_t);
             return std::array<generated_function_type, N>{nullptr};
         }
 
     public:
         static constexpr auto parse_result = parse<0, 0>();
+
+        /**
+         * @fn
+         * @brief
+        */
+        static constexpr std::size_t match(const std::string_view& s, std::size_t offset = 0)
+        {
+            for(generated_function_type before = nullptr; const auto& f : parse_result) {
+                if ((offset = f(s, offset)) == std::string_view::npos) return offset;
+                before = f;
+            }
+            return offset;
+        }
     };
 
     using empty_regex = regex<"">;

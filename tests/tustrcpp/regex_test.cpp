@@ -184,3 +184,16 @@ TEST(tustrcpptest, RegexParseTest)
     EXPECT_EQ(case9, std::string_view::npos);
     EXPECT_EQ(case10, 3 + 1);
 }
+
+TEST(tustrcpptest, RegexMatchTest)
+{
+    using type1 = tustr::regex<"abcdef[ghi].\\daz[$%&_1]">;
+
+    constexpr auto case1 = type1::match("abcdefg#5az&");
+    constexpr auto case2 = type1::match("abcdefv#5az&");
+    constexpr auto case3 = type1::match("nnnabcdefg#5az&nnn");
+
+    EXPECT_EQ(case1, 12);
+    EXPECT_EQ(case2, std::string_view::npos);
+    EXPECT_EQ(case3, 15);
+}
