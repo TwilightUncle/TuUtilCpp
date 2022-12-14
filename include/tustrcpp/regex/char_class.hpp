@@ -78,6 +78,25 @@ namespace tustr
             else return char_to_cstr(C);
         }
     };
+
+    template <cstr Pattern, std::size_t Pos>
+    struct regex_char_class_parser
+    {
+        static constexpr auto begin_pos = Pos;
+        static constexpr auto end_pos = Pos + 1;
+        static constexpr auto value = regex_char_class::get_const_char_set<Pattern[Pos]>();
+
+        /**
+         * @fn
+         * @brief ‰ğÍŒ‹‰Ê¶¬‚³‚ê‚½ˆ—
+        */
+        static constexpr std::size_t generated_func(const std::string_view& s, std::size_t offset)
+        {
+            return value.contains(char_to_cstr(s[offset]))
+                ? offset + 1
+                : std::string_view::npos;
+        }
+    };
 }
 
 #endif

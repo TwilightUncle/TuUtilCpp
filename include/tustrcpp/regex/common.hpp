@@ -75,6 +75,28 @@ namespace tustr
             for (const auto c : deny_chars.view())          attrs[c] |= DENY;
             return std::to_array(attrs);
         }();
+
+        /**
+         * @fn
+         * @brief Flagsに指定した全ての属性を合わせたビットがcに設定されている属性でも全て立っている場合のみ真
+        */
+        template <std::size_t... Flags>
+        static constexpr bool check_attrs_conjuction(char c)
+        {
+            constexpr auto attr = (Flags | ...);
+            return (attributes[c] & attr) == attr;
+        }
+
+        /**
+         * @fn
+         * @brief Flagsに指定したビットのうちいずれかの属性が一つでもcに設定されていれば真
+        */
+        template <std::size_t... Flags>
+        static constexpr bool check_attrs_disjuction(char c)
+        {
+            constexpr auto attr = (Flags | ...);
+            return bool(attributes[c] & attr);
+        }
     };
 
     /**

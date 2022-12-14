@@ -53,6 +53,29 @@ namespace tustr
     struct regex_parser<Pattern, Pos> : public regex_char_set_parser<Pattern, Pos> {};
 
     /**
+     * @fn
+     * @brief 文字クラスの場合
+    */
+    template <cstr Pattern, std::size_t Pos>
+    requires (
+        bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::CLASS)
+        && !bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::BK)
+    )
+    struct regex_parser<Pattern, Pos> : public regex_char_class_parser<Pattern, Pos> {};
+
+    /**
+     * @fn
+     * @brief 文字クラスの場合2(バックスラッシュ含めて2文字のため、位置を一つ進めている)
+    */
+    template <cstr Pattern, std::size_t Pos>
+    requires (
+        Pattern[Pos] == '\\'
+        && Pattern.size() - 1 > Pos
+        && regex_char_attribute::check_attrs_conjuction<regex_char_attribute::CLASS, regex_char_attribute::BK>(Pattern[Pos])
+    )
+    struct regex_parser<Pattern, Pos> : public regex_char_class_parser<Pattern, Pos + 1> { static constexpr auto begin_pos = Pos; };
+
+    /**
      * @class
      * @brief 正規表現格納オブジェクト。動的に生成されたパターンについては考慮しない
     */
@@ -69,6 +92,8 @@ namespace tustr
         template <std::size_t Pos, std::size_t N>
         static consteval auto parse()
         {
+            // あらかじめ、Pattern[Pos]の値によって部分特殊化し、
+            // 呼び出される処理をオーバーロードできるようにする
             using parser = regex_parser<Pattern, Pos>;
             auto parse_result = parse<parser::end_pos, N + 1>();
             parse_result[N] = parser::generated_func;
@@ -83,7 +108,10 @@ namespace tustr
         requires (Pattern.size() <= Pos)
         static consteval auto parse()
         {
-            return std::array<std::size_t(*)(const std::string_view&, std::size_t), N>{nullptr};
+            // 各perserで以下関数ポインタに格納可能な関数を定義することで、
+            // 解析結果を関数ポインタの配列として保持できるようにする
+            using generated_function_type = std::size_t(*)(const std::string_view&, std::size_t);
+            return std::array<generated_function_type, N>{nullptr};
         }
 
     public:
