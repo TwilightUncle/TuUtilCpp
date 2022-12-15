@@ -7,9 +7,6 @@
 
 namespace tustr
 {
-    // 前方宣言
-    template <cstr Pattern> struct regex;
-
     /**
      * @class
      * @brief キャプチャグループの解析

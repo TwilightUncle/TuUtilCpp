@@ -78,11 +78,13 @@ namespace tustr
     /**
      * @class
      * @brief 正規表現格納オブジェクト。動的に生成されたパターンについては考慮しない
+     * @tparam Pttern 正規表現の文字列リテラルを指定
+     * @tparam Parser 正規表現を解析するテンプレートクラスを指定
     */
-    template <cstr Pattern>
+    template <cstr Pattern, template <cstr, std::size_t> class Parser = regex_parser>
     struct regex
     {
-        using generated_function_type = std::size_t(*)(const std::string_view&, std::size_t);
+        using generated_function_type = std::size_t(*)(const std::string_view&, std::size_t, bool);
     private:
         static_assert(is_collect_regex_back_slash(Pattern.view()));
 
@@ -95,7 +97,7 @@ namespace tustr
         {
             // あらかじめ、Pattern[Pos]の値によって部分特殊化し、
             // 呼び出される処理をオーバーロードできるようにする
-            using parser = regex_parser<Pattern, Pos>;
+            using parser = Parser<Pattern, Pos>;
             auto parse_result = parse<parser::end_pos, N + 1>();
             parse_result[N] = parser::generated_func;
             return parse_result;
@@ -119,16 +121,19 @@ namespace tustr
 
         /**
          * @fn
-         * @brief
+         * @brief パターンマッチの基本。実行後の結果はPtternのsizeとなるが、一致しなかった場合はstd::string_view::nposが返される
         */
-        static constexpr std::size_t match(const std::string_view& s, std::size_t offset = 0)
+        static constexpr std::size_t run(const std::string_view& s, std::size_t offset = 0)
         {
+            bool is_pos_lock = false;
             for(generated_function_type before = nullptr; const auto& f : parse_result) {
-                if ((offset = f(s, offset)) == std::string_view::npos) return offset;
+                if ((offset = f(s, offset, std::exchange(is_pos_lock, true))) == std::string_view::npos) return offset;
                 before = f;
             }
             return offset;
         }
+
+        static constexpr bool match(const std::string_view& s) { return run(s, 0) != std::string_view::npos; }
     };
 
     using empty_regex = regex<"">;

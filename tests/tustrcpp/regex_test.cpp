@@ -162,19 +162,19 @@ TEST(tustrcpptest, RegexParseTest)
     // {'abcdef', '[ghi]', '.', '\\d', 'az', '[$%&_1]'}ÇªÇÍÇºÇÍÇ…ëŒÇµÇƒ6Ç¬ÇÃä÷êîÇ™ê∂ê¨Ç≥ÇÍÇÈ
     ASSERT_EQ(f_arr.size(), 6);
 
-    constexpr auto case1 = f_arr[0]("abgbzabcdefrrr", 0);
-    constexpr auto case2 = f_arr[1]("abgbzabcdefrrr", 0);
-    constexpr auto case3 = f_arr[1]("abgbzabcdefrrr", 2);
-    constexpr auto case4 = f_arr[2]("a\\%1", 0);
-    constexpr auto case5 = f_arr[2]("a\\%1", 1);
-    constexpr auto case6 = f_arr[2]("a\\%1", 2);
-    constexpr auto case7 = f_arr[2]("a\\%1", 3);
-    constexpr auto case8 = f_arr[3]("a\\%1", 0);
-    constexpr auto case9 = f_arr[3]("a\\%1", 1);
-    constexpr auto case10 = f_arr[3]("a\\%1", 3);
+    constexpr auto case1 = f_arr[0]("abgbzabcdefrrr", 0, false);
+    constexpr auto case2 = f_arr[1]("abgbzabcdefrrr", 0, false);
+    constexpr auto case3 = f_arr[1]("abgbzabcdefrrr", 2, false);
+    constexpr auto case4 = f_arr[2]("a\\%1", 0, false);
+    constexpr auto case5 = f_arr[2]("a\\%1", 1, false);
+    constexpr auto case6 = f_arr[2]("a\\%1", 2, false);
+    constexpr auto case7 = f_arr[2]("a\\%1", 3, false);
+    constexpr auto case8 = f_arr[3]("a\\%1", 0, false);
+    constexpr auto case9 = f_arr[3]("a\\%1", 1, false);
+    constexpr auto case10 = f_arr[3]("a\\%1", 3, false);
 
     EXPECT_EQ(case1, 5 + tustr::cstr{"abcdef"}.size());
-    EXPECT_EQ(case2, std::string_view::npos);
+    EXPECT_EQ(case2, 2 + 1);
     EXPECT_EQ(case3, 2 + 1);
     EXPECT_EQ(case4, 0 + 1);
     EXPECT_EQ(case5, 1 + 1);
@@ -183,17 +183,29 @@ TEST(tustrcpptest, RegexParseTest)
     EXPECT_EQ(case8, std::string_view::npos);
     EXPECT_EQ(case9, std::string_view::npos);
     EXPECT_EQ(case10, 3 + 1);
+
+    constexpr auto case11 = f_arr[0]("abgbzabcdefrrr", 0, true);
+    constexpr auto case12 = f_arr[0]("abgbzabcdefrrr", 5, true);
+    constexpr auto case13 = f_arr[1]("abgbzabcdefrrr", 0, true);
+    constexpr auto case14 = f_arr[1]("abgbzabcdefrrr", 2, true);
+
+    EXPECT_EQ(case11, std::string_view::npos);
+    EXPECT_EQ(case12, 5 + tustr::cstr{"abcdef"}.size());
+    EXPECT_EQ(case13, std::string_view::npos);
+    EXPECT_EQ(case14, 2 + 1);
 }
 
 TEST(tustrcpptest, RegexMatchTest)
 {
     using type1 = tustr::regex<"abcdef[ghi].\\daz[$%&_1]">;
 
-    constexpr auto case1 = type1::match("abcdefg#5az&");
-    constexpr auto case2 = type1::match("abcdefv#5az&");
-    constexpr auto case3 = type1::match("nnnabcdefg#5az&nnn");
+    constexpr auto case1 = type1::run("abcdefg#5az&");
+    constexpr auto case2 = type1::run("abcdefv#5az&");
+    constexpr auto case3 = type1::run("nnnabcdefg#5az&nnn");
+    constexpr auto case4 = type1::run("nnnabcdefng#5az&nnn");
 
     EXPECT_EQ(case1, 12);
     EXPECT_EQ(case2, std::string_view::npos);
     EXPECT_EQ(case3, 15);
+    EXPECT_EQ(case4, std::string_view::npos);
 }

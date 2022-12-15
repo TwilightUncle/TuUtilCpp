@@ -90,7 +90,7 @@ namespace tustr
          * @fn
          * @brief ‰ğÍŒ‹‰Ê¶¬‚³‚ê‚½ˆ—
         */
-        static constexpr std::size_t generated_func(const std::string_view& s, std::size_t offset)
+        static constexpr std::size_t generated_func(const std::string_view& s, std::size_t offset, bool is_pos_lock)
         {
             return value.contains(char_to_cstr(s[offset]))
                 ? offset + 1

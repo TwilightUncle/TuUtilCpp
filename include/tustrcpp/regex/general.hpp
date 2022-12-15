@@ -34,9 +34,11 @@ namespace tustr
          * @fn
          * @brief ‰ğÍŒ‹‰Ê¶¬‚³‚ê‚½ˆ—
         */
-        static constexpr std::size_t generated_func(const std::string_view& s, std::size_t offset)
+        static constexpr std::size_t generated_func(const std::string_view& s, std::size_t offset, bool is_pos_lock)
         {
-            auto pos = find_substr(value, s, offset);
+            auto pos = is_pos_lock
+                ? (exists_in_position(value, s, offset) ? offset : std::string_view::npos)
+                : find(value, s, offset);
             if (pos != std::string_view::npos) pos += value.size();
             return pos;
         }

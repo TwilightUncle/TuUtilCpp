@@ -84,12 +84,18 @@ namespace tustr
          * @fn
          * @brief 解析結果生成された処理
         */
-        static constexpr std::size_t generated_func(const std::string_view& s, std::size_t offset)
+        static constexpr std::size_t generated_func(const std::string_view& s, std::size_t offset, bool is_pos_lock)
         {
-            const auto is_contains = value.contains(char_to_cstr(s[offset]));
-            return allow_or_deny == is_contains
-                ? offset + 1
-                : std::string_view::npos;
+            bool is_match = false;
+
+            while (offset < s.size()) {
+                is_match = value.contains(char_to_cstr(s[offset++]));
+                if (!allow_or_deny) is_match = !is_match;
+                // 位置固定されていた場合、最初の位置のみ検証して、ループ脱出
+                if (is_pos_lock || is_match) break;
+            }
+
+            return is_match ? offset : std::string_view::npos;
         }
     };
 }
