@@ -67,7 +67,16 @@ namespace tustr
      * @brief どの機能の解析を行っているか、部分特殊化で条件分岐。デフォルト
     */
     template <cstr Pattern, std::size_t Pos>
-    struct regex_parser : public add_quantifier<Pattern, regex_general<Pattern, Pos>> {};
+    struct regex_parser : public add_quantifier<Pattern, regex_general<Pattern, Pos>>
+    {
+        // 単体で指定してはいけない文字か検証
+        using type = add_quantifier<Pattern, regex_general<Pattern, Pos>>;
+        static_assert(
+            type::end_pos == Pattern.size()
+            || !(regex_char_attribute::attributes[Pattern[type::end_pos]] & regex_char_attribute::DENY),
+            "Invalied template argment [Pattern, Pos]. Must not specified of '}', ')', ']'."
+        );
+    };
 
     /**
      * @fn

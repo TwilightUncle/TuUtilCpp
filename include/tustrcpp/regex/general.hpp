@@ -23,11 +23,6 @@ namespace tustr
             return Pattern.size();
         }();
 
-        static_assert(
-            end_pos == Pattern.size() || !(attributes[Pattern[end_pos]] & DENY),
-            "Invalied template argment [Pattern, Pos]. Must not specified of '}', ')', ']'."
-        );
-
         static constexpr auto value = Pattern.substr<Pos, end_pos - Pos>();
 
         /**
