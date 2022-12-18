@@ -87,6 +87,28 @@ namespace tustr
     struct regex_parser<Pattern, Pos> : public regex_general<Pattern, Pos + 1> { static constexpr auto begin_pos = Pos; };
 
     /**
+     * @brief forやwhileで回せるように、関数へ変換する際の型
+    */
+    using regex_generated_function_type = std::size_t(const std::string_view&, std::size_t, bool);
+    using regex_generated_function_ptr_type = std::size_t(*)(const std::string_view&, std::size_t, bool);
+
+    template <class T>
+    concept RegexParseable = requires {
+        // 静的メンバが定義済みか
+        T::begin_pos;
+        T::end_pos;
+        T::generated_func;
+
+        // 上記メンバの型チェック
+        requires std::is_same_v<decltype(T::begin_pos), const std::size_t>;
+        requires std::is_same_v<decltype(T::end_pos), const std::size_t>;
+        requires std::is_same_v<decltype(T::generated_func), regex_generated_function_type>;
+
+        // 違反している場合、無限再帰が発生してしまう
+        requires T::begin_pos < T::end_pos;
+    };
+
+    /**
      * @class
      * @brief 正規表現格納オブジェクト。動的に生成されたパターンについては考慮しない
      * @tparam Pttern 正規表現の文字列リテラルを指定
@@ -95,7 +117,6 @@ namespace tustr
     template <cstr Pattern, template <cstr, std::size_t> class Parser = regex_parser>
     struct regex
     {
-        using generated_function_type = std::size_t(*)(const std::string_view&, std::size_t, bool);
     private:
         // 文法上おかしいバックスラッシュの出現はここで検出、エラーとする
         static_assert(is_collect_regex_back_slash(Pattern.view()));
@@ -110,6 +131,9 @@ namespace tustr
             // あらかじめ、Pattern[Pos]の値によって部分特殊化し、
             // 呼び出される処理をオーバーロードできるようにする
             using parser = Parser<Pattern, Pos>;
+
+            static_assert(RegexParseable<parser>, "Invaild template argment [Parser]. See concept [RegexParseable].");
+
             auto parse_result = parse<parser::end_pos, N + 1>();
             parse_result[N] = parser::generated_func;
             return parse_result;
@@ -125,7 +149,7 @@ namespace tustr
         {
             // 各perserで以下関数ポインタに格納可能な関数を定義することで、
             // 解析結果を関数ポインタの配列として保持できるようにする
-            return std::array<generated_function_type, N>{nullptr};
+            return std::array<regex_generated_function_ptr_type, N>{nullptr};
         }
 
     public:
@@ -138,7 +162,7 @@ namespace tustr
         static constexpr std::size_t run(const std::string_view& s, std::size_t offset = 0)
         {
             bool is_pos_lock = false;
-            for(generated_function_type before = nullptr; const auto& f : parse_result) {
+            for(regex_generated_function_ptr_type before = nullptr; const auto& f : parse_result) {
                 if ((offset = f(s, offset, std::exchange(is_pos_lock, true))) == std::string_view::npos) return offset;
                 before = f;
             }
