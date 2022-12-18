@@ -103,6 +103,7 @@ TEST(tustrcpptest, RegexQuantifierParseTest)
     using type9 = tustr::regex_quantifier_perser<"abcd{20}?e", 4>;
     using type10 = tustr::regex_quantifier_perser<"abcd{2,}?", 4>;
     using type11 = tustr::regex_quantifier_perser<"abcd{25,512}?", 4>;
+
     EXPECT_FALSE(type1::negative);
     EXPECT_FALSE(type2::negative);
     EXPECT_TRUE(type3::negative);
@@ -114,6 +115,7 @@ TEST(tustrcpptest, RegexQuantifierParseTest)
     EXPECT_TRUE(type9::negative);
     EXPECT_TRUE(type10::negative);
     EXPECT_TRUE(type11::negative);
+
     EXPECT_EQ(type1::min_count, 0);
     EXPECT_EQ(type1::max_count, std::string_view::npos);
     EXPECT_EQ(type2::min_count, 0);
@@ -128,6 +130,15 @@ TEST(tustrcpptest, RegexQuantifierParseTest)
     EXPECT_EQ(type7::max_count, std::string_view::npos);
     EXPECT_EQ(type8::min_count, 25);
     EXPECT_EQ(type8::max_count, 512);
+
+    EXPECT_EQ(type1::begin_pos, 4);
+    EXPECT_EQ(type1::end_pos, 5);
+    EXPECT_EQ(type3::begin_pos, 4);
+    EXPECT_EQ(type3::end_pos, 6);
+    EXPECT_EQ(type4::begin_pos, 4);
+    EXPECT_EQ(type4::end_pos, 5);
+    EXPECT_EQ(type11::begin_pos, 4);
+    EXPECT_EQ(type11::end_pos, 13);
 }
 
 TEST(tustrcpptest, RegexCaptureParserTest)
@@ -154,14 +165,29 @@ TEST(tustrcpptest, RegexGeneralTest)
 {
     using type1 = tustr::regex_general<"abcdef[g", 0>;
     EXPECT_STREQ(type1::value.data(), "abcdef");
+    EXPECT_EQ(type1::begin_pos, 0);
+    EXPECT_EQ(type1::end_pos, 6);
 }
 
-using test_regex_type = tustr::regex<"abcdef[ghi].\\daz[$%&_1]\\[\\^">;
+TEST(tustrcpptest, RegexAddQuantifierTest)
+{
+    using type1 = tustr::add_quantifier<"abcdef[g", tustr::regex_general<"abcdef[g", 0>>;
+    using type2 = tustr::add_quantifier<"abcdef+[g", tustr::regex_general<"abcdef+[g", 0>>;
+
+    EXPECT_EQ(type1::begin_pos, 0);
+    EXPECT_EQ(type1::end_pos, 6);
+    EXPECT_EQ(type2::begin_pos, 0);
+    EXPECT_EQ(type2::end_pos, 7);
+    EXPECT_EQ(type2::min_count, 1);
+    EXPECT_EQ(type2::max_count, std::string_view::npos);
+}
+
+using test_regex_type = tustr::regex<"abcdef[ghi].\\daz[$%&_1]\\[+\\^?">;
 
 TEST(tustrcpptest, RegexParseTest)
 {
     constexpr auto f_arr = test_regex_type::parse_result;
-    // {'abcdef', '[ghi]', '.', '\\d', 'az', '[$%&_1]', '\\[', '\\^']}ÇªÇÍÇºÇÍÇ…ëŒÇµÇƒ8Ç¬ÇÃä÷êîÇ™ê∂ê¨Ç≥ÇÍÇÈ
+    // {'abcdef', '[ghi]', '.', '\\d', 'az', '[$%&_1]', '\\[+', '\\^?']}ÇªÇÍÇºÇÍÇ…ëŒÇµÇƒ8Ç¬ÇÃä÷êîÇ™ê∂ê¨Ç≥ÇÍÇÈ
     ASSERT_EQ(f_arr.size(), 8);
 
     constexpr auto case1 = f_arr[0]("abgbzabcdefrrr", 0, false);
@@ -203,9 +229,15 @@ TEST(tustrcpptest, RegexMatchTest)
     constexpr auto case2 = test_regex_type::run("abcdefv#5az&[^");
     constexpr auto case3 = test_regex_type::run("nnnabcdefg#5az&[^nnn");
     constexpr auto case4 = test_regex_type::run("nnnabcdefng#5az&[^nnn");
+    constexpr auto case5 = test_regex_type::run("abcdefg#5az&[[[");
+    constexpr auto case6 = test_regex_type::run("abcdefg#5az&[^^");
+    constexpr auto case7 = test_regex_type::run("abcdefg#5az&^^");
 
     EXPECT_EQ(case1, 14);
     EXPECT_EQ(case2, std::string_view::npos);
     EXPECT_EQ(case3, 17);
     EXPECT_EQ(case4, std::string_view::npos);
+    EXPECT_EQ(case5, 15);
+    EXPECT_EQ(case6, 14);
+    EXPECT_EQ(case7, std::string_view::npos);
 }

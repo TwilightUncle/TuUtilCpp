@@ -67,7 +67,7 @@ namespace tustr
      * @brief どの機能の解析を行っているか、部分特殊化で条件分岐。デフォルト
     */
     template <cstr Pattern, std::size_t Pos>
-    struct regex_parser : public regex_general<Pattern, Pos> {};
+    struct regex_parser : public add_quantifier<Pattern, regex_general<Pattern, Pos>> {};
 
     /**
      * @fn
@@ -75,7 +75,7 @@ namespace tustr
     */
     template <cstr Pattern, std::size_t Pos>
     requires (bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::CHARSET))
-    struct regex_parser<Pattern, Pos> : public regex_char_set_parser<Pattern, Pos> {};
+    struct regex_parser<Pattern, Pos> : public add_quantifier<Pattern, regex_char_set_parser<Pattern, Pos>> {};
 
     /**
      * @fn
@@ -86,7 +86,7 @@ namespace tustr
         bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::CLASS)
         && !bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::BK)
     )
-    struct regex_parser<Pattern, Pos> : public regex_char_class_parser<Pattern, Pos> {};
+    struct regex_parser<Pattern, Pos> : public add_quantifier<Pattern, regex_char_class_parser<Pattern, Pos>> {};
 
     /**
      * @fn
@@ -97,7 +97,7 @@ namespace tustr
         Pattern[Pos] == '\\' && Pattern.size() - 1 > Pos
         && regex_char_attribute::check_attrs_conjuction<regex_char_attribute::CLASS, regex_char_attribute::BK>(Pattern[Pos])
     )
-    struct regex_parser<Pattern, Pos> : public regex_char_class_parser<Pattern, Pos + 1> { static constexpr auto begin_pos = Pos; };
+    struct regex_parser<Pattern, Pos> : public add_quantifier<Pattern, regex_char_class_parser<Pattern, Pos + 1>> { static constexpr auto begin_pos = Pos; };
 
     /**
      * @fn
@@ -109,7 +109,7 @@ namespace tustr
         && bool(regex_char_attribute::attributes[Pattern[Pos]])
         && !bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::BK)
     )
-    struct regex_parser<Pattern, Pos> : public regex_general<Pattern, Pos + 1> { static constexpr auto begin_pos = Pos; };
+    struct regex_parser<Pattern, Pos> : public add_quantifier<Pattern, regex_general<Pattern, Pos + 1>> { static constexpr auto begin_pos = Pos; };
 
     /**
      * @class
