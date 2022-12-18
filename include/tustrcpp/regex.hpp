@@ -8,6 +8,31 @@
 #include <regex>
 #include <tustrcpp/cstr.hpp>
 
+namespace tustr
+{
+    /**
+     * @brief forやwhileで回せるように、関数へ変換する際の型
+    */
+    using regex_generated_function_type = std::size_t(const std::string_view&, std::size_t, bool);
+    using regex_generated_function_ptr_type = std::size_t(*)(const std::string_view&, std::size_t, bool);
+
+    template <class T>
+    concept RegexParseable = requires {
+        // 静的メンバが定義済みか
+        T::begin_pos;
+        T::end_pos;
+        T::generated_func;
+
+        // 上記メンバの型チェック
+        requires std::is_same_v<decltype(T::begin_pos), const std::size_t>;
+        requires std::is_same_v<decltype(T::end_pos), const std::size_t>;
+        requires std::is_same_v<decltype(T::generated_func), regex_generated_function_type>; // 関数
+
+        // 違反している場合、無限再帰が発生してしまう
+        requires T::begin_pos < T::end_pos;
+    };
+}
+
 #include <tustrcpp/regex/common.hpp>
 #include <tustrcpp/regex/bracket.hpp>
 #include <tustrcpp/regex/char_class.hpp>
@@ -85,28 +110,6 @@ namespace tustr
         && !bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::BK)
     )
     struct regex_parser<Pattern, Pos> : public regex_general<Pattern, Pos + 1> { static constexpr auto begin_pos = Pos; };
-
-    /**
-     * @brief forやwhileで回せるように、関数へ変換する際の型
-    */
-    using regex_generated_function_type = std::size_t(const std::string_view&, std::size_t, bool);
-    using regex_generated_function_ptr_type = std::size_t(*)(const std::string_view&, std::size_t, bool);
-
-    template <class T>
-    concept RegexParseable = requires {
-        // 静的メンバが定義済みか
-        T::begin_pos;
-        T::end_pos;
-        T::generated_func;
-
-        // 上記メンバの型チェック
-        requires std::is_same_v<decltype(T::begin_pos), const std::size_t>;
-        requires std::is_same_v<decltype(T::end_pos), const std::size_t>;
-        requires std::is_same_v<decltype(T::generated_func), regex_generated_function_type>;
-
-        // 違反している場合、無限再帰が発生してしまう
-        requires T::begin_pos < T::end_pos;
-    };
 
     /**
      * @class
