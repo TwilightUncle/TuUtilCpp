@@ -19,7 +19,11 @@ namespace tustr
 
         static constexpr auto end_pos = []() {
             for (auto i = Pos; i < Pattern.size(); i++)
-                if (attributes[Pattern[i]] && !(attributes[Pattern[i]] & BK)) return i;
+                if (attributes[Pattern[i]] && !(attributes[Pattern[i]] & BK)) {
+                    // 数量詞は直前の１文字のみに適用されるため、一気に判定する文字列からは除外する
+                    if (i - Pos > 1 && (attributes[Pattern[i]] & QUANTIFIER)) return i - 1;
+                    return i;
+                }
             return Pattern.size();
         }();
 

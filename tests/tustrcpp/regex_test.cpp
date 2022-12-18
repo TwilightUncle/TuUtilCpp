@@ -173,13 +173,16 @@ TEST(tustrcpptest, RegexAddQuantifierTest)
 {
     using type1 = tustr::add_quantifier<"abcdef[g", tustr::regex_general<"abcdef[g", 0>>;
     using type2 = tustr::add_quantifier<"abcdef+[g", tustr::regex_general<"abcdef+[g", 0>>;
+    using type3 = tustr::add_quantifier<"abcdef+[g", tustr::regex_general<"abcdef+[g", 5>>;
 
     EXPECT_EQ(type1::begin_pos, 0);
     EXPECT_EQ(type1::end_pos, 6);
     EXPECT_EQ(type2::begin_pos, 0);
-    EXPECT_EQ(type2::end_pos, 7);
-    EXPECT_EQ(type2::min_count, 1);
-    EXPECT_EQ(type2::max_count, std::string_view::npos);
+    EXPECT_EQ(type2::end_pos, 5);
+    EXPECT_EQ(type3::begin_pos, 5);
+    EXPECT_EQ(type3::end_pos, 7);
+    EXPECT_EQ(type3::min_count, 1);
+    EXPECT_EQ(type3::max_count, std::string_view::npos);
 }
 
 using test_regex_type = tustr::regex<"abcdef[ghi].\\daz[$%&_1]\\[+\\^?">;
