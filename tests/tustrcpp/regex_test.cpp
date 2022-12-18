@@ -156,11 +156,13 @@ TEST(tustrcpptest, RegexGeneralTest)
     EXPECT_STREQ(type1::value.data(), "abcdef");
 }
 
+using test_regex_type = tustr::regex<"abcdef[ghi].\\daz[$%&_1]\\[\\^">;
+
 TEST(tustrcpptest, RegexParseTest)
 {
-    constexpr auto f_arr = tustr::regex<"abcdef[ghi].\\daz[$%&_1]">::parse_result;
-    // {'abcdef', '[ghi]', '.', '\\d', 'az', '[$%&_1]'}‚»‚ê‚¼‚ê‚É‘Î‚µ‚Ä6‚Â‚ÌŠÖ”‚ª¶¬‚³‚ê‚é
-    ASSERT_EQ(f_arr.size(), 6);
+    constexpr auto f_arr = test_regex_type::parse_result;
+    // {'abcdef', '[ghi]', '.', '\\d', 'az', '[$%&_1]', '\\[', '\\^']}‚»‚ê‚¼‚ê‚É‘Î‚µ‚Ä8‚Â‚ÌŠÖ”‚ª¶¬‚³‚ê‚é
+    ASSERT_EQ(f_arr.size(), 8);
 
     constexpr auto case1 = f_arr[0]("abgbzabcdefrrr", 0, false);
     constexpr auto case2 = f_arr[1]("abgbzabcdefrrr", 0, false);
@@ -197,15 +199,13 @@ TEST(tustrcpptest, RegexParseTest)
 
 TEST(tustrcpptest, RegexMatchTest)
 {
-    using type1 = tustr::regex<"abcdef[ghi].\\daz[$%&_1]">;
+    constexpr auto case1 = test_regex_type::run("abcdefg#5az&[^");
+    constexpr auto case2 = test_regex_type::run("abcdefv#5az&[^");
+    constexpr auto case3 = test_regex_type::run("nnnabcdefg#5az&[^nnn");
+    constexpr auto case4 = test_regex_type::run("nnnabcdefng#5az&[^nnn");
 
-    constexpr auto case1 = type1::run("abcdefg#5az&");
-    constexpr auto case2 = type1::run("abcdefv#5az&");
-    constexpr auto case3 = type1::run("nnnabcdefg#5az&nnn");
-    constexpr auto case4 = type1::run("nnnabcdefng#5az&nnn");
-
-    EXPECT_EQ(case1, 12);
+    EXPECT_EQ(case1, 14);
     EXPECT_EQ(case2, std::string_view::npos);
-    EXPECT_EQ(case3, 15);
+    EXPECT_EQ(case3, 17);
     EXPECT_EQ(case4, std::string_view::npos);
 }

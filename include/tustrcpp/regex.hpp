@@ -69,11 +69,22 @@ namespace tustr
     */
     template <cstr Pattern, std::size_t Pos>
     requires (
-        Pattern[Pos] == '\\'
-        && Pattern.size() - 1 > Pos
+        Pattern[Pos] == '\\' && Pattern.size() - 1 > Pos
         && regex_char_attribute::check_attrs_conjuction<regex_char_attribute::CLASS, regex_char_attribute::BK>(Pattern[Pos])
     )
     struct regex_parser<Pattern, Pos> : public regex_char_class_parser<Pattern, Pos + 1> { static constexpr auto begin_pos = Pos; };
+
+    /**
+     * @fn
+     * @brief バックスラッシュにより、特殊文字としての機能を失った(エスケープ済み)もの(バックスラッシュ含めて2文字のため、位置を一つ進めている)
+    */
+    template <cstr Pattern, std::size_t Pos>
+    requires (
+        Pattern[Pos] == '\\' && Pattern.size() - 1 > Pos
+        && bool(regex_char_attribute::attributes[Pattern[Pos]])
+        && !bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::BK)
+    )
+    struct regex_parser<Pattern, Pos> : public regex_general<Pattern, Pos + 1> { static constexpr auto begin_pos = Pos; };
 
     /**
      * @class
@@ -86,6 +97,7 @@ namespace tustr
     {
         using generated_function_type = std::size_t(*)(const std::string_view&, std::size_t, bool);
     private:
+        // 文法上おかしいバックスラッシュの出現はここで検出、エラーとする
         static_assert(is_collect_regex_back_slash(Pattern.view()));
 
         /**
