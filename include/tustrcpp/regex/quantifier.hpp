@@ -121,7 +121,9 @@ namespace tustr
                 std::size_t temp_offset = offset;
                 temp_offset < s.size()
                 && cnt < max_count
-                && (temp_offset = T::generated_func(s, temp_offset, std::exchange(is_pos_lock, true))) != std::string_view::npos;
+                && (
+                    temp_offset = T::generated_func(s, temp_offset, std::exchange(is_pos_lock, true))
+                ) != std::string_view::npos;
                 offset = temp_offset, cnt++
             );
 
