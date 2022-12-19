@@ -31,6 +31,10 @@ namespace tustr
         // 違反している場合、無限再帰が発生してしまう
         requires T::begin_pos < T::end_pos;
     };
+    
+    // 前方宣言
+    template <cstr Pattern, std::size_t Pos> struct regex_parser;
+    template <cstr Pattern, template <cstr, std::size_t> class Parser> struct regex;
 }
 
 #include <tustrcpp/regex/common.hpp>
@@ -120,6 +124,10 @@ namespace tustr
     )
     struct regex_parser<Pattern, Pos> : public add_quantifier<Pattern, regex_general<Pattern, Pos + 1>> { static constexpr auto begin_pos = Pos; };
 
+    template <cstr Pattern, std::size_t Pos>
+    requires (Pattern[Pos] == '(')
+    struct regex_parser<Pattern, Pos> : public add_quantifier<Pattern, regex_capture_parser<Pattern, Pos>> {};
+
     /**
      * @class
      * @brief 正規表現格納オブジェクト。動的に生成されたパターンについては考慮しない
@@ -171,9 +179,8 @@ namespace tustr
          * @fn
          * @brief パターンマッチの基本。実行後の結果はPtternのsizeとなるが、一致しなかった場合はstd::string_view::nposが返される
         */
-        static constexpr std::size_t run(const std::string_view& s, std::size_t offset = 0)
+        static constexpr std::size_t run(const std::string_view& s, std::size_t offset = 0, bool is_pos_lock = false)
         {
-            bool is_pos_lock = false;
             for(regex_generated_function_ptr_type before = nullptr; const auto& f : parse_result) {
                 if ((offset = f(s, offset, std::exchange(is_pos_lock, true))) == std::string_view::npos) return offset;
                 before = f;

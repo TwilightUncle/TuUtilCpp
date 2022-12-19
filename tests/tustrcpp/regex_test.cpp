@@ -186,6 +186,7 @@ TEST(tustrcpptest, RegexAddQuantifierTest)
 }
 
 using test_regex_type = tustr::regex<"abcdef[ghi].\\daz[$%&_1]\\[+\\^?">;
+using test_regex_type2 = tustr::regex<"abcdef(?:ghi[jkl].\\dmn)op">;
 
 TEST(tustrcpptest, RegexParseTest)
 {
@@ -224,6 +225,9 @@ TEST(tustrcpptest, RegexParseTest)
     EXPECT_EQ(case12, 5 + tustr::cstr{"abcdef"}.size());
     EXPECT_EQ(case13, std::string_view::npos);
     EXPECT_EQ(case14, 2 + 1);
+
+    constexpr auto f_arr2 = test_regex_type2::parse_result;
+    ASSERT_EQ(f_arr2.size(), 3);
 }
 
 TEST(tustrcpptest, RegexMatchTest)
