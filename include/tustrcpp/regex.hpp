@@ -108,7 +108,7 @@ namespace tustr
     template <cstr Pattern, std::size_t Pos>
     requires (
         Pattern[Pos] == '\\' && Pattern.size() - 1 > Pos
-        && regex_char_attribute::check_attrs_conjuction<regex_char_attribute::CLASS, regex_char_attribute::BK>(Pattern[Pos])
+        && regex_char_attribute::check_attrs_conjuction<regex_char_attribute::CLASS, regex_char_attribute::BK>(Pattern[Pos + 1])
     )
     struct regex_parser<Pattern, Pos> : public add_quantifier<Pattern, regex_char_class_parser<Pattern, Pos + 1>> { static constexpr auto begin_pos = Pos; };
 
@@ -119,8 +119,8 @@ namespace tustr
     template <cstr Pattern, std::size_t Pos>
     requires (
         Pattern[Pos] == '\\' && Pattern.size() - 1 > Pos
-        && bool(regex_char_attribute::attributes[Pattern[Pos]])
-        && !bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::BK)
+        && bool(regex_char_attribute::attributes[Pattern[Pos + 1]])
+        && !bool(regex_char_attribute::attributes[Pattern[Pos + 1]] & regex_char_attribute::BK)
     )
     struct regex_parser<Pattern, Pos> : public add_quantifier<Pattern, regex_general<Pattern, Pos + 1>> { static constexpr auto begin_pos = Pos; };
 
