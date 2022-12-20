@@ -20,6 +20,7 @@ namespace tustr
             REFERENCE       = 0x0080u,
             DENY            = 0x0100u,
             BK              = 0x0200u,
+            OTHERS          = 0x0400u,
         };
 
         // 数量子の起点
@@ -29,7 +30,7 @@ namespace tustr
         static constexpr auto bk_anchor_chars       = cstr{"bB"};
         // 文字クラス
         static constexpr auto class_chars           = cstr{"."};
-        static constexpr auto bk_class_chars        = cstr{"dDwWsStrnvf0\\"};
+        static constexpr auto bk_class_chars        = cstr{"dDwWsStrnvf0"};
         // (キャプチャ/非キャプチャ)グループ
         static constexpr auto capture_chars         = cstr{"("};
         // or
@@ -73,6 +74,7 @@ namespace tustr
             for (const auto c : bk_char_set_inner.view())   attrs[c] |= CHARSET_INNER   | BK;
             for (const auto c : bk_reference_chars.view())  attrs[c] |= REFERENCE       | BK;
             for (const auto c : deny_chars.view())          attrs[c] |= DENY;
+            attrs['\\'] |= OTHERS;  // 一文字しか該当しないため、直接比較すればよいが、一括で特殊文字判定する時のため、属性を指定しておく
             return std::to_array(attrs);
         }();
 

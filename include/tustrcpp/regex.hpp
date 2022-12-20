@@ -124,6 +124,10 @@ namespace tustr
     )
     struct regex_parser<Pattern, Pos> : public add_quantifier<Pattern, regex_general<Pattern, Pos + 1>> { static constexpr auto begin_pos = Pos; };
 
+    /**
+     * @fn
+     * @brief キャプチャグループ用
+    */
     template <cstr Pattern, std::size_t Pos>
     requires (Pattern[Pos] == '(')
     struct regex_parser<Pattern, Pos> : public add_quantifier<Pattern, regex_capture_parser<Pattern, Pos>> {};

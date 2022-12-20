@@ -186,7 +186,7 @@ TEST(tustrcpptest, RegexAddQuantifierTest)
 }
 
 using test_regex_type = tustr::regex<"abcdef[ghi].\\daz[$%&_1]\\[+\\^?">;
-using test_regex_type2 = tustr::regex<"abcdef(?:ghi[jkl].\\dmn)op">;
+using test_regex_type2 = tustr::regex<"abcdef(?:ghi[jkl].\\d\\]m){2}\\)nop">;
 
 TEST(tustrcpptest, RegexParseTest)
 {
@@ -228,6 +228,14 @@ TEST(tustrcpptest, RegexParseTest)
 
     constexpr auto f_arr2 = test_regex_type2::parse_result;
     ASSERT_EQ(f_arr2.size(), 3);
+    
+    constexpr auto case15 = f_arr2[1]("ghij%1]m", 0, false);
+    constexpr auto case16 = f_arr2[1]("ghij%1]mghil<9]m", 0, false);
+    constexpr auto case17 = f_arr2[1]("aaghij%1]mghil<9]mghik#0]m", 0, false);
+
+    EXPECT_EQ(case15, std::string_view::npos);
+    EXPECT_EQ(case16, 16);
+    EXPECT_EQ(case17, 18);
 }
 
 TEST(tustrcpptest, RegexMatchTest)
@@ -247,4 +255,17 @@ TEST(tustrcpptest, RegexMatchTest)
     EXPECT_EQ(case5, 15);
     EXPECT_EQ(case6, 14);
     EXPECT_EQ(case7, std::string_view::npos);
+
+    // グループ二回繰り返し
+    constexpr auto case8 = test_regex_type2::run("abcdefghij%1]mghil<9]m)nop");
+    constexpr auto case9 = test_regex_type2::run("nnnabcdefghij%1]mghil<9]m)nopnnn");
+    // グループ一回繰り返し
+    constexpr auto case10 = test_regex_type2::run("abcdefghij%1]m)nop");
+    // グループ三回繰り返し
+    constexpr auto case11 = test_regex_type2::run("abcdefghij%1]mghil<9]mghik#0]m)nop");
+
+    EXPECT_EQ(case8, 26);
+    EXPECT_EQ(case9, 29);
+    EXPECT_EQ(case10, std::string_view::npos);
+    EXPECT_EQ(case11, std::string_view::npos);
 }

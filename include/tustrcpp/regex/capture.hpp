@@ -59,10 +59,7 @@ namespace tustr
         static constexpr std::size_t generated_func(const std::string_view& s, std::size_t offset, bool is_pos_lock)
         {
             using parser = regex<capture_pattern, regex_parser>;
-            const auto result = parser::run(s, offset, is_pos_lock);
-            return (result == std::string_view::npos)
-                ? result
-                : result + offset;
+            return parser::run(s, offset, is_pos_lock);
         }
     };
 }
