@@ -22,14 +22,14 @@ namespace tustr
         static constexpr auto begin_pos = Pos;
         static constexpr auto end_pos = brancket_inner::end_pos;
 
-        static constexpr auto is_capture = !(inner_pattern.find("?:") == 0);
+        static constexpr auto is_capture = !exists_in_position("?:", inner_pattern, 0);
 
     private:
         /**
          * @fn
          * @brief ƒLƒƒƒvƒ`ƒƒ‚Ì–¼Ì‚ğæ“¾
         */
-        template <char C> requires (C == '?' && inner_pattern.find("?<") == 0)
+        template <char C> requires (C == '?' && exists_in_position("?<", inner_pattern, 0))
         static constexpr auto extract_capture_name()
         {
             using named_bracket = regex_bracket_inner<inner_pattern, 1>;
