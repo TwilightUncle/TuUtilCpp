@@ -32,11 +32,11 @@ TEST(tustrcpptest, RegexExtractBrancketTest)
     // 正常
     constexpr auto case11 = tustr::regex_bracket_inner<"abc[defg{hijk}lm\\](opq)]rs", 3>::value;
     constexpr auto case12 = tustr::regex_bracket_inner<"abc{defg\\{hijk\\}lm](opq)}rs", 3>::value;
-    constexpr auto case13 = tustr::regex_bracket_inner<"abc(defg{hijk\\}lm](opq\\))rs", 3>::value;
+    constexpr auto case13 = tustr::regex_bracket_inner<"abc(defg{hijk\\}lm](opq\\)))rs", 3>::value;
     constexpr auto case14 = tustr::regex_bracket_inner<"abc<defg{hijk\\}lm](opq\\)>rs", 3>::value;
     EXPECT_STREQ(case11.data(), "defg{hijk}lm\\](opq)");
     EXPECT_STREQ(case12.data(), "defg\\{hijk\\}lm](opq)");
-    EXPECT_STREQ(case13.data(), "defg{hijk\\}lm](opq\\)");
+    EXPECT_STREQ(case13.data(), "defg{hijk\\}lm](opq\\))");
     EXPECT_STREQ(case14.data(), "defg{hijk\\}lm](opq\\)");
 
     // 異常(対応する閉じ括弧が存在しない) コメントアウトを外すとコンパイルエラーが発生
@@ -44,6 +44,7 @@ TEST(tustrcpptest, RegexExtractBrancketTest)
     // constexpr auto case16 = tustr::regex_bracket_inner<"abc{defg\\{hijk\\}lm](opq)\\}rs", 3>::value;
     // constexpr auto case17 = tustr::regex_bracket_inner<"abc(defg{hijk\\}lm](opq\\)\\)rs", 3>::value;
     // constexpr auto case18 = tustr::regex_bracket_inner<"abc<defg{hijk\\}lm](opq\\)\\>rs", 3>::value;
+    // constexpr auto case19 = tustr::regex_bracket_inner<"abc(defg{hijk\\}lm](opq\\))rs", 3>::value;
 }
 
 TEST(tustrcpptest, RegexCharRangeParseTest)

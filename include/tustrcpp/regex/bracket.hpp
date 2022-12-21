@@ -64,17 +64,19 @@ namespace tustr
 
         // 終わり括弧の位置
         static constexpr auto end_pos = []() {
-            const auto bracket_str = Pattern.view().substr(begin_pos + 1);
-            auto pos = std::string_view::npos;
-            for (const auto i : std::views::iota((std::size_t)0, bracket_str.size())) {
-                // とじ括弧かつエスケープされていない場合、位置を記録し終了
-                if (bracket_str[i] == bracket_info::end && !eq_before_char(bracket_str, i, '\\')) {
-                    // substrする前のtargetの位置基準
-                    pos = i + begin_pos + 2;
-                    break;
-                }
-            }
-            return pos;
+            // 括弧の多重度で対応括弧か判定
+            for (std::size_t depth{}; const auto i : std::views::iota(begin_pos, Pattern.size()))
+                if (!eq_before_char(Pattern, i, '\\'))
+                    switch (Pattern[i]) {
+                        case bracket_info::begin:
+                            depth++;
+                            break;
+                        case bracket_info::end:
+                            if ((--depth) == 0) return i + 1;
+                            break;
+                    }
+            // 対応括弧未発見
+            return std::string_view::npos;
         }();
 
         // エラーが発生したかどうか
