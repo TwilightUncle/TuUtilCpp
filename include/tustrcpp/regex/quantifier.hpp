@@ -91,19 +91,22 @@ namespace tustr
      * @brief 数量詞単体では効果をなさない(直前の繰り返しする対象が必要)ため、付与する形式とする
     */
     template <cstr Pattern, RegexParseable T>
-    struct add_quantifier : public T {};
+    struct add_quantifier : public T
+    {
+        static constexpr std::size_t min_count = 1;
+        static constexpr std::size_t max_count = 1;
+    };
 
     template <cstr Pattern, RegexParseable T>
     requires (
         T::end_pos < Pattern.size()
         && bool(regex_char_attribute::attributes[Pattern[T::end_pos]] & regex_char_attribute::QUANTIFIER)
     )
-    struct add_quantifier<Pattern, T>
+    struct add_quantifier<Pattern, T> : public T
     {
         using parsed_quantifier = regex_quantifier_perser<Pattern, T::end_pos>;
         static constexpr auto min_count = parsed_quantifier::min_count;
         static constexpr auto max_count = parsed_quantifier::max_count;
-        static constexpr auto begin_pos = T::begin_pos;
 
         // end_pos上書き
         static constexpr auto end_pos = parsed_quantifier::end_pos;

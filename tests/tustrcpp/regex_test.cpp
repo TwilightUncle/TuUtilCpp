@@ -186,11 +186,13 @@ TEST(tustrcpptest, RegexAddQuantifierTest)
 }
 
 using test_regex_type = tustr::regex<"abcdef[ghi].\\daz[$%&_1]\\[+\\^?">;
-using test_regex_type2 = tustr::regex<"abcdef(?:ghi[jkl].\\d\\]m){2}\\)nop">;
+using test_regex_type2 = tustr::regex<"abcdef(ghi[jkl].\\d\\]m){2}\\)nop">;
+// using test_regex_type3 = tustr::regex<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}\\)nop">;
+using test_regex_type4 = tustr::regex<"abcdef(ghi[jkl].\\d\\]m){2,}\\)nop">;
 
 TEST(tustrcpptest, RegexParseTest)
 {
-    constexpr auto f_arr = test_regex_type::parse_result;
+    constexpr auto f_arr = test_regex_type::match_rules;
     // {'abcdef', '[ghi]', '.', '\\d', 'az', '[$%&_1]', '\\[+', '\\^?']}ÇªÇÍÇºÇÍÇ…ëŒÇµÇƒ8Ç¬ÇÃä÷êîÇ™ê∂ê¨Ç≥ÇÍÇÈ
     ASSERT_EQ(f_arr.size(), 8);
 
@@ -226,7 +228,7 @@ TEST(tustrcpptest, RegexParseTest)
     EXPECT_EQ(case13, std::string_view::npos);
     EXPECT_EQ(case14, 2 + 1);
 
-    constexpr auto f_arr2 = test_regex_type2::parse_result;
+    constexpr auto f_arr2 = test_regex_type2::match_rules;
     ASSERT_EQ(f_arr2.size(), 3);
     
     constexpr auto case15 = f_arr2[1]("ghij%1]m", 0, false);
@@ -236,6 +238,11 @@ TEST(tustrcpptest, RegexParseTest)
     EXPECT_EQ(case15, std::string_view::npos);
     EXPECT_EQ(case16, 16);
     EXPECT_EQ(case17, 18);
+
+    EXPECT_EQ(test_regex_type::max_capture_count, 0);
+    EXPECT_EQ(test_regex_type2::max_capture_count, 2);
+    // EXPECT_EQ(test_regex_type3::max_capture_count, 14);
+    EXPECT_EQ(test_regex_type4::max_capture_count, test_regex_type4::allowed_max_capture_count);
 }
 
 TEST(tustrcpptest, RegexMatchTest)

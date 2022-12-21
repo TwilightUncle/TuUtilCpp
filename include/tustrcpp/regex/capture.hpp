@@ -52,14 +52,15 @@ namespace tustr
         // キャプチャの有無、キャプチャ名指定部分を取り除いたパターン
         static constexpr auto capture_pattern = inner_pattern.remove_prefix<(is_capture ? 0 : 2) + (is_named ? name.size() + 3 : 0)>();
 
+        using inner_regex = regex<capture_pattern, regex_parser>;
+
         /**
          * @fn
          * @brief 解析結果生成された処理
         */
         static constexpr std::size_t generated_func(const std::string_view& s, std::size_t offset, bool is_pos_lock)
         {
-            using parser = regex<capture_pattern, regex_parser>;
-            return parser::run(s, offset, is_pos_lock);
+            return inner_regex::run(s, offset, is_pos_lock);
         }
     };
 }

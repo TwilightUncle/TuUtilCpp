@@ -35,6 +35,26 @@ namespace tustr
     // 前方宣言
     template <cstr Pattern, std::size_t Pos> struct regex_parser;
     template <cstr Pattern, template <cstr, std::size_t> class Parser> struct regex;
+
+    template <class T> struct is_regex : public std::false_type {};
+    template <cstr Pattern, template <cstr, std::size_t> class Parser>
+    struct is_regex<regex<Pattern, Parser>> : public std::true_type {};
+
+    // 再帰的に正規表現クラスを内包しているか
+    template <class T>
+    concept InnerRegexReferable = requires {
+        // キャプチャグループ等括弧内を再帰的に解析している場合
+        typename T::inner_regex;
+        requires is_regex<typename T::inner_regex>::value;
+    };
+
+    // キャプチャを行うものか
+    template <class T>
+    concept RegexParserCaptureable = requires {
+        T::is_capture;
+        requires std::is_same_v<decltype(T::is_capture), bool>;
+        requires T::is_capture;
+    };
 }
 
 #include <tustrcpp/regex/common.hpp>
@@ -141,6 +161,8 @@ namespace tustr
     template <cstr Pattern, template <cstr, std::size_t> class Parser = regex_parser>
     struct regex
     {
+        // キャプチャ可能な最大数(静的に格納結果のキャプチャ領域を確保したいため、上限を設ける)
+        static constexpr std::size_t allowed_max_capture_count = 65535;
     private:
         // 文法上おかしいバックスラッシュの出現はここで検出、エラーとする
         static_assert(is_collect_regex_back_slash(Pattern.view()));
@@ -158,9 +180,22 @@ namespace tustr
 
             static_assert(RegexParseable<parser>, "Invaild template argment [Parser]. See concept [RegexParseable].");
 
-            auto parse_result = parse<parser::end_pos, N + 1>();
-            parse_result[N] = parser::generated_func;
-            return parse_result;
+            auto [f_arr, capture_cnt] = parse<parser::end_pos, N + 1>();
+            f_arr[N] = parser::generated_func;
+
+            // 結果を保存しなければならないキャプチャが存在する場合加算
+            if constexpr (InnerRegexReferable<parser>)
+                capture_cnt = (std::max)(
+                    capture_cnt + parser::inner_regex::max_capture_count * parser::max_count,
+                    (std::max)(parser::max_count, capture_cnt)
+                );
+            if constexpr (RegexParserCaptureable<parser>)
+                capture_cnt = (std::max)(
+                    capture_cnt + parser::max_count,
+                    (std::max)(parser::max_count, capture_cnt)
+                );
+
+            return std::pair{f_arr, (std::min)(capture_cnt, allowed_max_capture_count)};
         }
 
         /**
@@ -173,11 +208,19 @@ namespace tustr
         {
             // 各perserで以下関数ポインタに格納可能な関数を定義することで、
             // 解析結果を関数ポインタの配列として保持できるようにする
-            return std::array<regex_generated_function_ptr_type, N>{nullptr};
+            return std::pair{
+                std::array<regex_generated_function_ptr_type, N>{nullptr},
+                std::size_t{}
+            };
         }
+        static constexpr auto parse_result = parse<0, 0>();
 
     public:
-        static constexpr auto parse_result = parse<0, 0>();
+        // 正規表現のパターンを解析した結果のルールを関数集合としたもの
+        static constexpr auto& match_rules = parse_result.first;
+
+        // 想定される最大キャプチャ数
+        static constexpr auto max_capture_count = parse_result.second;
 
         /**
          * @fn
@@ -185,7 +228,7 @@ namespace tustr
         */
         static constexpr std::size_t run(const std::string_view& s, std::size_t offset = 0, bool is_pos_lock = false)
         {
-            for(regex_generated_function_ptr_type before = nullptr; const auto& f : parse_result) {
+            for(regex_generated_function_ptr_type before = nullptr; const auto& f : match_rules) {
                 if ((offset = f(s, offset, std::exchange(is_pos_lock, true))) == std::string_view::npos) return offset;
                 before = f;
             }
