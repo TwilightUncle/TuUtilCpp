@@ -10,6 +10,7 @@ namespace tustr
     /**
      * @class
      * @brief 数量子を解析する
+     * TODO: 貪欲なマッチに対応できていないので修正すること
     */
     template <cstr Pattern, std::size_t Pos>
     requires (Pos > 0)
@@ -115,7 +116,7 @@ namespace tustr
          * @fn
          * @brief 解析結果生成された処理(上書き)
         */
-        static constexpr std::size_t generated_func(const std::string_view& s, std::size_t offset, bool is_pos_lock)
+        static constexpr std::size_t generated_func(std::string_view s, std::size_t offset, bool is_pos_lock)
         {
             std::size_t cnt = 0;
 

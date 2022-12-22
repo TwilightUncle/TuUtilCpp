@@ -105,7 +105,7 @@ namespace tustr
      * @fn
      * @brief 正しくない書き方がされているバックスラッシュが存在する場合偽が返る
     */
-    inline constexpr bool is_collect_regex_back_slash(const std::string_view& target)
+    inline constexpr bool is_collect_regex_back_slash(std::string_view target)
     {
         for (int i = 0; i < target.size(); i++)
             if (target[i] == '\\' && (i == target.size() - 1 || !regex_char_attribute::attributes[target[++i]]))
@@ -144,7 +144,7 @@ namespace tustr
      * @fn
      * @brief indexの位置の一つ前の文字が指定の文字か確認する
     */
-    inline constexpr bool eq_before_char(const std::string_view& target, int index, char ch)
+    inline constexpr bool eq_before_char(std::string_view target, int index, char ch)
     {
         return index > 0 && target[(std::max)(index - 1, 0)] == ch;
     }

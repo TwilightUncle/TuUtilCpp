@@ -13,8 +13,8 @@ namespace tustr
     /**
      * @brief forやwhileで回せるように、関数へ変換する際の型
     */
-    using regex_generated_function_type = std::size_t(const std::string_view&, std::size_t, bool);
-    using regex_generated_function_ptr_type = std::size_t(*)(const std::string_view&, std::size_t, bool);
+    using regex_generated_function_type = std::size_t(std::string_view, std::size_t, bool);
+    using regex_generated_function_ptr_type = std::size_t(*)(std::string_view, std::size_t, bool);
 
     template <class T>
     concept RegexParseable = requires {
@@ -165,7 +165,7 @@ namespace tustr
          * @fn
          * @brief パターンマッチの基本。実行後の結果はPtternのsizeとなるが、一致しなかった場合はstd::string_view::nposが返される
         */
-        static constexpr std::size_t run(const std::string_view& s, std::size_t offset = 0, bool is_pos_lock = false)
+        static constexpr std::size_t run(std::string_view s, std::size_t offset = 0, bool is_pos_lock = false)
         {
             for(regex_generated_function_ptr_type before = nullptr; const auto& f : match_rules) {
                 if ((offset = f(s, offset, std::exchange(is_pos_lock, true))) == std::string_view::npos) return offset;
@@ -174,7 +174,7 @@ namespace tustr
             return offset;
         }
 
-        static constexpr bool match(const std::string_view& s) { return run(s, 0) != std::string_view::npos; }
+        static constexpr bool match(std::string_view s) { return run(s, 0) != std::string_view::npos; }
     };
 
     using empty_regex = regex<"">;

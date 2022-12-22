@@ -84,7 +84,7 @@ namespace tustr
          * @fn
          * @brief ‰ğÍŒ‹‰Ê¶¬‚³‚ê‚½ˆ—
         */
-        static constexpr std::size_t generated_func(const std::string_view& s, std::size_t offset, bool is_pos_lock)
+        static constexpr std::size_t generated_func(std::string_view s, std::size_t offset, bool is_pos_lock)
         {
             bool is_match = false;
 
