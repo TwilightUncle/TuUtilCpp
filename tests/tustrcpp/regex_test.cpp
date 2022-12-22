@@ -147,6 +147,7 @@ TEST(tustrcpptest, RegexCaptureParserTest)
     using type1 = tustr::regex_capture_parser<"ab(cdefg)", 2>;
     using type2 = tustr::regex_capture_parser<"ab(?:cdefg)", 2>;
     using type3 = tustr::regex_capture_parser<"ab(?<a_1>cdefg)", 2>;
+    using type4 = tustr::regex_capture_parser<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}(aa)\\)nop", 6>;
 
     EXPECT_TRUE(type1::is_capture);
     EXPECT_FALSE(type2::is_capture);
@@ -160,6 +161,12 @@ TEST(tustrcpptest, RegexCaptureParserTest)
     EXPECT_STREQ(type1::capture_pattern.data(), "cdefg");
     EXPECT_STREQ(type2::capture_pattern.data(), "cdefg");
     EXPECT_STREQ(type3::capture_pattern.data(), "cdefg");
+    EXPECT_STREQ(type4::capture_pattern.data(), "(ghi[jkl].){2,4}(\\d(\\]m))");
+    EXPECT_EQ(type4::inner_regex::max_capture_count, 6);
+
+    EXPECT_TRUE(tustr::RegexParserCaptureable<type1>);
+    EXPECT_FALSE(tustr::RegexParserCaptureable<type2>);
+    EXPECT_TRUE(tustr::RegexParserCaptureable<type3>);
 }
 
 TEST(tustrcpptest, RegexGeneralTest)
@@ -188,7 +195,7 @@ TEST(tustrcpptest, RegexAddQuantifierTest)
 
 using test_regex_type = tustr::regex<"abcdef[ghi].\\daz[$%&_1]\\[+\\^?">;
 using test_regex_type2 = tustr::regex<"abcdef(ghi[jkl].\\d\\]m){2}\\)nop">;
-// using test_regex_type3 = tustr::regex<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}\\)nop">;
+using test_regex_type3 = tustr::regex<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}(aa)\\)nop">;
 using test_regex_type4 = tustr::regex<"abcdef(ghi[jkl].\\d\\]m){2,}\\)nop">;
 
 TEST(tustrcpptest, RegexParseTest)
@@ -242,7 +249,7 @@ TEST(tustrcpptest, RegexParseTest)
 
     EXPECT_EQ(test_regex_type::max_capture_count, 0);
     EXPECT_EQ(test_regex_type2::max_capture_count, 2);
-    // EXPECT_EQ(test_regex_type3::max_capture_count, 14);
+    EXPECT_EQ(test_regex_type3::max_capture_count, 15);
     EXPECT_EQ(test_regex_type4::max_capture_count, test_regex_type4::allowed_max_capture_count);
 }
 

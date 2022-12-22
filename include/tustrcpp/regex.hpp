@@ -52,7 +52,7 @@ namespace tustr
     template <class T>
     concept RegexParserCaptureable = requires {
         T::is_capture;
-        requires std::is_same_v<decltype(T::is_capture), bool>;
+        requires std::is_same_v<decltype(T::is_capture), const bool>;
         requires T::is_capture;
     };
 }
@@ -105,7 +105,7 @@ namespace tustr
 
         /**
          * @fn
-         * @brief 正規表現の解析。特殊文字を含まない個所の担当
+         * @brief 正規表現の解析
         */
         template <std::size_t Pos, std::size_t N>
         static consteval auto parse()
@@ -120,16 +120,17 @@ namespace tustr
             f_arr[N] = parser::generated_func;
 
             // 結果を保存しなければならないキャプチャが存在する場合加算
-            if constexpr (InnerRegexReferable<parser>)
-                capture_cnt = (std::max)(
-                    capture_cnt + parser::inner_regex::max_capture_count * parser::max_count,
-                    (std::max)(parser::max_count, capture_cnt)
-                );
-            if constexpr (RegexParserCaptureable<parser>)
-                capture_cnt = (std::max)(
-                    capture_cnt + parser::max_count,
-                    (std::max)(parser::max_count, capture_cnt)
-                );
+            // 既に上限に達していたらスルー
+            if (capture_cnt < allowed_max_capture_count) {
+                // 再帰的にregexが定義されている場合
+                if constexpr (InnerRegexReferable<parser>)
+                    capture_cnt += (parser::max_count == std::string_view::npos)
+                        ? allowed_max_capture_count
+                        : parser::inner_regex::max_capture_count * parser::max_count;
+                // 自身がキャプチャ
+                if constexpr (RegexParserCaptureable<parser>)
+                    capture_cnt += (std::min)(allowed_max_capture_count, parser::max_count);
+            }
 
             return std::pair{f_arr, (std::min)(capture_cnt, allowed_max_capture_count)};
         }
@@ -149,6 +150,8 @@ namespace tustr
                 std::size_t{}
             };
         }
+
+        // 解析を実行し、悔過を格納
         static constexpr auto parse_result = parse<0, 0>();
 
     public:
