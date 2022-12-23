@@ -116,7 +116,8 @@ namespace tustr
          * @fn
          * @brief ‰ğÍŒ‹‰Ê¶¬‚³‚ê‚½ˆ—(ã‘‚«)
         */
-        static constexpr std::size_t generated_func(std::string_view s, std::size_t offset, bool is_pos_lock)
+        template <std::size_t N>
+        static constexpr std::size_t generated_func(std::string_view s, std::size_t offset, bool is_pos_lock, regex_capture_store<N>& cs)
         {
             std::size_t cnt = 0;
 
@@ -126,7 +127,7 @@ namespace tustr
                 temp_offset < s.size()
                 && cnt < max_count
                 && (
-                    temp_offset = T::generated_func(s, temp_offset, std::exchange(is_pos_lock, true))
+                    temp_offset = T::generated_func<N>(s, temp_offset, std::exchange(is_pos_lock, true), cs)
                 ) != std::string_view::npos;
                 offset = temp_offset, cnt++
             );
