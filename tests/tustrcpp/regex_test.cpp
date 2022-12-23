@@ -316,5 +316,21 @@ TEST(tustrcpptest, RegexRunTest)
     EXPECT_EQ(case12.first.get(9), "2]m"sv);
     EXPECT_EQ(case12.first.get(10), "]m"sv);
     EXPECT_EQ(case12.first.get(11), "aa"sv);
+}
 
+TEST(tustrcpptest, RegexMatchTest)
+{
+    constexpr auto case1 = test_regex_type3::search("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nop");
+    constexpr auto case2 = test_regex_type3::search("aabcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nop");
+    constexpr auto case3 = test_regex_type3::search("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopa");
+    constexpr auto case4 = test_regex_type3::match("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nop");
+    constexpr auto case5 = test_regex_type3::match("aabcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nop");
+    constexpr auto case6 = test_regex_type3::match("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopa");
+
+    EXPECT_TRUE(case1);
+    EXPECT_TRUE(case2);
+    EXPECT_TRUE(case3);
+    EXPECT_TRUE(case4);
+    EXPECT_FALSE(case5);
+    EXPECT_FALSE(case6);
 }

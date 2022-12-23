@@ -252,7 +252,17 @@ namespace tustr
             return std::pair{cs, offset};
         }
 
-        static constexpr bool match(std::string_view s) { return run(s, 0).second != std::string_view::npos; }
+        /**
+         * @fn
+         * @brief 引数の文字列内に、パターンマッチする部分が内包されていれば真
+        */
+        static constexpr bool search(std::string_view s) { return run(s, 0).second != std::string_view::npos; }
+
+        /**
+         * @fn
+         * @brief 引数の文字列の全体がパターンマッチしている場合真
+        */
+        static constexpr bool match(std::string_view s) { return run(s, 0, true).second == s.size(); }
     };
 
     using empty_regex = regex<"">;
