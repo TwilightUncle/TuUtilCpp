@@ -72,6 +72,17 @@ namespace tustr
     template <cstr Pattern, std::size_t Pos>
     requires (Pattern[Pos] == '(')
     struct regex_parser<Pattern, Pos> : public add_quantifier<Pattern, regex_capture_parser<Pattern, Pos>> {};
+
+    /**
+     * @fn
+     * @brief キャプチャ参照
+    */
+    template <cstr Pattern, std::size_t Pos>
+    requires (
+        Pattern[Pos] == '\\' && Pattern.size() - 1 > Pos
+        && bool(regex_char_attribute::attributes[Pattern[Pos + 1]] & regex_char_attribute::REFERENCE)
+    )
+    struct regex_parser<Pattern, Pos> : public add_quantifier<Pattern, regex_reference_parser<Pattern, Pos + 1>> { static constexpr auto begin_pos = Pos; };
 }
 
 #endif // TUSTRCPP_INCLUDE_GUARD_REGEX_PERSER_HPP
