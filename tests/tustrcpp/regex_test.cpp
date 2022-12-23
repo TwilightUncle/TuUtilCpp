@@ -177,6 +177,17 @@ TEST(tustrcpptest, RegexGeneralTest)
     EXPECT_EQ(type1::end_pos, 6);
 }
 
+TEST(tustrcpptest, RegexReferenceTest)
+{
+    using type1 = tustr::regex_reference_parser<"\\1", 1>;
+    using type2 = tustr::regex_reference_parser<"\\345", 1>;
+
+    EXPECT_EQ(type1::end_pos, 2);
+    EXPECT_EQ(type1::reference_index, 0);
+    EXPECT_EQ(type2::end_pos, 4);
+    EXPECT_EQ(type2::reference_index, 344);
+}
+
 TEST(tustrcpptest, RegexAddQuantifierTest)
 {
     using type1 = tustr::add_quantifier<"abcdef[g", tustr::regex_general<"abcdef[g", 0>>;
@@ -320,12 +331,13 @@ TEST(tustrcpptest, RegexRunTest)
 
 TEST(tustrcpptest, RegexMatchTest)
 {
-    constexpr auto case1 = test_regex_type3::search("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nop");
-    constexpr auto case2 = test_regex_type3::search("aabcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nop");
-    constexpr auto case3 = test_regex_type3::search("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopa");
-    constexpr auto case4 = test_regex_type3::match("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nop");
-    constexpr auto case5 = test_regex_type3::match("aabcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nop");
-    constexpr auto case6 = test_regex_type3::match("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopa");
+    using type1 = tustr::regex<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}(aa)\\)nop\\2\\6">;
+    constexpr auto case1 = type1::search("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]m");
+    constexpr auto case2 = type1::search("aabcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]m");
+    constexpr auto case3 = type1::search("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]ma");
+    constexpr auto case4 = type1::match("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]m");
+    constexpr auto case5 = type1::match("aabcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]m");
+    constexpr auto case6 = type1::match("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]ma");
 
     EXPECT_TRUE(case1);
     EXPECT_TRUE(case2);

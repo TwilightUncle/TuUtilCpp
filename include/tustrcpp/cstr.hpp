@@ -119,7 +119,7 @@ namespace tustr
         constexpr auto get_charset_match_range(std::string_view char_set, std::size_t offset = 0, bool is_allow = true) const
         {
             std::size_t s_pos = std::string_view::npos, cnt{};
-            for (std::size_t i = 0; i < this->size(); i++) {
+            for (std::size_t i = offset; i < this->size(); i++) {
                 const auto is_find = char_set.find_first_of(this->data()[i]) != std::string_view::npos;
                 if (is_allow != is_find) break;
                 s_pos = (std::min)(s_pos, i);

@@ -127,6 +127,7 @@ namespace tustr
 #include <tustrcpp/regex/char_set.hpp>
 #include <tustrcpp/regex/capture.hpp>
 #include <tustrcpp/regex/general.hpp>
+#include <tustrcpp/regex/reference.hpp>
 #include <tustrcpp/regex/perser.hpp>
 
 namespace tustr
