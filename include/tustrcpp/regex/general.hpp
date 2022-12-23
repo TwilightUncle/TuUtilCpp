@@ -18,12 +18,17 @@ namespace tustr
         static constexpr auto begin_pos = Pos;
 
         static constexpr auto end_pos = []() {
-            for (auto i = Pos; i < Pattern.size(); i++)
+            for (auto i = Pos; i < Pattern.size(); i++) {
+                // 先頭が特殊文字の時はエスケープされていると想定
+                if (attributes[Pattern[i]] && i == Pos) continue;
+
+                // 二文字目以降の特殊文字
                 if (attributes[Pattern[i]] && !(attributes[Pattern[i]] & BK)) {
                     // 数量詞は直前の１文字のみに適用されるため、一気に判定する文字列からは除外する
                     if (i - Pos > 1 && (attributes[Pattern[i]] & QUANTIFIER)) return i - 1;
                     return i;
                 }
+            }
             return Pattern.size();
         }();
 
@@ -33,7 +38,8 @@ namespace tustr
          * @fn
          * @brief 解析結果生成された処理
         */
-        static constexpr std::size_t generated_func(const std::string_view& s, std::size_t offset, bool is_pos_lock)
+        template <std::size_t N>
+        static constexpr std::size_t generated_func(std::string_view s, std::size_t offset, bool is_pos_lock, regex_capture_store<N>& cs)
         {
             auto pos = is_pos_lock
                 ? (exists_in_position(value, s, offset) ? offset : std::string_view::npos)

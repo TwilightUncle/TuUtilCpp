@@ -17,8 +17,8 @@ namespace tustr
      * @param pos 判定位置
     */
     inline constexpr auto exists_in_position(
-        const std::string_view& search,
-        const std::string_view& subject,
+        std::string_view search,
+        std::string_view subject,
         std::size_t pos
     ) {
         // そもそもpos以降の文字数が、searchより短い場合存在のしようがない
@@ -38,8 +38,8 @@ namespace tustr
      * @param offset 検索開始位置
     */
     inline constexpr auto find(
-        const std::string_view& search,
-        const std::string_view& subject,
+        std::string_view search,
+        std::string_view subject,
         std::size_t offset = 0
     ) {
         for (std::size_t i = offset; i < subject.size(); i++)
@@ -87,7 +87,7 @@ namespace tustr
          * @fn
          * @brief sの文字列が出現する数をカウント
         */
-        constexpr auto count(const std::string_view& s) const
+        constexpr auto count(std::string_view s) const
         {
             const auto sv = this->view();
             std::size_t cnt = 0;
@@ -100,13 +100,13 @@ namespace tustr
          * @fn
          * @brief 文字列が最初に出現する場所を検索する
         */
-        constexpr auto find(const std::string_view& s, std::size_t offset = 0) const { return tustr::find(s, this->view(), offset); }
+        constexpr auto find(std::string_view s, std::size_t offset = 0) const { return tustr::find(s, this->view(), offset); }
 
         /**
          * @fn
          * @brief 指定の文字、文字列が含まれるとき真
         */
-        constexpr auto contains(const std::string_view& s) const { return this->find(s) != std::string_view::npos; }
+        constexpr auto contains(std::string_view s) const { return this->find(s) != std::string_view::npos; }
 
         /**
          * @fn
@@ -116,7 +116,7 @@ namespace tustr
          * @param is_allow falseを指定すると文字集合にマッチしないときの範囲を返す
          * @return 見つからない場合、位置がstd::string_view::npos
         */
-        constexpr auto get_charset_match_range(const std::string_view& char_set, std::size_t offset = 0, bool is_allow = true) const
+        constexpr auto get_charset_match_range(std::string_view char_set, std::size_t offset = 0, bool is_allow = true) const
         {
             std::size_t s_pos = std::string_view::npos, cnt{};
             for (std::size_t i = 0; i < this->size(); i++) {
@@ -134,7 +134,7 @@ namespace tustr
          * @param char_set 文字集合
          * @param offset 開始位置
         */
-        constexpr auto get_charset_unmatch_range(const std::string_view& char_set, std::size_t offset = 0) const
+        constexpr auto get_charset_unmatch_range(std::string_view char_set, std::size_t offset = 0) const
         {
             return this->get_charset_match_range(char_set, offset, false);
         }
@@ -143,7 +143,7 @@ namespace tustr
          * @fn
          * @brief 全ての要素が指定された文字集合に含まれているとき真
         */
-        constexpr auto match_all_charset(const std::string_view& char_set, bool is_allow = true) const
+        constexpr auto match_all_charset(std::string_view char_set, bool is_allow = true) const
         {
             auto [s_pos, cnt] = this->get_charset_match_range(char_set, 0, is_allow);
             return s_pos == 0 && cnt == this->size();
@@ -153,7 +153,7 @@ namespace tustr
          * @fn
          * @brief 全ての要素が指定した文字集合に含まれていないとき真
         */
-        constexpr auto unmatch_all_charset(const std::string_view& char_set) const { return this->match_all_charset(char_set, false); }
+        constexpr auto unmatch_all_charset(std::string_view char_set) const { return this->match_all_charset(char_set, false); }
 
         /**
          * @fn
@@ -316,7 +316,7 @@ namespace tustr
         return val;
     }
     template <std::integral T>
-    constexpr T to_int(const std::string_view& s) { return to_int<T>(std::string(s)); }
+    constexpr T to_int(std::string_view s) { return to_int<T>(std::string(s)); }
 
     /**
      * @fn

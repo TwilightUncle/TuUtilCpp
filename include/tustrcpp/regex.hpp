@@ -11,25 +11,112 @@
 namespace tustr
 {
     /**
+     * @class
+     * @brief キャプチャ結果の保存と取得を行うオブジェクト。
+    */
+    template <std::size_t N>
+    class regex_capture_store
+    {
+    private:
+        std::array<std::string_view, N> buf{};
+        std::size_t end_pos{};
+    
+    public:
+        constexpr regex_capture_store() noexcept {}
+
+        /**
+         * @fn
+         * @brief キャプチャ結果を格納
+        */
+        constexpr void push_back(std::string_view sv)
+        {
+            if (this->end_pos >= N) throw std::out_of_range(std::string("orver max size. max value is ") + std::to_string(N));
+            this->buf[this->end_pos++] = sv;
+        }
+
+        template <std::size_t M>
+        constexpr void push_back(const regex_capture_store<M>& cs)
+        {
+            for (auto i = std::size_t{}; this->end_pos < N && i < cs.size(); i++)
+                this->push_back(cs.get(i));
+        }
+
+        /**
+         * @fn
+         * @brief 指定インデックスに格納されたキャプチャ内容を取り出す
+        */
+        constexpr auto get(std::size_t index) const
+        {
+            // 値が未格納の領域へのアクセスは禁止する
+            if (index >= this->end_pos)
+                throw std::out_of_range(
+                    std::string("index exceeds maximum allowed value. size: ")
+                    + std::to_string(this->end_pos) + ", specify index: " + std::to_string(index)
+                );
+            return this->buf[index];
+        }
+
+        constexpr auto front() const noexcept
+        {
+            static_assert(N, "don't call function. because [regex_capture_store<0>] max size is 0.");
+            return this->buf[0];
+        }
+        constexpr auto back() const noexcept
+        {
+            static_assert(N, "don't call function. because [regex_capture_store<0>] max size is 0.");
+            return this->buf[this->end_pos - 1];
+        }
+
+        constexpr bool empty() const noexcept { return !bool(this->end_pos); }
+        constexpr std::size_t size() const noexcept { return this->end_pos; }
+    };
+
+    /**
      * @brief forやwhileで回せるように、関数へ変換する際の型
     */
-    using regex_generated_function_type = std::size_t(const std::string_view&, std::size_t, bool);
-    using regex_generated_function_ptr_type = std::size_t(*)(const std::string_view&, std::size_t, bool);
+    template <std::size_t N>
+    using regex_generated_function_type = std::size_t(std::string_view, std::size_t, bool, regex_capture_store<N>&);
+    template <std::size_t N>
+    using regex_generated_function_ptr_type = std::size_t(*)(std::string_view, std::size_t, bool, regex_capture_store<N>&);
 
     template <class T>
     concept RegexParseable = requires {
         // 静的メンバが定義済みか
         T::begin_pos;
         T::end_pos;
-        T::generated_func;
+        // T::generated_func<0>;
 
         // 上記メンバの型チェック
         requires std::is_same_v<decltype(T::begin_pos), const std::size_t>;
         requires std::is_same_v<decltype(T::end_pos), const std::size_t>;
-        requires std::is_same_v<decltype(T::generated_func), regex_generated_function_type>; // 関数
+        // requires is_regex_generated_function_type<decltype(T::generated_func)>::value; // 関数
 
         // 違反している場合、無限再帰が発生してしまう
         requires T::begin_pos < T::end_pos;
+    };
+    
+    // 前方宣言
+    template <cstr Pattern, std::size_t Pos> struct regex_parser;
+    template <cstr Pattern, template <cstr, std::size_t> class Parser> struct regex;
+
+    template <class T> struct is_regex : public std::false_type {};
+    template <cstr Pattern, template <cstr, std::size_t> class Parser>
+    struct is_regex<regex<Pattern, Parser>> : public std::true_type {};
+
+    // 再帰的に正規表現クラスを内包しているか
+    template <class T>
+    concept InnerRegexReferable = requires {
+        // キャプチャグループ等括弧内を再帰的に解析している場合
+        typename T::inner_regex;
+        requires is_regex<typename T::inner_regex>::value;
+    };
+
+    // キャプチャを行うものか
+    template <class T>
+    concept RegexParserCaptureable = requires {
+        T::is_capture;
+        requires std::is_same_v<decltype(T::is_capture), const bool>;
+        requires T::is_capture;
     };
 }
 
@@ -40,12 +127,14 @@ namespace tustr
 #include <tustrcpp/regex/char_set.hpp>
 #include <tustrcpp/regex/capture.hpp>
 #include <tustrcpp/regex/general.hpp>
+#include <tustrcpp/regex/perser.hpp>
 
 namespace tustr
 {
     /**
      * @fn
      * @brief 渡された文字範囲を許可/拒否リストに展開し、与えられた文字列がマッチするか判定する関数オブジェクトを返却する
+     * TODO: いらないのでいつかテストの修正と本関数を削除する
     */
     template <cstr Pattern, std::size_t Pos>
     constexpr auto get_regex_char_range_matcher()
@@ -63,64 +152,6 @@ namespace tustr
     }
 
     /**
-     * @fn
-     * @brief どの機能の解析を行っているか、部分特殊化で条件分岐。デフォルト
-    */
-    template <cstr Pattern, std::size_t Pos>
-    struct regex_parser : public add_quantifier<Pattern, regex_general<Pattern, Pos>>
-    {
-        // 単体で指定してはいけない文字か検証
-        using type = add_quantifier<Pattern, regex_general<Pattern, Pos>>;
-        static_assert(
-            type::end_pos == Pattern.size()
-            || !(regex_char_attribute::attributes[Pattern[type::end_pos]] & regex_char_attribute::DENY),
-            "Invalied template argment [Pattern, Pos]. Must not specified of '}', ')', ']'."
-        );
-    };
-
-    /**
-     * @fn
-     * @brief 文字集合の場合
-    */
-    template <cstr Pattern, std::size_t Pos>
-    requires (bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::CHARSET))
-    struct regex_parser<Pattern, Pos> : public add_quantifier<Pattern, regex_char_set_parser<Pattern, Pos>> {};
-
-    /**
-     * @fn
-     * @brief 文字クラスの場合
-    */
-    template <cstr Pattern, std::size_t Pos>
-    requires (
-        bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::CLASS)
-        && !bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::BK)
-    )
-    struct regex_parser<Pattern, Pos> : public add_quantifier<Pattern, regex_char_class_parser<Pattern, Pos>> {};
-
-    /**
-     * @fn
-     * @brief 文字クラスの場合2(バックスラッシュ含めて2文字のため、位置を一つ進めている)
-    */
-    template <cstr Pattern, std::size_t Pos>
-    requires (
-        Pattern[Pos] == '\\' && Pattern.size() - 1 > Pos
-        && regex_char_attribute::check_attrs_conjuction<regex_char_attribute::CLASS, regex_char_attribute::BK>(Pattern[Pos])
-    )
-    struct regex_parser<Pattern, Pos> : public add_quantifier<Pattern, regex_char_class_parser<Pattern, Pos + 1>> { static constexpr auto begin_pos = Pos; };
-
-    /**
-     * @fn
-     * @brief バックスラッシュにより、特殊文字としての機能を失った(エスケープ済み)もの(バックスラッシュ含めて2文字のため、位置を一つ進めている)
-    */
-    template <cstr Pattern, std::size_t Pos>
-    requires (
-        Pattern[Pos] == '\\' && Pattern.size() - 1 > Pos
-        && bool(regex_char_attribute::attributes[Pattern[Pos]])
-        && !bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::BK)
-    )
-    struct regex_parser<Pattern, Pos> : public add_quantifier<Pattern, regex_general<Pattern, Pos + 1>> { static constexpr auto begin_pos = Pos; };
-
-    /**
      * @class
      * @brief 正規表現格納オブジェクト。動的に生成されたパターンについては考慮しない
      * @tparam Pttern 正規表現の文字列リテラルを指定
@@ -129,15 +160,36 @@ namespace tustr
     template <cstr Pattern, template <cstr, std::size_t> class Parser = regex_parser>
     struct regex
     {
+        // キャプチャ可能な最大数(静的に格納結果のキャプチャ領域を確保したいため、上限を設ける)
+        static constexpr std::size_t allowed_max_capture_count = 65535;
     private:
         // 文法上おかしいバックスラッシュの出現はここで検出、エラーとする
         static_assert(is_collect_regex_back_slash(Pattern.view()));
 
         /**
          * @fn
-         * @brief 正規表現の解析。特殊文字を含まない個所の担当
+         * @brief 各解析結果における想定される最大のキャプチャ数を計算する
         */
-        template <std::size_t Pos, std::size_t N>
+        template <RegexParseable ParserPart>
+        static consteval auto get_parser_max_capture_count()
+        {
+            std::size_t cnt{};
+            // 再帰的にregexが定義されている場合
+            if constexpr (InnerRegexReferable<ParserPart>)
+                cnt += (ParserPart::max_count == std::string_view::npos)
+                    ? allowed_max_capture_count
+                    : ParserPart::inner_regex::max_capture_count * ParserPart::max_count;
+            // 自身がキャプチャ
+            if constexpr (RegexParserCaptureable<ParserPart>)
+                cnt += (std::min)(allowed_max_capture_count, ParserPart::max_count);
+            return cnt;
+        }
+
+        /**
+         * @fn
+         * @brief 正規表現の解析
+        */
+        template <std::size_t Pos, std::size_t N, std::size_t MaxCaptureCnt>
         static consteval auto parse()
         {
             // あらかじめ、Pattern[Pos]の値によって部分特殊化し、
@@ -146,42 +198,61 @@ namespace tustr
 
             static_assert(RegexParseable<parser>, "Invaild template argment [Parser]. See concept [RegexParseable].");
 
-            auto parse_result = parse<parser::end_pos, N + 1>();
-            parse_result[N] = parser::generated_func;
-            return parse_result;
+            auto [f_arr, capture_cnt] = parse<
+                parser::end_pos,
+                N + 1,
+                (std::min)(MaxCaptureCnt + get_parser_max_capture_count<parser>(), allowed_max_capture_count)
+            >();
+
+            f_arr[N] = parser::generated_func;
+            return std::pair{f_arr, capture_cnt};
         }
 
         /**
          * @fn
          * @brief 再帰の終端
         */
-        template <std::size_t Pos, std::size_t N>
+        template <std::size_t Pos, std::size_t N, std::size_t MaxCaptureCnt>
         requires (Pattern.size() <= Pos)
         static consteval auto parse()
         {
             // 各perserで以下関数ポインタに格納可能な関数を定義することで、
             // 解析結果を関数ポインタの配列として保持できるようにする
-            return std::array<regex_generated_function_ptr_type, N>{nullptr};
+            return std::pair{
+                std::array<regex_generated_function_ptr_type<MaxCaptureCnt>, N>{nullptr},
+                MaxCaptureCnt
+            };
         }
 
+        // 解析を実行し、悔過を格納
+        static constexpr auto parse_result = parse<0, 0, 0>();
+
     public:
-        static constexpr auto parse_result = parse<0, 0>();
+        // 正規表現のパターンを解析した結果のルールを関数集合としたもの
+        static constexpr auto& match_rules = parse_result.first;
+
+        // 想定される最大キャプチャ数
+        static constexpr auto max_capture_count = parse_result.second;
+
+        using capture_store_type = regex_capture_store<max_capture_count>;
+        using function_ptr_type = regex_generated_function_ptr_type<max_capture_count>;
 
         /**
          * @fn
          * @brief パターンマッチの基本。実行後の結果はPtternのsizeとなるが、一致しなかった場合はstd::string_view::nposが返される
         */
-        static constexpr std::size_t run(const std::string_view& s, std::size_t offset = 0)
+        static constexpr auto run(std::string_view s, std::size_t offset = 0, bool is_pos_lock = false)
         {
-            bool is_pos_lock = false;
-            for(regex_generated_function_ptr_type before = nullptr; const auto& f : parse_result) {
-                if ((offset = f(s, offset, std::exchange(is_pos_lock, true))) == std::string_view::npos) return offset;
+            auto cs = capture_store_type{};
+            for(function_ptr_type before = nullptr; const auto& f : match_rules) {
+                if ((offset = f(s, offset, std::exchange(is_pos_lock, true), cs)) == std::string_view::npos)
+                    return std::pair{cs, offset};
                 before = f;
             }
-            return offset;
+            return std::pair{cs, offset};
         }
 
-        static constexpr bool match(const std::string_view& s) { return run(s, 0) != std::string_view::npos; }
+        static constexpr bool match(std::string_view s) { return run(s, 0).second != std::string_view::npos; }
     };
 
     using empty_regex = regex<"">;
