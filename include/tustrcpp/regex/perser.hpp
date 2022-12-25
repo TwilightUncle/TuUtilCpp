@@ -7,82 +7,92 @@
 
 namespace tustr
 {
+    namespace _regex
+    {
+        /**
+         * @fn
+         * @brief どの機能の解析を行っているか、部分特殊化で名前解決
+        */
+        template <cstr Pattern, std::size_t Pos>
+        struct resolve_regex_parser : public regex_general<Pattern, Pos> {};
+
+        /**
+         * @fn
+         * @brief 文字集合の場合
+        */
+        template <cstr Pattern, std::size_t Pos>
+        requires (bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::CHARSET))
+        struct resolve_regex_parser<Pattern, Pos> : public regex_char_set_parser<Pattern, Pos> {};
+
+        /**
+         * @fn
+         * @brief 文字クラスの場合
+        */
+        template <cstr Pattern, std::size_t Pos>
+        requires (
+            bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::CLASS)
+            && !bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::BK)
+        )
+        struct resolve_regex_parser<Pattern, Pos> : public regex_char_class_parser<Pattern, Pos> {};
+
+        /**
+         * @fn
+         * @brief キャプチャグループ用
+        */
+        template <cstr Pattern, std::size_t Pos>
+        requires (Pattern[Pos] == '(')
+        struct resolve_regex_parser<Pattern, Pos> : public regex_capture_parser<Pattern, Pos> {};
+
+        namespace bk
+        {
+            /**
+             * @fn
+             * @brief バックスラッシュに続く文字に対して解決する(デフォルトはエスケープ)
+            */
+            template <cstr Pattern, std::size_t Pos>
+            struct resolve_regex_parser : public regex_general<Pattern, Pos> {};
+
+            /**
+             * @fn
+             * @brief キャプチャ参照
+            */
+            template <cstr Pattern, std::size_t Pos>
+            requires (bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::REFERENCE))
+            struct resolve_regex_parser<Pattern, Pos> : public regex_reference_parser<Pattern, Pos> {};
+
+            /**
+             * @fn
+             * @brief バックスラッシュから始まる文字クラス
+            */
+            template <cstr Pattern, std::size_t Pos>
+            requires (regex_char_attribute::check_attrs_conjuction<regex_char_attribute::CLASS, regex_char_attribute::BK>(Pattern[Pos]))
+            struct resolve_regex_parser<Pattern, Pos> : public regex_char_class_parser<Pattern, Pos> {};
+        }
+
+        /**
+         * @fn
+         * @brief バックスラッシュから始まる場合の起点(ここでバックスラッシュを利用する評価は終わるので、次の文字に進む)
+        */
+        template <cstr Pattern, std::size_t Pos>
+        requires (Pattern[Pos] == '\\' && Pattern.size() - 1 > Pos)
+        struct resolve_regex_parser<Pattern, Pos> : public bk::resolve_regex_parser<Pattern, Pos + 1> { static constexpr auto begin_pos = Pos; };
+    }
+
     /**
-     * @fn
-     * @brief どの機能の解析を行っているか、部分特殊化で条件分岐。デフォルト
+     * @class
+     * @brief 正規表現パターンの指定個所の解析を行う
+     * @tparam Pattern 正規表現パターンの文字列リテラルを指定
+     * @tparam Pos Patternの解析する開始位置を指定
     */
     template <cstr Pattern, std::size_t Pos>
-    struct regex_parser : public add_quantifier<Pattern, regex_general<Pattern, Pos>>
+    struct regex_parser : public add_quantifier<Pattern, _regex::resolve_regex_parser<Pattern, Pos>>
     {
         // 単体で指定してはいけない文字か検証
-        using type = add_quantifier<Pattern, regex_general<Pattern, Pos>>;
         static_assert(
-            type::end_pos == Pattern.size()
-            || !(regex_char_attribute::attributes[Pattern[type::end_pos]] & regex_char_attribute::DENY),
+            !(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::DENY),
             "Invalied template argment [Pattern, Pos]. Must not specified of '}', ')', ']'."
         );
     };
-
-    /**
-     * @fn
-     * @brief 文字集合の場合
-    */
-    template <cstr Pattern, std::size_t Pos>
-    requires (bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::CHARSET))
-    struct regex_parser<Pattern, Pos> : public add_quantifier<Pattern, regex_char_set_parser<Pattern, Pos>> {};
-
-    /**
-     * @fn
-     * @brief 文字クラスの場合
-    */
-    template <cstr Pattern, std::size_t Pos>
-    requires (
-        bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::CLASS)
-        && !bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::BK)
-    )
-    struct regex_parser<Pattern, Pos> : public add_quantifier<Pattern, regex_char_class_parser<Pattern, Pos>> {};
-
-    /**
-     * @fn
-     * @brief 文字クラスの場合2(バックスラッシュ含めて2文字のため、位置を一つ進めている)
-    */
-    template <cstr Pattern, std::size_t Pos>
-    requires (
-        Pattern[Pos] == '\\' && Pattern.size() - 1 > Pos
-        && regex_char_attribute::check_attrs_conjuction<regex_char_attribute::CLASS, regex_char_attribute::BK>(Pattern[Pos + 1])
-    )
-    struct regex_parser<Pattern, Pos> : public add_quantifier<Pattern, regex_char_class_parser<Pattern, Pos + 1>> { static constexpr auto begin_pos = Pos; };
-
-    /**
-     * @fn
-     * @brief バックスラッシュにより、特殊文字としての機能を失った(エスケープ済み)もの(バックスラッシュ含めて2文字のため、位置を一つ進めている)
-    */
-    template <cstr Pattern, std::size_t Pos>
-    requires (
-        Pattern[Pos] == '\\' && Pattern.size() - 1 > Pos
-        && bool(regex_char_attribute::attributes[Pattern[Pos + 1]])
-        && !bool(regex_char_attribute::attributes[Pattern[Pos + 1]] & regex_char_attribute::BK)
-    )
-    struct regex_parser<Pattern, Pos> : public add_quantifier<Pattern, regex_general<Pattern, Pos + 1>> { static constexpr auto begin_pos = Pos; };
-
-    /**
-     * @fn
-     * @brief キャプチャグループ用
-    */
-    template <cstr Pattern, std::size_t Pos>
-    requires (Pattern[Pos] == '(')
-    struct regex_parser<Pattern, Pos> : public add_quantifier<Pattern, regex_capture_parser<Pattern, Pos>> {};
-
-    /**
-     * @fn
-     * @brief キャプチャ参照
-    */
-    template <cstr Pattern, std::size_t Pos>
-    requires (
-        Pattern[Pos] == '\\' && Pattern.size() - 1 > Pos
-        && bool(regex_char_attribute::attributes[Pattern[Pos + 1]] & regex_char_attribute::REFERENCE)
-    )
-    struct regex_parser<Pattern, Pos> : public add_quantifier<Pattern, regex_reference_parser<Pattern, Pos + 1>> { static constexpr auto begin_pos = Pos; };
 }
 
 #endif // TUSTRCPP_INCLUDE_GUARD_REGEX_PERSER_HPP
