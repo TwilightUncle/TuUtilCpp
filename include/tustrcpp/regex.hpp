@@ -128,6 +128,7 @@ namespace tustr
 #include <tustrcpp/regex/capture.hpp>
 #include <tustrcpp/regex/general.hpp>
 #include <tustrcpp/regex/reference.hpp>
+#include <tustrcpp/regex/assertion.hpp>
 #include <tustrcpp/regex/perser.hpp>
 
 namespace tustr
@@ -246,7 +247,8 @@ namespace tustr
         {
             auto cs = capture_store_type{};
             for(function_ptr_type before = nullptr; const auto& f : match_rules) {
-                if ((offset = f(s, offset, std::exchange(is_pos_lock, true), cs)) == std::string_view::npos)
+                offset = f(s, offset, std::exchange(is_pos_lock, true), cs);
+                if (offset == std::string_view::npos)
                     return std::pair{cs, offset};
                 before = f;
             }

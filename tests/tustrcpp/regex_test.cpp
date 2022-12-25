@@ -204,6 +204,59 @@ TEST(tustrcpptest, RegexAddQuantifierTest)
     EXPECT_EQ(type3::max_count, std::string_view::npos);
 }
 
+TEST(tustrcpptest, RegexAssertionTest)
+{
+
+    constexpr auto check_func = [](auto t, std::string_view sv, std::size_t offset, bool is_lock_pos) {
+        tustr::regex_capture_store<0> cs;
+        return t.generated_func<0>(sv, offset, is_lock_pos, cs);
+    };
+
+    using type1 = tustr::regex_assertion_parser<"^", 0>;
+    EXPECT_EQ(check_func(type1{}, "", 0, true), 0);
+    EXPECT_EQ(check_func(type1{}, "a", 0, true), 0);
+    EXPECT_EQ(check_func(type1{}, "a", 1, true), std::string_view::npos);
+    EXPECT_EQ(check_func(type1{}, "a", 2, true), std::string_view::npos);
+    EXPECT_EQ(check_func(type1{}, "a\n", 1, true), std::string_view::npos);
+    EXPECT_EQ(check_func(type1{}, "a\n", 1, false), 2);
+    EXPECT_EQ(check_func(type1{}, "a\n", 2, true), 2);
+    EXPECT_EQ(check_func(type1{}, "\na", 1, true), 1);
+    EXPECT_EQ(check_func(type1{}, "a\na", 1, false), 2);
+
+    using type2 = tustr::regex_assertion_parser<"$", 0>;
+    EXPECT_EQ(check_func(type2{}, "", 0, true), 0);
+    EXPECT_EQ(check_func(type2{}, "a", 0, true), std::string_view::npos);
+    EXPECT_EQ(check_func(type2{}, "a", 0, false), 1);
+    EXPECT_EQ(check_func(type2{}, "a", 1, true), 1);
+    EXPECT_EQ(check_func(type2{}, "a", 2, true), std::string_view::npos);
+    EXPECT_EQ(check_func(type2{}, "a\n", 1, true), 1);
+    EXPECT_EQ(check_func(type2{}, "a\n", 0, false), 1);
+    EXPECT_EQ(check_func(type2{}, "\na", 0, true), 0);
+    EXPECT_EQ(check_func(type2{}, "\na", 1, true), std::string_view::npos);
+
+    using type3 = tustr::regex_assertion_parser<"b", 0>;
+    EXPECT_EQ(check_func(type3{}, "", 0, true), std::string_view::npos);
+    EXPECT_EQ(check_func(type3{}, "a", 0, true), 0);
+    EXPECT_EQ(check_func(type3{}, "a", 1, true), 1);
+    EXPECT_EQ(check_func(type3{}, "ab_@12d xy", 2, true), std::string_view::npos);
+    EXPECT_EQ(check_func(type3{}, "ab_@12d xy", 3, true), 3);
+    EXPECT_EQ(check_func(type3{}, "ab_@12d xy", 4, true), 4);
+    EXPECT_EQ(check_func(type3{}, "ab_@12d xy", 7, true), 7);
+    EXPECT_EQ(check_func(type3{}, "ab_@12d xy", 8, true), 8);
+    EXPECT_EQ(check_func(type3{}, "ab_@12d xy", 1, false), 3);
+
+    using type4 = tustr::regex_assertion_parser<"B", 0>;
+    EXPECT_EQ(check_func(type4{}, "", 0, true), 0);
+    EXPECT_EQ(check_func(type4{}, "a", 0, true), std::string_view::npos);
+    EXPECT_EQ(check_func(type4{}, "a", 1, true), std::string_view::npos);
+    EXPECT_EQ(check_func(type4{}, "ab_@12d xy", 2, true), 2);
+    EXPECT_EQ(check_func(type4{}, "ab_@12d xy", 3, true), std::string_view::npos);
+    EXPECT_EQ(check_func(type4{}, "ab_@12d xy", 4, true), std::string_view::npos);
+    EXPECT_EQ(check_func(type4{}, "ab_@12d xy", 7, true), std::string_view::npos);
+    EXPECT_EQ(check_func(type4{}, "ab_@12d xy", 8, true), std::string_view::npos);
+    EXPECT_EQ(check_func(type4{}, "ab_@12d xy", 7, false), 9);
+}
+
 using test_regex_type = tustr::regex<"abcdef[ghi].\\daz[$%&_1]\\[+\\^?">;
 using test_regex_type2 = tustr::regex<"abcdef(ghi[jkl].\\d\\]m){2}\\)nop">;
 using test_regex_type3 = tustr::regex<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}(aa)\\)nop">;
