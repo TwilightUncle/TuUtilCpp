@@ -19,11 +19,11 @@ namespace tustr
 
         enum check_flags
         {
-            BEGIN = 0x0001u,            // 対象文字列の先頭にマッチ
-            END = 0x0002u,              // 対象文字列の末尾にマッチ
-            EMPTY = 0x0004u,            // 空文字列に対してマッチ
-            WORD_BOUNDARY = 0x0008u,    // 単語の境界
-            IN_WORD = 0x0010u,          // 単語内
+            BEGIN           = 0x0001u,  // 対象文字列の先頭にマッチ
+            END             = 0x0002u,  // 対象文字列の末尾にマッチ
+            EMPTY           = 0x0004u,  // 空文字列に対してマッチ
+            WORD_BOUNDARY   = 0x0008u,  // 単語の境界
+            IN_WORD         = 0x0010u,  // 単語内
         };
 
         static constexpr auto check_flag = []() -> std::size_t {
