@@ -29,10 +29,7 @@ namespace tustr
          * @brief •¶šƒNƒ‰ƒX‚Ìê‡
         */
         template <cstr Pattern, std::size_t Pos>
-        requires (
-            bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::CLASS)
-            && !bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::BK)
-        )
+        requires (bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::CLASS))
         struct resolve_regex_parser<Pattern, Pos> : public regex_char_class_parser<Pattern, Pos> {};
 
         /**
