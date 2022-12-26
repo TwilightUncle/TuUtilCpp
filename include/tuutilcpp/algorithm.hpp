@@ -15,23 +15,53 @@ namespace tudb
 
     /**
      * @fn
-     * @brief メタ関数の引数部分適用。bindで前から順に引数を渡し、callで残りの引数を渡すことで実行
+     * @brief メタ関数を実体化済みの型に丸める
     */
+    template <template <class...> class F> struct quote {};
+
+    /**
+     * @fn
+     * @brief テンプレートパラメータの部分適用
+    */
+    template <class RoundedF, class... PartialArgs> struct bind;
     template <template <class...> class F, class... PartialArgs>
-    struct bind
-    {
-        template <class... Args>
-        requires (Testable<F<PartialArgs..., Args...>> || TypeGetable<F<PartialArgs..., Args...>>)
-        struct call : public F<PartialArgs..., Args...> {};
+    struct bind<quote<F>, PartialArgs...> {};
+    // bindをさらにbind
+    template <class RoundedF, class... PartialArgs, class... PartialArgs2>
+    struct bind<bind<RoundedF, PartialArgs...>, PartialArgs2...> {};
 
-        template <class... Args>
-        requires TypeGetable<F<PartialArgs..., Args...>>
-        using call_t = typename call<Args...>::type;
+    /**
+     * @fn
+     * @brief メタ関数を丸めこんだものか判定
+    */
+    template <class T> struct is_rounded_meta_function : public std::false_type {};
+    template <template <class...> class F>
+    struct is_rounded_meta_function<quote<F>> : public std::true_type {};
+    template <class RoundedF, class... PartialArgs>
+    struct is_rounded_meta_function<bind<RoundedF, PartialArgs...>> : public std::true_type {};
 
-        template <class... Args>
-        requires Testable<F<PartialArgs..., Args...>>
-        static constexpr auto call_v = call<Args...>::value;
-    };
+    /**
+     * @fn
+     * @brief メタ関数を丸めこんだものか判定
+    */
+    template <class T> constexpr auto is_rounded_meta_function_v = is_rounded_meta_function<T>::value;
+
+    template <class T>
+    concept ApplicableMetaFuntion = is_rounded_meta_function_v<T>;
+
+    /**
+     * @fn
+     * @brief quoteまたはbindを渡す。 type呼び出しで実行
+    */
+    template <ApplicableMetaFuntion F, class... Args> struct apply;
+    // 引数を渡して実行
+    template <template <class...> class F, class... Args>
+    struct apply<quote<F>, Args...> : public F<Args...> {};
+    // 再帰的に部分適用された引数を展開
+    template <class RoundedF, class... PartialArgs, class... Args>
+    struct apply<bind<RoundedF, PartialArgs...>, Args...> : public apply<RoundedF, PartialArgs..., Args...> {};
+
+    template <ApplicableMetaFuntion F, class... Args> using apply_t = apply<F, Args...>::type; 
 
     /**
      * @fn
@@ -39,6 +69,31 @@ namespace tudb
     */
     template <class Head, class... Parameters>
     struct get_first_type : public std::type_identity<Head> {};
+
+    /**
+     * @fn
+     * @brief 左から右へ畳み込み
+    */
+    template <ApplicableMetaFuntion F, class... Parameters> struct foldl;
+    template <ApplicableMetaFuntion F, class Init, class Head, class... Parameters>
+    struct foldl<F, Init, Head, Parameters...> : public foldl<F, apply<F, Init, Head>, Parameters...> {};
+    template <ApplicableMetaFuntion F, class Init, class Head>
+    struct foldl<F, Init, Head> : public apply<F, Init, Head> {};
+
+    template <ApplicableMetaFuntion F, class... Parameters> using foldl_t = foldl<F, Parameters...>::type;
+
+    /**
+     * @fn
+     * @brief 右から左へ畳み込み
+    */
+    template <ApplicableMetaFuntion F, class... Parameters> struct foldr;
+    template <ApplicableMetaFuntion F, class Head, class... Parameters>
+    struct foldr<F, Head, Parameters...> : public apply<F, Head, foldr<F, Parameters...>> {};
+    template <ApplicableMetaFuntion F, class Head, class Next>
+    struct foldr<F, Head, Next> : public apply<F, Head, Next> {};
+
+    template <ApplicableMetaFuntion F, class... Parameters> using foldr_t = foldr<F, Parameters...>::type;
+
 
     /**
      * @fn
