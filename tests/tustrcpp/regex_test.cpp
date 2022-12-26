@@ -190,9 +190,9 @@ TEST(tustrcpptest, RegexReferenceTest)
 
 TEST(tustrcpptest, RegexAddQuantifierTest)
 {
-    using type1 = tustr::add_quantifier<"abcdef[g", tustr::regex_general<"abcdef[g", 0>>;
-    using type2 = tustr::add_quantifier<"abcdef+[g", tustr::regex_general<"abcdef+[g", 0>>;
-    using type3 = tustr::add_quantifier<"abcdef+[g", tustr::regex_general<"abcdef+[g", 5>>;
+    using type1 = tustr::add_quantifier<"abcdef[g", tustr::regex_general<"abcdef[g", 0>>::type;
+    using type2 = tustr::add_quantifier<"abcdef+[g", tustr::regex_general<"abcdef+[g", 0>>::type;
+    using type3 = tustr::add_quantifier<"abcdef+[g", tustr::regex_general<"abcdef+[g", 5>>::type;
 
     EXPECT_EQ(type1::begin_pos, 0);
     EXPECT_EQ(type1::end_pos, 6);
