@@ -85,6 +85,12 @@ namespace tustr
 
         /**
          * @fn
+         * @brief 保持している文字列が空の場合真
+        */
+        constexpr auto empty() const noexcept { return view().empty(); }
+
+        /**
+         * @fn
          * @brief sの文字列が出現する数をカウント
         */
         constexpr auto count(std::string_view s) const

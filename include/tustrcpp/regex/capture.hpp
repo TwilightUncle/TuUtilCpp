@@ -61,7 +61,8 @@ namespace tustr
         template <std::size_t N>
         static constexpr std::size_t generated_func(std::string_view s, std::size_t offset, bool is_pos_lock, regex_capture_store<N>& cs)
         {
-            const auto [cap, en] = inner_regex::run(s, offset, is_pos_lock);
+            const auto [cap, re] = inner_regex::run(s, offset, is_pos_lock);
+            const auto en = re.get_end_pos();
             if (en != std::string_view::npos) {
                 if (is_capture) cs.push_back(s.substr(offset, en - offset));
                 cs.push_back(cap);

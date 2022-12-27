@@ -60,6 +60,19 @@ namespace tustr
         static constexpr auto assertion_pattern = extract_assertion<Pattern[Pos]>();
         static constexpr auto end_pos = Pos + assertion_pattern.size();
 
+        // 再帰的な正規表現パターン解析に渡す文字列の生成
+        static constexpr auto inner_match_pattern = []() {
+            if constexpr (assertion_pattern[0] == '(') {
+                if constexpr (exists_in_position("(?=", Pattern, Pos) || exists_in_position("(?!", Pattern, Pos))
+                    return assertion_pattern.remove_prefix_suffix<3, 1>();
+                else return assertion_pattern.remove_prefix_suffix<4, 1>();
+            }
+            // TODO: 仮。orを定義したら正規表現パターンを返すようにする
+            else return cstr{""};
+        }();
+
+        // static_assert(inner_match_pattern.size() > 0, "Specified assertion match pattern is empty.");
+
         /**
          * @fn
          * @brief 解析結果生成された処理
@@ -67,33 +80,43 @@ namespace tustr
         template <std::size_t N>
         static constexpr std::size_t generated_func(std::string_view s, std::size_t offset, bool is_pos_lock, regex_capture_store<N>& cs)
         {
+            // 任意パターンの先読み、後読み共に前後に何かしらの文字列が存在することが前提と思われるため、
+            // 空文字の場合は全て処理を返す
             if (s.empty()) return (check_flag & EMPTY)
                 ? 0
                 : std::string_view::npos;
             if ((check_flag & BEGIN) && offset == 0) return 0;
             if ((check_flag & END) && (s.front() == '\r' || s.front() == '\n') && offset == 0) return 0;
             
-            for (; offset < s.size(); offset++) {
-                if (offset > 0) {
-                    const auto before = s[offset - 1];
-                    const auto current = s[offset];
+            // TODO: 仮。orを定義したら全て正規表現パターンで判定を行うよう修正
+            if (inner_match_pattern.empty())
+                for (; offset < s.size(); offset++) {
+                    if (offset > 0) {
+                        const auto before = s[offset - 1];
+                        const auto current = s[offset];
 
-                    // CR と LFの間の場合は改行位置として認識させない
-                    if (before != '\r' || current != '\n') {
-                        if ((check_flag & BEGIN) && (before == '\r' || before == '\n')) return offset;
-                        if ((check_flag & END) && (current == '\r' || current == '\n')) return offset;
+                        // CR と LFの間の場合は改行位置として認識させない
+                        if (before != '\r' || current != '\n') {
+                            if ((check_flag & BEGIN) && (before == '\r' || before == '\n')) return offset;
+                            if ((check_flag & END) && (current == '\r' || current == '\n')) return offset;
+                        }
+
+                        const auto is_before_word = regex_char_class::get_const_char_set<'w'>().contains(char_to_cstr(before));
+                        const auto is_current_word = regex_char_class::get_const_char_set<'w'>().contains(char_to_cstr(current));
+                        if ((check_flag & WORD_BOUNDARY) && is_before_word != is_current_word) return offset;
+                        if ((check_flag & IN_WORD) && is_before_word && is_current_word) return offset;
                     }
-
-                    const auto is_before_word = regex_char_class::get_const_char_set<'w'>().contains(char_to_cstr(before));
-                    const auto is_current_word = regex_char_class::get_const_char_set<'w'>().contains(char_to_cstr(current));
-                    if ((check_flag & WORD_BOUNDARY) && is_before_word != is_current_word) return offset;
-                    if ((check_flag & IN_WORD) && is_before_word && is_current_word) return offset;
+                    if (is_pos_lock) break;
                 }
-                if (is_pos_lock) break;
+            else {
+                using assertion_matcher = regex<inner_match_pattern, regex_parser>;
+                const auto [cs, renge] = assertion_matcher::run(s, offset, is_pos_lock);
+                if (!renge) return (check_flag & NEGATIVE) ? 0 : std::string_view::npos;
+                if (check_flag & LOOK_AHEAD) offset = renge.get_end_pos();
+                else if (check_flag & LOOK_BEHIND) offset = renge.get_begin_pos();
             }
 
             if ((check_flag & BEGIN) && (s.back() == '\r' || s.back() == '\n') && offset == s.size()) return offset;
-
             return (check_flag & END) && offset == s.size()
                 ? offset
                 : std::string_view::npos;

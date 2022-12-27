@@ -72,6 +72,21 @@ namespace tustr
     };
 
     /**
+     * @class
+     * @brief 正規表現に一致した範囲を格納する
+    */
+    struct regex_match_range : public std::array<std::size_t, 2>
+    {
+        inline constexpr bool is_match() const noexcept { return this->at(0) != std::string_view::npos; }
+        inline constexpr explicit operator bool() const noexcept { return this->is_match(); }
+        inline constexpr auto get_begin_pos() const noexcept { return this->at(0); }
+        inline constexpr auto match_length() const noexcept { return this->at(1); }
+        inline constexpr auto get_end_pos() const noexcept { return this->at(0) + this->at(1); }
+
+        inline static constexpr auto make_unmatch() { return regex_match_range{std::string_view::npos, 0}; }
+    };
+
+    /**
      * @brief forやwhileで回せるように、関数へ変換する際の型
     */
     template <std::size_t N>
@@ -246,26 +261,28 @@ namespace tustr
         static constexpr auto run(std::string_view s, std::size_t offset = 0, bool is_pos_lock = false)
         {
             auto cs = capture_store_type{};
-            for(function_ptr_type before = nullptr; const auto& f : match_rules) {
+            auto re = regex_match_range::make_unmatch();
+            for(const auto& f : match_rules) {
+                re[0] = offset;
                 offset = f(s, offset, std::exchange(is_pos_lock, true), cs);
                 if (offset == std::string_view::npos)
-                    return std::pair{cs, offset};
-                before = f;
+                    return std::pair{cs, regex_match_range::make_unmatch()};
             }
-            return std::pair{cs, offset};
+            re[1] = offset - re[0];
+            return std::pair{cs, re};
         }
 
         /**
          * @fn
          * @brief 引数の文字列内に、パターンマッチする部分が内包されていれば真
         */
-        static constexpr bool search(std::string_view s) { return run(s, 0).second != std::string_view::npos; }
+        static constexpr bool search(std::string_view s) { return bool(run(s, 0).second); }
 
         /**
          * @fn
          * @brief 引数の文字列の全体がパターンマッチしている場合真
         */
-        static constexpr bool match(std::string_view s) { return run(s, 0, true).second == s.size(); }
+        static constexpr bool match(std::string_view s) { return run(s, 0, true).second.match_length() == s.size(); }
     };
 
     using empty_regex = regex<"">;
