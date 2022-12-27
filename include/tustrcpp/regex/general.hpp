@@ -44,8 +44,9 @@ namespace tustr
             auto pos = is_pos_lock
                 ? (exists_in_position(value, s, offset) ? offset : std::string_view::npos)
                 : find(value, s, offset);
-            if (pos == std::string_view::npos) return regex_match_range::make_unmatch();
-            return regex_match_range{pos, value.size()};
+            return (pos == std::string_view::npos)
+                ? regex_match_range::make_unmatch()
+                : regex_match_range{pos, value.size()};
         }
     };
 }

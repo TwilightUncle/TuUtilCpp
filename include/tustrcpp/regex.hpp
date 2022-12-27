@@ -281,10 +281,10 @@ namespace tustr
                 const auto part_range = f(s, offset, std::exchange(is_pos_lock, true), cs);
                 if (!part_range)
                     return std::pair{cs, regex_match_range::make_unmatch()};
-                re[0] = (std::min)(part_range[0], re[0]);
+                re.set_begin_pos((std::min)(part_range.get_begin_pos(), re.get_begin_pos()));
                 offset = part_range.get_end_pos();
             }
-            re[1] = offset - re[0];
+            re.set_end_pos(offset);
             return std::pair{cs, re};
         }
 
