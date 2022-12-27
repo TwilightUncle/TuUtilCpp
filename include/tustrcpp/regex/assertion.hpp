@@ -10,12 +10,12 @@ namespace tustr
     /**
      * @fn
      * @brief 境界assertionについて解析し、判定関数を生成する
+     * キャプチャと同等に再帰的にパターン解析し、境界アサーションは文字列マッチングに置き換えて実行する方向で考える
     */
     template <cstr Pattern, std::size_t Pos>
     struct regex_assertion_boundary_parser
     {
         static constexpr auto begin_pos = Pos;
-        static constexpr auto end_pos = Pos + 1;
 
         enum check_flags
         {
@@ -24,17 +24,41 @@ namespace tustr
             EMPTY           = 0x0004u,  // 空文字列に対してマッチ
             WORD_BOUNDARY   = 0x0008u,  // 単語の境界
             IN_WORD         = 0x0010u,  // 単語内
+            LOOK_AHEAD      = 0x0020u,  // 先読み
+            LOOK_BEHIND     = 0x0040u,  // 後読み
+            NEGATIVE        = 0x0080u,  // 否定的の場合立てる
         };
 
         static constexpr auto check_flag = []() -> std::size_t {
             switch (Pattern[Pos]) {
-                case '^': return BEGIN | EMPTY;
-                case '$': return END | EMPTY;
+                case '^': return BEGIN | EMPTY | LOOK_BEHIND;
+                case '$': return END | EMPTY | LOOK_AHEAD;
                 case 'b': return BEGIN | END | WORD_BOUNDARY;
                 case 'B': return EMPTY | IN_WORD;
             }
+            if (exists_in_position("(?=", Pattern, Pos))    return LOOK_AHEAD;
+            if (exists_in_position("(?!", Pattern, Pos))    return LOOK_AHEAD | NEGATIVE;
+            if (exists_in_position("(?<=", Pattern, Pos))   return LOOK_BEHIND;
+            if (exists_in_position("(?<!", Pattern, Pos))   return LOOK_BEHIND | NEGATIVE;
             return 0;
         }();
+
+        static_assert(check_flag != 0, "Invalied template argment [Pattern, Pos]. Specified not assertion.");
+
+    private:
+        template <char C>
+        static consteval auto extract_assertion() { return char_to_cstr(C); }
+
+        template <char C>
+        requires (C == '(')
+        static consteval auto extract_assertion()
+        {
+            return regex_bracket_inner<Pattern, Pos>::value_with_bracket;
+        }
+
+    public:
+        static constexpr auto assertion_pattern = extract_assertion<Pattern[Pos]>();
+        static constexpr auto end_pos = Pos + assertion_pattern.size();
 
         /**
          * @fn
