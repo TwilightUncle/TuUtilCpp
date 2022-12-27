@@ -77,22 +77,37 @@ namespace tustr
     */
     struct regex_match_range : public std::array<std::size_t, 2>
     {
+        inline static constexpr auto make_unmatch() { return regex_match_range{std::string_view::npos, 0}; }
+
         inline constexpr bool is_match() const noexcept { return this->at(0) != std::string_view::npos; }
         inline constexpr explicit operator bool() const noexcept { return this->is_match(); }
         inline constexpr auto get_begin_pos() const noexcept { return this->at(0); }
         inline constexpr auto match_length() const noexcept { return this->at(1); }
-        inline constexpr auto get_end_pos() const noexcept { return this->at(0) + this->at(1); }
+        inline constexpr auto get_end_pos() const noexcept { return bool(*this) ? this->at(0) + this->at(1) : std::string_view::npos; }
 
-        inline static constexpr auto make_unmatch() { return regex_match_range{std::string_view::npos, 0}; }
+        inline constexpr void set_begin_pos(std::size_t pos) noexcept { this->at(0) = pos; }
+        inline constexpr void set_begin_pos(const regex_match_range& range) noexcept { this->at(0) = range[0]; }
+        inline constexpr void set_match_length(std::size_t len) noexcept { this->at(1) = len; }
+        inline constexpr void set_match_length(const regex_match_range& range) noexcept { this->at(1) = range[1]; }
+        inline constexpr void set_end_pos(std::size_t pos) noexcept
+        {
+            if (pos == std::string_view::npos) (*this) = make_unmatch();
+            else if (this->at(0) > pos) {
+                this->at(0) = pos;
+                this->at(1) = 0;
+            }
+            else this->at(1) = pos - this->at(0);
+        }
+        inline constexpr void set_end_pos(const regex_match_range& range) noexcept { this->set_end_pos(range.get_end_pos()); }
     };
 
     /**
      * @brief for‚âwhile‚Å‰ñ‚¹‚é‚æ‚¤‚ÉAŠÖ”‚Ö•ÏŠ·‚·‚éÛ‚ÌŒ^
     */
     template <std::size_t N>
-    using regex_generated_function_type = std::size_t(std::string_view, std::size_t, bool, regex_capture_store<N>&);
+    using regex_generated_function_type = regex_match_range(std::string_view, std::size_t, bool, regex_capture_store<N>&);
     template <std::size_t N>
-    using regex_generated_function_ptr_type = std::size_t(*)(std::string_view, std::size_t, bool, regex_capture_store<N>&);
+    using regex_generated_function_ptr_type = regex_match_range(*)(std::string_view, std::size_t, bool, regex_capture_store<N>&);
 
     template <class T>
     concept RegexParseable = requires {
@@ -263,10 +278,11 @@ namespace tustr
             auto cs = capture_store_type{};
             auto re = regex_match_range::make_unmatch();
             for(const auto& f : match_rules) {
-                re[0] = offset;
-                offset = f(s, offset, std::exchange(is_pos_lock, true), cs);
-                if (offset == std::string_view::npos)
+                const auto part_range = f(s, offset, std::exchange(is_pos_lock, true), cs);
+                if (!part_range)
                     return std::pair{cs, regex_match_range::make_unmatch()};
+                re[0] = (std::min)(part_range[0], re[0]);
+                offset = part_range.get_end_pos();
             }
             re[1] = offset - re[0];
             return std::pair{cs, re};

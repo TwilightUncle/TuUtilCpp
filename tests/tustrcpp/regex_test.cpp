@@ -277,7 +277,7 @@ TEST(tustrcpptest, RegexParseTest)
     constexpr auto check_func1 = [](auto f, std::string_view sv, std::size_t offset, bool is_fixed) {
         using capture_store_type1 = tustr::regex_capture_store<test_regex_type::max_capture_count>;
         capture_store_type1 dummy_cs{};
-        return f(sv, offset, is_fixed, dummy_cs);
+        return f(sv, offset, is_fixed, dummy_cs).get_end_pos();
     };
 
     constexpr auto case1 = check_func1(f_arr[0], "abgbzabcdefrrr", 0, false);
@@ -318,7 +318,7 @@ TEST(tustrcpptest, RegexParseTest)
     constexpr auto check_func2 = [](auto f, std::string_view sv, std::size_t offset, bool is_fixed) {
         using capture_store_type2 = tustr::regex_capture_store<test_regex_type2::max_capture_count>;
         capture_store_type2 dummy_cs{};
-        return f(sv, offset, is_fixed, dummy_cs);
+        return f(sv, offset, is_fixed, dummy_cs).get_end_pos();
     };
     
     constexpr auto case15 = check_func2(f_arr2[1], "ghij%1]m", 0, false);
@@ -340,13 +340,13 @@ TEST(tustrcpptest, RegexRunTest)
     constexpr auto case6 = test_regex_type::run("abcdefg#5az&[^^");
     constexpr auto case7 = test_regex_type::run("abcdefg#5az&^^");
 
-    EXPECT_EQ(case1.second, 14);
-    EXPECT_EQ(case2.second, std::string_view::npos);
-    EXPECT_EQ(case3.second, 17);
-    EXPECT_EQ(case4.second, std::string_view::npos);
-    EXPECT_EQ(case5.second, 15);
-    EXPECT_EQ(case6.second, 14);
-    EXPECT_EQ(case7.second, std::string_view::npos);
+    EXPECT_EQ(case1.second.get_end_pos(), 14);
+    EXPECT_EQ(case2.second.get_end_pos(), std::string_view::npos);
+    EXPECT_EQ(case3.second.get_end_pos(), 17);
+    EXPECT_EQ(case4.second.get_end_pos(), std::string_view::npos);
+    EXPECT_EQ(case5.second.get_end_pos(), 15);
+    EXPECT_EQ(case6.second.get_end_pos(), 14);
+    EXPECT_EQ(case7.second.get_end_pos(), std::string_view::npos);
 
     // グループ二回繰り返し
     constexpr auto case8 = test_regex_type2::run("abcdefghij%1]mghil<9]m)nop");
@@ -356,17 +356,17 @@ TEST(tustrcpptest, RegexRunTest)
     // グループ三回繰り返し
     constexpr auto case11 = test_regex_type2::run("abcdefghij%1]mghil<9]mghik#0]m)nop");
 
-    EXPECT_EQ(case8.second, 26);
-    EXPECT_EQ(case9.second, 29);
-    EXPECT_EQ(case10.second, std::string_view::npos);
-    EXPECT_EQ(case11.second, std::string_view::npos);
+    EXPECT_EQ(case8.second.get_end_pos(), 26);
+    EXPECT_EQ(case9.second.get_end_pos(), 29);
+    EXPECT_EQ(case10.second.get_end_pos(), std::string_view::npos);
+    EXPECT_EQ(case11.second.get_end_pos(), std::string_view::npos);
 
     EXPECT_EQ(case8.first.get(0), "ghij%1]m"sv);
     EXPECT_EQ(case8.first.get(1), "ghil<9]m"sv);
 
     constexpr auto case12 = test_regex_type3::run("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nop");
 
-    EXPECT_EQ(case12.second, 43);
+    EXPECT_EQ(case12.second.get_end_pos(), 43);
     ASSERT_EQ(case12.first.size(), 12);
     EXPECT_EQ(case12.first.get(0), "ghij@ghij$ghij%1]m"sv);
     EXPECT_EQ(case12.first.get(1), "ghij@"sv);
