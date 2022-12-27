@@ -399,3 +399,31 @@ TEST(tustrcpptest, RegexMatchTest)
     EXPECT_FALSE(case5);
     EXPECT_FALSE(case6);
 }
+
+TEST(tustrcpptest, RegexResultTest)
+{
+    using type1 = tustr::regex<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}(aa)\\)nop\\2\\6">;
+    constexpr auto case1 = type1("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]m");
+    constexpr auto case2 = type1("aabcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]m");
+    constexpr auto case3 = type1("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]ma");
+    constexpr auto case4 = type1("abcefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]ma");
+
+    EXPECT_TRUE(case1.is_find());
+    EXPECT_TRUE(case2.is_find());
+    EXPECT_TRUE(case3.is_find());
+    EXPECT_FALSE(case4.is_find());
+    EXPECT_TRUE(case1.is_match());
+    EXPECT_FALSE(case2.is_match());
+    EXPECT_FALSE(case3.is_match());
+    EXPECT_FALSE(case4.is_match());
+    EXPECT_EQ(case1.get_match_part(), "abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]m"sv);
+    EXPECT_EQ(case2.get_match_part(), "abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]m"sv);
+    EXPECT_EQ(case3.get_match_part(), "abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]m"sv);
+    EXPECT_EQ(case4.get_match_part(), ""sv);
+
+    EXPECT_EQ(case1.get_match_part(2), "ghij@"sv);
+    EXPECT_EQ(case1.get_match_part(7), "ghij/ghij|2]m"sv);
+    EXPECT_EQ(case1.get_match_part(12), "aa"sv);
+    EXPECT_EQ(case1.get_match_part(13), ""sv);
+    EXPECT_EQ(case1.get_match_part(99), ""sv);
+}

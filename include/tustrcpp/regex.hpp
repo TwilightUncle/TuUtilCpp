@@ -185,9 +185,9 @@ namespace tustr
 
     /**
      * @class
-     * @brief 正規表現格納オブジェクト。動的に生成されたパターンについては考慮しない
+     * @brief 正規表現格納オブジェクト。動的に生成されたパターンについては考慮しない。インスタンスにはパターンマッチの結果が格納される。
      * @tparam Pttern 正規表現の文字列リテラルを指定
-     * @tparam Parser 正規表現を解析するテンプレートクラスを指定
+     * @tparam Parser 正規表現を解析するテンプレートクラスを指定(option)
     */
     template <cstr Pattern, template <cstr, std::size_t> class Parser = regex_parser>
     struct regex
@@ -299,6 +299,56 @@ namespace tustr
          * @brief 引数の文字列の全体がパターンマッチしている場合真
         */
         static constexpr bool match(std::string_view s) { return run(s, 0, true).second.match_length() == s.size(); }
+
+    private:
+        // 結果キャプチャリストを格納
+        const capture_store_type capture_list;
+        // 結果のマッチ範囲を格納
+        const regex_match_range match_range;
+        // テスト対象
+        const std::string_view test_target;
+
+        constexpr regex(std::string_view test_target, const std::pair<capture_store_type, regex_match_range>& run_result)
+            : capture_list(run_result.first)
+            , match_range(run_result.second)
+            , test_target(test_target)
+        {}
+
+    public:
+        /**
+         * @fn
+         * @brief パターンマッチを行い、インスタンスには結果を格納する
+         * @param test_target パターンマッチの対象文字列
+         * @param offset 対象文字列のパターンマッチを開始する位置
+         * @param is_pos_lock 真の場合パターンマッチの位置をoffsetで固定する。offsetの位置から一致していない場合一致なしとなる
+        */
+        constexpr regex(std::string_view test_target, std::size_t offset = 0, bool is_pos_lock = false)
+            : regex(test_target, run(test_target, offset, is_pos_lock))
+        {}
+
+        /**
+         * @fn
+         * @brief 検査対象文字列にパターンマッチしている部分が存在したら真
+        */
+        constexpr bool is_find() const noexcept { return bool(match_range); }
+
+        /**
+         * @fn
+         * @brief 検査対象の文字列全体がパターンマッチしているとき真
+        */
+        constexpr bool is_match() const noexcept { return match_range.match_length() == test_target.size(); }
+
+        /**
+         * @fn
+         * @brief パターンマッチした部分の文字列を取得する。抽出結果なしの場合空文字を返却
+         * @param index 0を指定すると、一致個所全体、1以上の値を設定すると該当するキャプチャのマッチを取得
+        */
+        constexpr std::string_view get_match_part(std::size_t index = 0) const
+        {
+            if (!this->is_find() || this->capture_list.size() < index) return std::string_view{};
+            if (!index) return test_target.substr(match_range.get_begin_pos(), match_range.match_length());
+            return this->capture_list.get(index - 1);
+        }
     };
 
     using empty_regex = regex<"">;
