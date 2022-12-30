@@ -47,13 +47,13 @@ namespace tudb
     template <class T> constexpr auto is_rounded_meta_function_v = is_rounded_meta_function<T>::value;
 
     template <class T>
-    concept ApplicableMetaFuntion = is_rounded_meta_function_v<T>;
+    concept MetaCallable = is_rounded_meta_function_v<T>;
 
     /**
      * @fn
      * @brief quoteまたはbindを渡す。 type呼び出しで実行
     */
-    template <ApplicableMetaFuntion F, class... Args> struct apply;
+    template <MetaCallable F, class... Args> struct apply;
     // 引数を渡して実行
     template <template <class...> class F, class... Args>
     struct apply<quote<F>, Args...> : public F<Args...> {};
@@ -61,7 +61,7 @@ namespace tudb
     template <class RoundedF, class... PartialArgs, class... Args>
     struct apply<bind<RoundedF, PartialArgs...>, Args...> : public apply<RoundedF, PartialArgs..., Args...> {};
 
-    template <ApplicableMetaFuntion F, class... Args> using apply_t = apply<F, Args...>::type; 
+    template <MetaCallable F, class... Args> using apply_t = apply<F, Args...>::type; 
 
     /**
      * @fn
@@ -74,25 +74,25 @@ namespace tudb
      * @fn
      * @brief 左から右へ畳み込み
     */
-    template <ApplicableMetaFuntion F, class... Parameters> struct foldl;
-    template <ApplicableMetaFuntion F, class Init, class Head, class... Parameters>
+    template <MetaCallable F, class... Parameters> struct foldl;
+    template <MetaCallable F, class Init, class Head, class... Parameters>
     struct foldl<F, Init, Head, Parameters...> : public foldl<F, apply<F, Init, Head>, Parameters...> {};
-    template <ApplicableMetaFuntion F, class Init, class Head>
+    template <MetaCallable F, class Init, class Head>
     struct foldl<F, Init, Head> : public apply<F, Init, Head> {};
 
-    template <ApplicableMetaFuntion F, class... Parameters> using foldl_t = foldl<F, Parameters...>::type;
+    template <MetaCallable F, class... Parameters> using foldl_t = foldl<F, Parameters...>::type;
 
     /**
      * @fn
      * @brief 右から左へ畳み込み
     */
-    template <ApplicableMetaFuntion F, class... Parameters> struct foldr;
-    template <ApplicableMetaFuntion F, class Head, class... Parameters>
+    template <MetaCallable F, class... Parameters> struct foldr;
+    template <MetaCallable F, class Head, class... Parameters>
     struct foldr<F, Head, Parameters...> : public apply<F, Head, foldr<F, Parameters...>> {};
-    template <ApplicableMetaFuntion F, class Head, class Next>
+    template <MetaCallable F, class Head, class Next>
     struct foldr<F, Head, Next> : public apply<F, Head, Next> {};
 
-    template <ApplicableMetaFuntion F, class... Parameters> using foldr_t = foldr<F, Parameters...>::type;
+    template <MetaCallable F, class... Parameters> using foldr_t = foldr<F, Parameters...>::type;
 
 
     /**
