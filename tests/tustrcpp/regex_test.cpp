@@ -255,6 +255,42 @@ TEST(tustrcpptest, RegexAssertionTest)
     EXPECT_EQ(check_func(type4{}, "ab_@12d xy", 7, true), std::string_view::npos);
     EXPECT_EQ(check_func(type4{}, "ab_@12d xy", 8, true), std::string_view::npos);
     EXPECT_EQ(check_func(type4{}, "ab_@12d xy", 7, false), 9);
+
+    using type5 = tustr::regex_assertion_parser<"(?=abc)", 0>;
+    EXPECT_STREQ(type5::inner_match_pattern.data(), "abc");
+    EXPECT_EQ(check_func(type5{}, "ab", 0, false), std::string_view::npos);
+    EXPECT_EQ(check_func(type5{}, "abc", 0, true), 0);
+    EXPECT_EQ(check_func(type5{}, "abc", 3, false), std::string_view::npos); // 境界(文字列の最後尾の位置を指定)
+    EXPECT_EQ(check_func(type5{}, "aaabc", 0, true), std::string_view::npos);
+    EXPECT_EQ(check_func(type5{}, "aaabc", 0, false), 2);
+
+    using type6 = tustr::regex_assertion_parser<"(?!abc)", 0>;
+    EXPECT_STREQ(type6::inner_match_pattern.data(), "abc");
+    EXPECT_EQ(check_func(type6{}, "ab", 0, false), 0);
+    EXPECT_EQ(check_func(type6{}, "abc", 0, true), std::string_view::npos);
+    EXPECT_EQ(check_func(type6{}, "abc", 3, true), 3); // 境界(文字列の最後尾の位置を指定)
+    EXPECT_EQ(check_func(type6{}, "aaabc", 0, true), 0);
+    EXPECT_EQ(check_func(type6{}, "aaabc", 1, false), 1);
+    EXPECT_EQ(check_func(type6{}, "aaabc", 2, false), 3);
+    EXPECT_EQ(check_func(type6{}, "aaabc", 2, true), std::string_view::npos);
+
+    using type7 = tustr::regex_assertion_parser<"(?<=abc)", 0>;
+    EXPECT_STREQ(type7::inner_match_pattern.data(), "abc");
+    EXPECT_EQ(check_func(type7{}, "ab", 0, false), std::string_view::npos);
+    EXPECT_EQ(check_func(type7{}, "abc", 0, false), 3);
+    EXPECT_EQ(check_func(type7{}, "abc", 0, true), std::string_view::npos);
+    EXPECT_EQ(check_func(type7{}, "abc", 3, true), 3);
+    EXPECT_EQ(check_func(type7{}, "abcc", 0, false), 3);
+    EXPECT_EQ(check_func(type7{}, "abcc", 3, true), 3);
+    EXPECT_EQ(check_func(type7{}, "aabc", 0, false), 4);
+
+    using type8 = tustr::regex_assertion_parser<"(?<!abc)", 0>;
+    EXPECT_STREQ(type8::inner_match_pattern.data(), "abc");
+    EXPECT_EQ(check_func(type8{}, "ab", 0, false), 0);
+    EXPECT_EQ(check_func(type8{}, "abc", 0, false), 0);
+    EXPECT_EQ(check_func(type8{}, "abc", 3, false), std::string_view::npos);
+    EXPECT_EQ(check_func(type8{}, "abcc", 3, false), 4);
+    EXPECT_EQ(check_func(type8{}, "abcc", 3, true), std::string_view::npos);
 }
 
 using test_regex_type = tustr::regex<"abcdef[ghi].\\daz[$%&_1]\\[+\\^?">;

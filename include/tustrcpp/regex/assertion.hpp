@@ -9,11 +9,11 @@ namespace tustr
 {
     /**
      * @fn
-     * @brief 境界assertionについて解析し、判定関数を生成する
+     * @brief 言明について解析
      * キャプチャと同等に再帰的にパターン解析し、境界アサーションは文字列マッチングに置き換えて実行する方向で考える
     */
     template <cstr Pattern, std::size_t Pos>
-    struct regex_assertion_boundary_parser
+    struct regex_assertion_parser
     {
         static constexpr auto begin_pos = Pos;
 
@@ -109,11 +109,29 @@ namespace tustr
                     if (is_pos_lock) break;
                 }
             else {
-                using assertion_matcher = regex<inner_match_pattern, regex_parser>;
-                const auto [cs, renge] = assertion_matcher::run(s, offset, is_pos_lock);
-                if (!renge) return (check_flag & NEGATIVE) ? 0 : std::string_view::npos;
-                if (check_flag & LOOK_AHEAD) offset = renge.get_end_pos();
-                else if (check_flag & LOOK_BEHIND) offset = renge.get_begin_pos();
+                const auto get_range = [s](std::size_t ofs) {
+                    using assertion_matcher = regex<inner_match_pattern, regex_parser>;
+                    return assertion_matcher::run(s, ofs, true).second;
+                };
+                const auto check_behind = [&get_range](std::size_t ofs) {
+                    std::size_t result_pos = ofs + 1;
+                    for (
+                        std::size_t i = ofs;
+                        i > 0 && result_pos != ofs;
+                        result_pos = get_range(--i).get_end_pos()
+                    );
+                    return (result_pos == ofs) ? ofs : std::string_view::npos;
+                };
+
+                for (; offset <= s.size(); offset++) {
+                    auto pos = std::string_view::npos;
+                    if constexpr (check_flag & LOOK_BEHIND) 
+                        pos = check_behind(offset);
+                    if constexpr (check_flag & LOOK_AHEAD)
+                        pos = get_range(offset).get_begin_pos();
+                    if (bool(check_flag & NEGATIVE) == (pos == std::string_view::npos)) return offset;
+                    if (is_pos_lock) break;
+                }
             }
 
             if ((check_flag & BEGIN) && (s.back() == '\r' || s.back() == '\n') && offset == s.size()) return offset;
@@ -122,15 +140,6 @@ namespace tustr
                 : std::string_view::npos;
         }
     };
-
-    /**
-     * @fn
-     * @brief 言明について解析
-    */
-    template <cstr Pattern, std::size_t Pos>
-    struct regex_assertion_parser
-        : public regex_assertion_boundary_parser<Pattern, Pos>
-    {};
 }
 
 #endif // TUSTRCPP_INCLUDE_GUARD_REGEX_ASSERTION_HPP
