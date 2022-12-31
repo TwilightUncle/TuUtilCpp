@@ -94,7 +94,7 @@ namespace tustr
         template <std::size_t N>
         static constexpr regex_match_range generated_func(std::string_view s, std::size_t offset, bool is_pos_lock, regex_capture_store<N>& cs)
         {
-            return value.contains(char_to_cstr(s[offset]))
+            return offset < s.size() && value.contains(char_to_cstr(s[offset]))
                 ? regex_match_range{offset, 1}
                 : regex_match_range::make_unmatch();
         }

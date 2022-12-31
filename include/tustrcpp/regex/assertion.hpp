@@ -33,8 +33,8 @@ namespace tustr
             switch (Pattern[Pos]) {
                 case '^': return BEGIN | EMPTY | LOOK_BEHIND;
                 case '$': return END | EMPTY | LOOK_AHEAD;
-                case 'b': return BEGIN | END | WORD_BOUNDARY;
-                case 'B': return EMPTY | IN_WORD;
+                case 'b': return BEGIN | END | WORD_BOUNDARY | LOOK_AHEAD | LOOK_BEHIND;
+                case 'B': return EMPTY | IN_WORD | LOOK_AHEAD | LOOK_BEHIND;
             }
             if (exists_in_position("(?=", Pattern, Pos))    return LOOK_AHEAD;
             if (exists_in_position("(?!", Pattern, Pos))    return LOOK_AHEAD | NEGATIVE;
@@ -67,6 +67,7 @@ namespace tustr
                     return assertion_pattern.remove_prefix_suffix<3, 1>();
                 else return assertion_pattern.remove_prefix_suffix<4, 1>();
             }
+            else if constexpr (assertion_pattern[0] == 'b' || assertion_pattern[0] == 'B') return cstr{"\\w"};
             // TODO: 仮。orを定義したら正規表現パターンを返すようにする
             else return cstr{""};
         }();
@@ -100,11 +101,6 @@ namespace tustr
                             if ((check_flag & BEGIN) && (before == '\r' || before == '\n')) return offset;
                             if ((check_flag & END) && (current == '\r' || current == '\n')) return offset;
                         }
-
-                        const auto is_before_word = regex_char_class::get_const_char_set<'w'>().contains(char_to_cstr(before));
-                        const auto is_current_word = regex_char_class::get_const_char_set<'w'>().contains(char_to_cstr(current));
-                        if ((check_flag & WORD_BOUNDARY) && is_before_word != is_current_word) return offset;
-                        if ((check_flag & IN_WORD) && is_before_word && is_current_word) return offset;
                     }
                     if (is_pos_lock) break;
                 }
@@ -120,16 +116,26 @@ namespace tustr
                         i > 0 && result_pos != ofs;
                         result_pos = get_range(--i).get_end_pos()
                     );
-                    return (result_pos == ofs) ? ofs : std::string_view::npos;
+                    return result_pos == ofs;
                 };
 
                 for (; offset <= s.size(); offset++) {
-                    auto pos = std::string_view::npos;
+                    bool match = false;
+                    bool behind_match = false;
+                    bool ahead_match = false;
                     if constexpr (check_flag & LOOK_BEHIND) 
-                        pos = check_behind(offset);
+                        match = behind_match = check_behind(offset);
                     if constexpr (check_flag & LOOK_AHEAD)
-                        pos = get_range(offset).get_begin_pos();
-                    if (bool(check_flag & NEGATIVE) == (pos == std::string_view::npos)) return offset;
+                        match = ahead_match = (get_range(offset).get_begin_pos() != std::string_view::npos);
+
+                    if (check_flag & IN_WORD) {
+                        if (behind_match && ahead_match) return offset;
+                    }
+                    else if (check_flag & WORD_BOUNDARY) {
+                        if (behind_match != ahead_match) return offset;
+                    }
+                    else if (bool(check_flag & NEGATIVE) != match) return offset;
+
                     if (is_pos_lock) break;
                 }
             }
