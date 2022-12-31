@@ -72,12 +72,42 @@ namespace tustr
     };
 
     /**
+     * @class
+     * @brief 正規表現に一致した範囲を格納する
+    */
+    struct regex_match_range : public std::array<std::size_t, 2>
+    {
+        inline static constexpr auto make_unmatch() { return regex_match_range{std::string_view::npos, 0}; }
+
+        inline constexpr bool is_match() const noexcept { return this->at(0) != std::string_view::npos; }
+        inline constexpr explicit operator bool() const noexcept { return this->is_match(); }
+        inline constexpr auto get_begin_pos() const noexcept { return this->at(0); }
+        inline constexpr auto match_length() const noexcept { return this->at(1); }
+        inline constexpr auto get_end_pos() const noexcept { return bool(*this) ? this->at(0) + this->at(1) : std::string_view::npos; }
+
+        inline constexpr void set_begin_pos(std::size_t pos) noexcept { this->at(0) = pos; }
+        inline constexpr void set_begin_pos(const regex_match_range& range) noexcept { this->at(0) = range[0]; }
+        inline constexpr void set_match_length(std::size_t len) noexcept { this->at(1) = len; }
+        inline constexpr void set_match_length(const regex_match_range& range) noexcept { this->at(1) = range[1]; }
+        inline constexpr void set_end_pos(std::size_t pos) noexcept
+        {
+            if (pos == std::string_view::npos) (*this) = make_unmatch();
+            else if (this->at(0) > pos) {
+                this->at(0) = pos;
+                this->at(1) = 0;
+            }
+            else this->at(1) = pos - this->at(0);
+        }
+        inline constexpr void set_end_pos(const regex_match_range& range) noexcept { this->set_end_pos(range.get_end_pos()); }
+    };
+
+    /**
      * @brief forやwhileで回せるように、関数へ変換する際の型
     */
     template <std::size_t N>
-    using regex_generated_function_type = std::size_t(std::string_view, std::size_t, bool, regex_capture_store<N>&);
+    using regex_generated_function_type = regex_match_range(std::string_view, std::size_t, bool, regex_capture_store<N>&);
     template <std::size_t N>
-    using regex_generated_function_ptr_type = std::size_t(*)(std::string_view, std::size_t, bool, regex_capture_store<N>&);
+    using regex_generated_function_ptr_type = regex_match_range(*)(std::string_view, std::size_t, bool, regex_capture_store<N>&);
 
     template <class T>
     concept RegexParseable = requires {
@@ -128,6 +158,7 @@ namespace tustr
 #include <tustrcpp/regex/capture.hpp>
 #include <tustrcpp/regex/general.hpp>
 #include <tustrcpp/regex/reference.hpp>
+#include <tustrcpp/regex/assertion.hpp>
 #include <tustrcpp/regex/perser.hpp>
 
 namespace tustr
@@ -154,9 +185,9 @@ namespace tustr
 
     /**
      * @class
-     * @brief 正規表現格納オブジェクト。動的に生成されたパターンについては考慮しない
+     * @brief 正規表現格納オブジェクト。動的に生成されたパターンについては考慮しない。インスタンスにはパターンマッチの結果が格納される。
      * @tparam Pttern 正規表現の文字列リテラルを指定
-     * @tparam Parser 正規表現を解析するテンプレートクラスを指定
+     * @tparam Parser 正規表現を解析するテンプレートクラスを指定(option)
     */
     template <cstr Pattern, template <cstr, std::size_t> class Parser = regex_parser>
     struct regex
@@ -245,25 +276,79 @@ namespace tustr
         static constexpr auto run(std::string_view s, std::size_t offset = 0, bool is_pos_lock = false)
         {
             auto cs = capture_store_type{};
-            for(function_ptr_type before = nullptr; const auto& f : match_rules) {
-                if ((offset = f(s, offset, std::exchange(is_pos_lock, true), cs)) == std::string_view::npos)
-                    return std::pair{cs, offset};
-                before = f;
+            auto re = regex_match_range::make_unmatch();
+            for(const auto& f : match_rules) {
+                const auto part_range = f(s, offset, std::exchange(is_pos_lock, true), cs);
+                if (!part_range)
+                    return std::pair{cs, regex_match_range::make_unmatch()};
+                re.set_begin_pos((std::min)(part_range.get_begin_pos(), re.get_begin_pos()));
+                offset = part_range.get_end_pos();
             }
-            return std::pair{cs, offset};
+            re.set_end_pos(offset);
+            return std::pair{cs, re};
         }
 
         /**
          * @fn
          * @brief 引数の文字列内に、パターンマッチする部分が内包されていれば真
         */
-        static constexpr bool search(std::string_view s) { return run(s, 0).second != std::string_view::npos; }
+        static constexpr bool search(std::string_view s) { return bool(run(s, 0).second); }
 
         /**
          * @fn
          * @brief 引数の文字列の全体がパターンマッチしている場合真
         */
-        static constexpr bool match(std::string_view s) { return run(s, 0, true).second == s.size(); }
+        static constexpr bool match(std::string_view s) { return run(s, 0, true).second.match_length() == s.size(); }
+
+    private:
+        // 結果キャプチャリストを格納
+        const capture_store_type capture_list;
+        // 結果のマッチ範囲を格納
+        const regex_match_range match_range;
+        // テスト対象
+        const std::string_view test_target;
+
+        constexpr regex(std::string_view test_target, const std::pair<capture_store_type, regex_match_range>& run_result)
+            : capture_list(run_result.first)
+            , match_range(run_result.second)
+            , test_target(test_target)
+        {}
+
+    public:
+        /**
+         * @fn
+         * @brief パターンマッチを行い、インスタンスには結果を格納する
+         * @param test_target パターンマッチの対象文字列
+         * @param offset 対象文字列のパターンマッチを開始する位置
+         * @param is_pos_lock 真の場合パターンマッチの位置をoffsetで固定する。offsetの位置から一致していない場合一致なしとなる
+        */
+        constexpr regex(std::string_view test_target, std::size_t offset = 0, bool is_pos_lock = false)
+            : regex(test_target, run(test_target, offset, is_pos_lock))
+        {}
+
+        /**
+         * @fn
+         * @brief 検査対象文字列にパターンマッチしている部分が存在したら真
+        */
+        constexpr bool is_find() const noexcept { return bool(match_range); }
+
+        /**
+         * @fn
+         * @brief 検査対象の文字列全体がパターンマッチしているとき真
+        */
+        constexpr bool is_match() const noexcept { return match_range.match_length() == test_target.size(); }
+
+        /**
+         * @fn
+         * @brief パターンマッチした部分の文字列を取得する。抽出結果なしの場合空文字を返却
+         * @param index 0を指定すると、一致個所全体、1以上の値を設定すると該当するキャプチャのマッチを取得
+        */
+        constexpr std::string_view get_match_part(std::size_t index = 0) const
+        {
+            if (!this->is_find() || this->capture_list.size() < index) return std::string_view{};
+            if (!index) return test_target.substr(match_range.get_begin_pos(), match_range.match_length());
+            return this->capture_list.get(index - 1);
+        }
     };
 
     using empty_regex = regex<"">;

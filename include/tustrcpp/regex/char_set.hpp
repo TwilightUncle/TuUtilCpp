@@ -85,18 +85,19 @@ namespace tustr
          * @brief 解析結果生成された処理
         */
         template <std::size_t N>
-        static constexpr std::size_t generated_func(std::string_view s, std::size_t offset, bool is_pos_lock, regex_capture_store<N>& cs)
+        static constexpr regex_match_range generated_func(std::string_view s, std::size_t offset, bool is_pos_lock, regex_capture_store<N>& cs)
         {
             bool is_match = false;
-
-            while (offset < s.size()) {
-                is_match = value.contains(char_to_cstr(s[offset++]));
+            for (; offset < s.size(); offset++) {
+                is_match = value.contains(char_to_cstr(s[offset]));
                 if (!allow_or_deny) is_match = !is_match;
                 // 位置固定されていた場合、最初の位置のみ検証して、ループ脱出
                 if (is_pos_lock || is_match) break;
             }
 
-            return is_match ? offset : std::string_view::npos;
+            return is_match
+                ? regex_match_range{offset, 1}
+                : regex_match_range::make_unmatch();
         }
     };
 }

@@ -92,10 +92,13 @@ namespace tustr
      * @brief 数量詞単体では効果をなさない(直前の繰り返しする対象が必要)ため、付与する形式とする
     */
     template <cstr Pattern, RegexParseable T>
-    struct add_quantifier : public T
+    struct add_quantifier
     {
-        static constexpr std::size_t min_count = 1;
-        static constexpr std::size_t max_count = 1;
+        struct type : public T
+        {
+            static constexpr std::size_t min_count = 1;
+            static constexpr std::size_t max_count = 1;
+        };
     };
 
     template <cstr Pattern, RegexParseable T>
@@ -103,39 +106,42 @@ namespace tustr
         T::end_pos < Pattern.size()
         && bool(regex_char_attribute::attributes[Pattern[T::end_pos]] & regex_char_attribute::QUANTIFIER)
     )
-    struct add_quantifier<Pattern, T> : public T
+    struct add_quantifier<Pattern, T>
     {
-        using parsed_quantifier = regex_quantifier_perser<Pattern, T::end_pos>;
-        static constexpr auto min_count = parsed_quantifier::min_count;
-        static constexpr auto max_count = parsed_quantifier::max_count;
-
-        // end_pos上書き
-        static constexpr auto end_pos = parsed_quantifier::end_pos;
-
-        /**
-         * @fn
-         * @brief 解析結果生成された処理(上書き)
-        */
-        template <std::size_t N>
-        static constexpr std::size_t generated_func(std::string_view s, std::size_t offset, bool is_pos_lock, regex_capture_store<N>& cs)
+        struct type : public T
         {
-            std::size_t cnt = 0;
+            using parsed_quantifier = regex_quantifier_perser<Pattern, T::end_pos>;
+            static constexpr auto min_count = parsed_quantifier::min_count;
+            static constexpr auto max_count = parsed_quantifier::max_count;
 
-            // 何回連続でマッチするかカウントする
-            for (
-                std::size_t temp_offset = offset;
-                temp_offset < s.size()
-                && cnt < max_count
-                && (
-                    temp_offset = T::generated_func<N>(s, temp_offset, std::exchange(is_pos_lock, true), cs)
-                ) != std::string_view::npos;
-                offset = temp_offset, cnt++
-            );
+            // end_pos上書き
+            static constexpr auto end_pos = parsed_quantifier::end_pos;
 
-            return (cnt < min_count)
-                ? std::string_view::npos
-                : offset;
-        }
+            /**
+             * @fn
+             * @brief 解析結果生成された処理(上書き)
+            */
+            template <std::size_t N>
+            static constexpr regex_match_range generated_func(std::string_view s, std::size_t offset, bool is_pos_lock, regex_capture_store<N>& cs)
+            {
+                std::size_t cnt = 0;
+                auto range = regex_match_range::make_unmatch();
+
+                // 何回連続でマッチするかカウントする
+                for (regex_match_range temp_range{offset, 0}; temp_range.get_end_pos() < s.size() && cnt < max_count; cnt++) {
+                    if (!(temp_range = T::generated_func<N>(s, temp_range.get_end_pos(), std::exchange(is_pos_lock, true), cs))) break;
+                    range.set_begin_pos((std::min)(range.get_begin_pos(), temp_range.get_begin_pos()));
+                    range.set_end_pos(temp_range);
+                }
+
+                // 0回マッチでもOKの場合
+                if (!cnt && !min_count) range.set_begin_pos(offset);
+
+                return (cnt < min_count)
+                    ? regex_match_range::make_unmatch()
+                    : range;
+            }
+        };
     };
 }
 

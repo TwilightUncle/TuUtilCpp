@@ -39,13 +39,14 @@ namespace tustr
          * @brief ‰ğÍŒ‹‰Ê¶¬‚³‚ê‚½ˆ—
         */
         template <std::size_t N>
-        static constexpr std::size_t generated_func(std::string_view s, std::size_t offset, bool is_pos_lock, regex_capture_store<N>& cs)
+        static constexpr regex_match_range generated_func(std::string_view s, std::size_t offset, bool is_pos_lock, regex_capture_store<N>& cs)
         {
             auto pos = is_pos_lock
                 ? (exists_in_position(value, s, offset) ? offset : std::string_view::npos)
                 : find(value, s, offset);
-            if (pos != std::string_view::npos) pos += value.size();
-            return pos;
+            return (pos == std::string_view::npos)
+                ? regex_match_range::make_unmatch()
+                : regex_match_range{pos, value.size()};
         }
     };
 }
