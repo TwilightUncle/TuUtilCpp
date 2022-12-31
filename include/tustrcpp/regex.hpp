@@ -74,26 +74,6 @@ namespace tustr
 namespace tustr
 {
     /**
-     * @fn
-     * @brief 渡された文字範囲を許可/拒否リストに展開し、与えられた文字列がマッチするか判定する関数オブジェクトを返却する
-     * TODO: いらないのでいつかテストの修正と本関数を削除する
-    */
-    template <cstr Pattern, std::size_t Pos>
-    constexpr auto get_regex_char_range_matcher()
-    {
-        return [](const std::string& comp) -> bool {
-            using range_parser = regex_char_set_parser<Pattern, Pos>;
-            return is_allowed_string(
-                comp,
-                range_parser::allow_or_deny,
-                range_parser::value.data(),
-                range_parser::bk_value.data(),
-                false
-            );
-        };
-    }
-
-    /**
      * @class
      * @brief 正規表現格納オブジェクト。動的に生成されたパターンについては考慮しない。インスタンスにはパターンマッチの結果が格納される。
      * @tparam Pttern 正規表現の文字列リテラルを指定

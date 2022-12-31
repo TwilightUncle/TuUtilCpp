@@ -115,33 +115,6 @@ namespace tustr
 
     /**
      * @fn
-     * @brief 許可リストまたは拒否リストとして指定したchar_listを参照し、targetが有効か検証する。バックスラッシュを含む場合、二つで一文字と認識する
-     * @param target 検証する文字列
-     * @param allow_or_deny allowの場合trueを指定、denyの場合falseを指定
-     * @param char_list 許可または拒否文字のリスト。allow_or_denyによって拒否リストか許可リストか制御する
-    */
-    inline constexpr bool is_allowed_string(
-        const std::string& target,
-        bool allow_or_deny,
-        const std::string& char_list,
-        const std::string& bk_char_list,
-        bool is_bk_escape = true
-    ) {
-        const auto collate_list = [&allow_or_deny](const std::string& list, char ch)->bool {
-            // 許可リストの中から未発見のものがあった場合または、
-            // 拒否リストの中から発見されたものがあった場合、失敗
-            return (list.find_first_of(ch) == std::string::npos) == allow_or_deny;
-        };
-
-        for (int i = 0; i < target.size(); i++) {
-            if ((target[i] != '\\' || !is_bk_escape) && collate_list(char_list, target[i])) return false;
-            else if (target[i] == '\\' && i < target.size() - 1 && collate_list(bk_char_list, target[++i])) return false;
-        }
-        return true;
-    }
-
-    /**
-     * @fn
      * @brief indexの位置の一つ前の文字が指定の文字か確認する
     */
     inline constexpr bool eq_before_char(std::string_view target, int index, char ch)

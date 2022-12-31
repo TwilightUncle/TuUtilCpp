@@ -1,20 +1,47 @@
 #include <gtest/gtest.h>
 #include <tustrcpp/regex.hpp>
 
-
 using namespace std::string_view_literals;
+
+/**
+ * @fn
+ * @brief 許可リストまたは拒否リストとして指定したchar_listを参照し、targetが有効か検証する。バックスラッシュを含む場合、二つで一文字と認識する
+ * @param target 検証する文字列
+ * @param allow_or_deny allowの場合trueを指定、denyの場合falseを指定
+ * @param char_list 許可または拒否文字のリスト。allow_or_denyによって拒否リストか許可リストか制御する
+*/
+static constexpr bool is_allowed_string(
+    const std::string& target,
+    bool allow_or_deny,
+    const std::string& char_list,
+    const std::string& bk_char_list,
+    bool is_bk_escape = true
+) {
+    const auto collate_list = [&allow_or_deny](const std::string& list, char ch)->bool {
+        // 許可リストの中から未発見のものがあった場合または、
+        // 拒否リストの中から発見されたものがあった場合、失敗
+        return (list.find_first_of(ch) == std::string::npos) == allow_or_deny;
+    };
+
+    for (int i = 0; i < target.size(); i++) {
+        if ((target[i] != '\\' || !is_bk_escape) && collate_list(char_list, target[i])) return false;
+        else if (target[i] == '\\' && i < target.size() - 1 && collate_list(bk_char_list, target[++i])) return false;
+    }
+    return true;
+}
+
 TEST(tustrcpptest, RegexFunctionTest)
 {
     constexpr auto case1 = tustr::is_collect_regex_back_slash("a\\0\\\\a\\\\");
     constexpr auto case2 = tustr::is_collect_regex_back_slash("a\\0\\\\a\\");
     constexpr auto case3 = tustr::is_collect_regex_back_slash("\\a\\0\\\\a\\\\");
     constexpr auto case4 = tustr::is_collect_regex_back_slash("a\\0\\\\\\a\\\\");
-    constexpr auto case5 = tustr::is_allowed_string("aaaab", true, "ab", "");
-    constexpr auto case6 = tustr::is_allowed_string("\\0\\n\\\\", true, "", "0n\\");
-    constexpr auto case7 = tustr::is_allowed_string("a\\0\\\\a\\\\", true, "a", "\\0");
-    constexpr auto case8 = tustr::is_allowed_string("a\\0\\\\a\\\\", false, "bc", "ds");
-    constexpr auto case9 = tustr::is_allowed_string("ab\\0\\\\a\\\\", true, "a", "\\0");
-    constexpr auto case10 = tustr::is_allowed_string("a\\d\\0\\\\a\\\\", false, "bc", "ds");
+    constexpr auto case5 = is_allowed_string("aaaab", true, "ab", "");
+    constexpr auto case6 = is_allowed_string("\\0\\n\\\\", true, "", "0n\\");
+    constexpr auto case7 = is_allowed_string("a\\0\\\\a\\\\", true, "a", "\\0");
+    constexpr auto case8 = is_allowed_string("a\\0\\\\a\\\\", false, "bc", "ds");
+    constexpr auto case9 = is_allowed_string("ab\\0\\\\a\\\\", true, "a", "\\0");
+    constexpr auto case10 = is_allowed_string("a\\d\\0\\\\a\\\\", false, "bc", "ds");
     ASSERT_TRUE(case1);
     ASSERT_FALSE(case2);
     ASSERT_FALSE(case3);
@@ -47,16 +74,36 @@ TEST(tustrcpptest, RegexExtractBrancketTest)
     // constexpr auto case19 = tustr::regex_bracket_inner<"abc(defg{hijk\\}lm](opq\\))rs", 3>::value;
 }
 
+/**
+ * @fn
+ * @brief 渡された文字範囲を許可/拒否リストに展開し、与えられた文字列がマッチするか判定する関数オブジェクトを返却する
+ * TODO: いらないのでいつかテストの修正と本関数を削除する
+*/
+template <tustr::cstr Pattern, std::size_t Pos>
+static constexpr auto get_regex_char_range_matcher()
+{
+    return [](const std::string& comp) -> bool {
+        using range_parser = tustr::regex_char_set_parser<Pattern, Pos>;
+        return is_allowed_string(
+            comp,
+            range_parser::allow_or_deny,
+            range_parser::value.data(),
+            range_parser::bk_value.data(),
+            false
+        );
+    };
+}
+
 TEST(tustrcpptest, RegexCharRangeParseTest)
 {
     // 文字クラス,バックスラッシュ,文字範囲指定なし
-    constexpr auto case19 = tustr::get_regex_char_range_matcher<"ab[-abc.]", 2>()(".c-aba");
-    constexpr auto case20 = tustr::get_regex_char_range_matcher<"[abc.-]", 0>()(".c-aba");
-    constexpr auto case21 = tustr::get_regex_char_range_matcher<"[-abc.]", 0>()("b.c-d");
-    constexpr auto case22 = tustr::get_regex_char_range_matcher<"[-abc.]", 0>()("def");
-    constexpr auto case23 = tustr::get_regex_char_range_matcher<"[^-abc]", 0>()("cab");
-    constexpr auto case24 = tustr::get_regex_char_range_matcher<"[^-abc]", 0>()("bcd");
-    constexpr auto case25 = tustr::get_regex_char_range_matcher<"[^-abc]", 0>()("def^");
+    constexpr auto case19 = get_regex_char_range_matcher<"ab[-abc.]", 2>()(".c-aba");
+    constexpr auto case20 = get_regex_char_range_matcher<"[abc.-]", 0>()(".c-aba");
+    constexpr auto case21 = get_regex_char_range_matcher<"[-abc.]", 0>()("b.c-d");
+    constexpr auto case22 = get_regex_char_range_matcher<"[-abc.]", 0>()("def");
+    constexpr auto case23 = get_regex_char_range_matcher<"[^-abc]", 0>()("cab");
+    constexpr auto case24 = get_regex_char_range_matcher<"[^-abc]", 0>()("bcd");
+    constexpr auto case25 = get_regex_char_range_matcher<"[^-abc]", 0>()("def^");
     EXPECT_TRUE(case19);
     EXPECT_TRUE(case20);
     EXPECT_FALSE(case21);
@@ -66,17 +113,17 @@ TEST(tustrcpptest, RegexCharRangeParseTest)
     EXPECT_TRUE(case25);
 
     // 文字クラス指定あり
-    constexpr auto case26 = tustr::get_regex_char_range_matcher<"[\\d]", 0>()("0123456789");
-    constexpr auto case27 = tustr::get_regex_char_range_matcher<"[\\d]", 0>()("0123456789a");
-    constexpr auto case28 = tustr::get_regex_char_range_matcher<"[^\\d]", 0>()("0aabc_%&\t\\[");
-    constexpr auto case29 = tustr::get_regex_char_range_matcher<"[^\\d]", 0>()("abc_%&\t\\[");
-    constexpr auto case30 = tustr::get_regex_char_range_matcher<"[\\D]", 0>()("0aabc_%&\t\\[");
-    constexpr auto case31 = tustr::get_regex_char_range_matcher<"[\\D]", 0>()("aabc_%&\t\\[");
-    constexpr auto case32 = tustr::get_regex_char_range_matcher<"[^\\D]", 0>()("0123456789");
-    constexpr auto case33 = tustr::get_regex_char_range_matcher<"[^\\D]", 0>()("0123456789a");
+    constexpr auto case26 = get_regex_char_range_matcher<"[\\d]", 0>()("0123456789");
+    constexpr auto case27 = get_regex_char_range_matcher<"[\\d]", 0>()("0123456789a");
+    constexpr auto case28 = get_regex_char_range_matcher<"[^\\d]", 0>()("0aabc_%&\t\\[");
+    constexpr auto case29 = get_regex_char_range_matcher<"[^\\d]", 0>()("abc_%&\t\\[");
+    constexpr auto case30 = get_regex_char_range_matcher<"[\\D]", 0>()("0aabc_%&\t\\[");
+    constexpr auto case31 = get_regex_char_range_matcher<"[\\D]", 0>()("aabc_%&\t\\[");
+    constexpr auto case32 = get_regex_char_range_matcher<"[^\\D]", 0>()("0123456789");
+    constexpr auto case33 = get_regex_char_range_matcher<"[^\\D]", 0>()("0123456789a");
 
     // 生成した関数を保持できるかも確認(レンジのテスト)
-    constexpr auto range_matcher1 = tustr::get_regex_char_range_matcher<"[0-5a-dA\\-E\\t]", 0>();
+    constexpr auto range_matcher1 = get_regex_char_range_matcher<"[0-5a-dA\\-E\\t]", 0>();
 
     EXPECT_TRUE(case26);
     EXPECT_FALSE(case27);
