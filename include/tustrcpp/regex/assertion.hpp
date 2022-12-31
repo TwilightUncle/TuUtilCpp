@@ -79,15 +79,15 @@ namespace tustr
          * @brief 解析結果生成された処理
         */
         template <std::size_t N>
-        static constexpr std::size_t generated_func(std::string_view s, std::size_t offset, bool is_pos_lock, regex_capture_store<N>& cs)
+        static constexpr regex_match_range generated_func(std::string_view s, std::size_t offset, bool is_pos_lock, regex_capture_store<N>& cs)
         {
             // 任意パターンの先読み、後読み共に前後に何かしらの文字列が存在することが前提と思われるため、
             // 空文字の場合は全て処理を返す
             if (s.empty()) return (check_flag & EMPTY)
-                ? 0
-                : std::string_view::npos;
-            if ((check_flag & BEGIN) && offset == 0) return 0;
-            if ((check_flag & END) && (s.front() == '\r' || s.front() == '\n') && offset == 0) return 0;
+                ? regex_match_range{0, 0}
+                : regex_match_range::make_unmatch();
+            if ((check_flag & BEGIN) && offset == 0) return regex_match_range{0, 0};
+            if ((check_flag & END) && (s.front() == '\r' || s.front() == '\n') && offset == 0) return regex_match_range{0, 0};
             
             // TODO: 仮。orを定義したら全て正規表現パターンで判定を行うよう修正
             if (inner_match_pattern.empty())
@@ -98,8 +98,8 @@ namespace tustr
 
                         // CR と LFの間の場合は改行位置として認識させない
                         if (before != '\r' || current != '\n') {
-                            if ((check_flag & BEGIN) && (before == '\r' || before == '\n')) return offset;
-                            if ((check_flag & END) && (current == '\r' || current == '\n')) return offset;
+                            if ((check_flag & BEGIN) && (before == '\r' || before == '\n')) return regex_match_range{offset, 0};
+                            if ((check_flag & END) && (current == '\r' || current == '\n')) return regex_match_range{offset, 0};
                         }
                     }
                     if (is_pos_lock) break;
@@ -128,22 +128,22 @@ namespace tustr
                     if constexpr (check_flag & LOOK_AHEAD)
                         match = ahead_match = (get_range(offset).get_begin_pos() != std::string_view::npos);
 
-                    if (check_flag & IN_WORD) {
-                        if (behind_match && ahead_match) return offset;
+                    if constexpr (check_flag & IN_WORD) {
+                        if (behind_match && ahead_match) return regex_match_range{offset, 0};
                     }
-                    else if (check_flag & WORD_BOUNDARY) {
-                        if (behind_match != ahead_match) return offset;
+                    else if constexpr (check_flag & WORD_BOUNDARY) {
+                        if (behind_match != ahead_match) return regex_match_range{offset, 0};
                     }
-                    else if (bool(check_flag & NEGATIVE) != match) return offset;
+                    else if (bool(check_flag & NEGATIVE) != match) return regex_match_range{offset, 0};
 
                     if (is_pos_lock) break;
                 }
             }
 
-            if ((check_flag & BEGIN) && (s.back() == '\r' || s.back() == '\n') && offset == s.size()) return offset;
+            if ((check_flag & BEGIN) && (s.back() == '\r' || s.back() == '\n') && offset == s.size()) return regex_match_range{offset, 0};
             return (check_flag & END) && offset == s.size()
-                ? offset
-                : std::string_view::npos;
+                ? regex_match_range{offset, 0}
+                : regex_match_range::make_unmatch();
         }
     };
 }

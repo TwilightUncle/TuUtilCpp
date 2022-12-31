@@ -34,11 +34,42 @@ namespace tustr
 
         /**
          * @fn
-         * @brief キャプチャグループ用
+         * @brief 言明($と^)の場合
+        */
+        template <cstr Pattern, std::size_t Pos>
+        requires (bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::ANCHOR) && Pattern[Pos] != '(')
+        struct resolve_regex_parser<Pattern, Pos> : public regex_assertion_parser<Pattern, Pos> {};
+
+        namespace br
+        {
+            /**
+             * @fn
+             * @brief 括弧に続く文字に対して解決する(デフォルトはキャプチャ)
+            */
+            template <cstr Pattern, std::size_t Pos>
+            struct resolve_regex_parser : public regex_capture_parser<Pattern, Pos> {};
+
+            /**
+             * @fn
+             * @brief 前後読みの言明
+            */
+            template <cstr Pattern, std::size_t Pos>
+            requires (
+                exists_in_position("(?=", Pattern, Pos)
+                || exists_in_position("(?!", Pattern, Pos)
+                || exists_in_position("(?<=", Pattern, Pos)
+                || exists_in_position("(?<!", Pattern, Pos)
+            )
+            struct resolve_regex_parser<Pattern, Pos> : public regex_assertion_parser<Pattern, Pos> {};
+        }
+
+        /**
+         * @fn
+         * @brief 丸括弧から始まる場合
         */
         template <cstr Pattern, std::size_t Pos>
         requires (Pattern[Pos] == '(')
-        struct resolve_regex_parser<Pattern, Pos> : public regex_capture_parser<Pattern, Pos> {};
+        struct resolve_regex_parser<Pattern, Pos> : public br::resolve_regex_parser<Pattern, Pos> {};
 
         namespace bk
         {
@@ -64,6 +95,14 @@ namespace tustr
             template <cstr Pattern, std::size_t Pos>
             requires (regex_char_attribute::check_attrs_conjuction<regex_char_attribute::CLASS, regex_char_attribute::BK>(Pattern[Pos]))
             struct resolve_regex_parser<Pattern, Pos> : public regex_char_class_parser<Pattern, Pos> {};
+
+            /**
+             * @fn
+             * @brief バックスラッシュから始まる言明
+            */
+            template <cstr Pattern, std::size_t Pos>
+            requires (regex_char_attribute::check_attrs_conjuction<regex_char_attribute::ANCHOR, regex_char_attribute::BK>(Pattern[Pos]))
+            struct resolve_regex_parser<Pattern, Pos> : public regex_assertion_parser<Pattern, Pos> {};
         }
 
         /**
