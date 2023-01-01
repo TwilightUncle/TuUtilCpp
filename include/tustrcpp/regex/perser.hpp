@@ -128,6 +128,10 @@ namespace tustr
         template <template <cstr, RegexParseable> class F, cstr Pattern> using bind_regex_pattern_t = bind_regex_pattern<F, Pattern>::type;
     }
 
+    
+    template <cstr Pattern, std::size_t Pos>
+    struct regex_parser : public regex_or_parser<Pattern, get_or_pos_regex_pattern(Pattern)> {};
+
     /**
      * @class
      * @brief 正規表現パターンの指定個所の解析を行う(継承は一括で適用したい関数が増えることを想定して、右畳み込みで実装)
@@ -135,7 +139,8 @@ namespace tustr
      * @tparam Pos Patternの解析する開始位置を指定
     */
     template <cstr Pattern, std::size_t Pos>
-    struct regex_parser : public tudb::foldr_t<
+    requires (get_or_pos_regex_pattern(Pattern) == std::string_view::npos)
+    struct regex_parser<Pattern, Pos> : public tudb::foldr_t<
         tudb::quote<tudb::apply>,
         _regex::bind_regex_pattern_t<add_quantifier, Pattern>,
         _regex::resolve_regex_parser<Pattern, Pos>
