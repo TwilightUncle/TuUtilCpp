@@ -10,7 +10,6 @@ namespace tustr
     /**
      * @fn
      * @brief 言明について解析
-     * キャプチャと同等に再帰的にパターン解析し、境界アサーションは文字列マッチングに置き換えて実行する方向で考える
     */
     template <cstr Pattern, std::size_t Pos>
     struct regex_assertion_parser
@@ -68,11 +67,11 @@ namespace tustr
                 else return assertion_pattern.remove_prefix_suffix<4, 1>();
             }
             else if constexpr (assertion_pattern[0] == 'b' || assertion_pattern[0] == 'B') return cstr{"\\w"};
-            // TODO: 仮。orを定義したら正規表現パターンを返すようにする
+            else if constexpr (assertion_pattern[0] == '^' || assertion_pattern[0] == '$') return cstr{"\\r|\\n|\\r\\n"};
             else return cstr{""};
         }();
 
-        // static_assert(inner_match_pattern.size() > 0, "Specified assertion match pattern is empty.");
+        static_assert(inner_match_pattern.size() > 0, "Specified assertion match pattern is empty.");
 
         /**
          * @fn
@@ -87,24 +86,8 @@ namespace tustr
                 ? regex_match_range{0, 0}
                 : regex_match_range::make_unmatch();
             if ((check_flag & BEGIN) && offset == 0) return regex_match_range{0, 0};
-            if ((check_flag & END) && (s.front() == '\r' || s.front() == '\n') && offset == 0) return regex_match_range{0, 0};
             
-            // TODO: 仮。orを定義したら全て正規表現パターンで判定を行うよう修正
-            if (inner_match_pattern.empty())
-                for (; offset < s.size(); offset++) {
-                    if (offset > 0) {
-                        const auto before = s[offset - 1];
-                        const auto current = s[offset];
-
-                        // CR と LFの間の場合は改行位置として認識させない
-                        if (before != '\r' || current != '\n') {
-                            if ((check_flag & BEGIN) && (before == '\r' || before == '\n')) return regex_match_range{offset, 0};
-                            if ((check_flag & END) && (current == '\r' || current == '\n')) return regex_match_range{offset, 0};
-                        }
-                    }
-                    if (is_pos_lock) break;
-                }
-            else {
+            {
                 const auto get_range = [s](std::size_t ofs) {
                     using assertion_matcher = regex<inner_match_pattern, regex_parser>;
                     return assertion_matcher::run(s, ofs, true).second;
@@ -137,10 +120,11 @@ namespace tustr
                     else if (bool(check_flag & NEGATIVE) != match) return regex_match_range{offset, 0};
 
                     if (is_pos_lock) break;
+                    // 文字サイズと位置が等しい場合、位置をインクリメントさせない
+                    if (offset == s.size()) break;
                 }
             }
 
-            if ((check_flag & BEGIN) && (s.back() == '\r' || s.back() == '\n') && offset == s.size()) return regex_match_range{offset, 0};
             return (check_flag & END) && offset == s.size()
                 ? regex_match_range{offset, 0}
                 : regex_match_range::make_unmatch();

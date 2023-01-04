@@ -68,6 +68,7 @@ namespace tustr
 #include <tustrcpp/regex/capture.hpp>
 #include <tustrcpp/regex/general.hpp>
 #include <tustrcpp/regex/reference.hpp>
+#include <tustrcpp/regex/or.hpp>
 #include <tustrcpp/regex/assertion.hpp>
 #include <tustrcpp/regex/perser.hpp>
 
