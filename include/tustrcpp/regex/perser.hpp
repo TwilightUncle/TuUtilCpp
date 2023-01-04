@@ -149,7 +149,7 @@ namespace tustr
      * @brief 正規表現パターン解析(orの場合)
     */
     template <cstr Pattern, std::size_t Pos>
-    struct regex_parser : public regex_or_parser<Pattern, get_or_pos_regex_pattern(Pattern)>
+    struct regex_parser
     {
         using parsed_type = regex_or_parser<Pattern, get_or_pos_regex_pattern(Pattern)>;
         static constexpr std::size_t max_capture_count = parsed_type::inner_regex::parser::max_capture_count;
@@ -169,11 +169,8 @@ namespace tustr
     */
     template <cstr Pattern, std::size_t Pos>
     requires (get_or_pos_regex_pattern(Pattern) == std::string_view::npos && Pattern.size() > Pos)
-    struct regex_parser<Pattern, Pos> : public tudb::foldr_t<
-        tudb::quote<tudb::apply>,
-        _regex::bind_regex_pattern_t<add_quantifier, Pattern>,
-        _regex::resolve_regex_parser<Pattern, Pos>
-    > {
+    struct regex_parser<Pattern, Pos>
+    {
         // 単体で指定してはいけない文字か検証
         static_assert(
             !(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::DENY),
