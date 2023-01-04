@@ -144,9 +144,23 @@ namespace tustr
         template <template <cstr, RegexParseable> class F, cstr Pattern> using bind_regex_pattern_t = bind_regex_pattern<F, Pattern>::type;
     }
 
-    
+    /**
+     * @class
+     * @brief 正規表現パターン解析(orの場合)
+    */
     template <cstr Pattern, std::size_t Pos>
-    struct regex_parser : public regex_or_parser<Pattern, get_or_pos_regex_pattern(Pattern)> {};
+    struct regex_parser : public regex_or_parser<Pattern, get_or_pos_regex_pattern(Pattern)>
+    {
+        using parsed_type = regex_or_parser<Pattern, get_or_pos_regex_pattern(Pattern)>;
+        static constexpr std::size_t max_capture_count = parsed_type::inner_regex::max_capture_count;
+
+        static constexpr auto exec(std::string_view subject, std::size_t offset = 0, bool is_pos_lock = false)
+        {
+            regex_capture_store<max_capture_count> capture_store{};
+            auto result = parsed_type::template generated_func<max_capture_count>(subject, offset, is_pos_lock, capture_store);
+            return std::pair{capture_store, result};
+        }
+    };
 
     /**
      * @class
@@ -155,7 +169,7 @@ namespace tustr
      * @tparam Pos Patternの解析する開始位置を指定
     */
     template <cstr Pattern, std::size_t Pos>
-    requires (get_or_pos_regex_pattern(Pattern) == std::string_view::npos)
+    requires (get_or_pos_regex_pattern(Pattern) == std::string_view::npos && Pattern.size() > Pos)
     struct regex_parser<Pattern, Pos> : public tudb::foldr_t<
         tudb::quote<tudb::apply>,
         _regex::bind_regex_pattern_t<add_quantifier, Pattern>,
@@ -166,6 +180,90 @@ namespace tustr
             !(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::DENY),
             "Invalied template argment [Pattern, Pos]. Must not specified of '}', ')', ']'."
         );
+
+        using parsed_type = tudb::foldr_t<
+            tudb::quote<tudb::apply>,
+            _regex::bind_regex_pattern_t<add_quantifier, Pattern>,
+            _regex::resolve_regex_parser<Pattern, Pos>
+        >;
+
+        using parsed_next_type = regex_parser<Pattern, parsed_type::end_pos>;
+
+        static constexpr std::size_t max_capture_count = []() {
+            constexpr std::size_t allowed_max_capture_count = 65535;
+            std::size_t cnt{};
+            // 再帰的にregexが定義されている場合
+            if constexpr (InnerRegexReferable<parsed_type>)
+                cnt += (parsed_type::max_count == std::string_view::npos)
+                    ? allowed_max_capture_count
+                    : parsed_type::inner_regex::max_capture_count * parsed_type::max_count;
+            // 自身がキャプチャ
+            if constexpr (RegexParserCaptureable<parsed_type>)
+                cnt += (std::min)(allowed_max_capture_count, parsed_type::max_count);
+            return cnt + parsed_next_type::max_capture_count;
+        }();
+
+        static constexpr auto exec(std::string_view subject, std::size_t offset = 0, bool is_pos_lock = false)
+        {
+            std::size_t cnt = 0;
+            regex_capture_store<max_capture_count> capture_store{};
+            regex_capture_store<parsed_next_type::max_capture_count> temp_capture_store{};
+            auto result = regex_match_result::make_unmatch();
+            bool is_lock = is_pos_lock;
+
+            for (
+                auto end_pos = offset, begin_pos = std::string_view::npos;
+                end_pos < subject.size() && cnt < parsed_type::max_count;
+            ) {
+                const auto temp_result = parsed_type::template generated_func2<max_capture_count>(
+                    subject,
+                    end_pos,
+                    std::exchange(is_lock, true),
+                    capture_store // captureの接続がおかしい？
+                );
+                if (!temp_result) break;
+                begin_pos = (std::min)(begin_pos, temp_result.get_begin_pos());
+                end_pos = temp_result.get_end_pos();
+
+                if (++cnt >= parsed_type::min_count ) {
+                    const auto [rc, re] = parsed_next_type::exec(subject, end_pos, true);
+                    if (!re) continue;
+                    result.set_begin_pos(begin_pos);
+                    result.set_end_pos(re);
+                    temp_capture_store = rc;
+                    if constexpr (parsed_type::negative) break;
+                }
+            }
+
+            // 0回マッチでもOKの場合
+            if (!cnt && !parsed_type::min_count)
+                std::tie(temp_capture_store, result) = parsed_next_type::exec(subject, offset, is_pos_lock);
+
+            capture_store.push_back(temp_capture_store);
+
+            return std::pair{
+                capture_store,
+                (cnt < parsed_type::min_count)
+                    ? regex_match_result::make_unmatch()
+                    : result
+            };
+        }
+    };
+
+    /**
+     * @class
+     * @brief 再帰定義の終点
+    */
+    template <cstr Pattern, std::size_t Pos>
+    requires (Pattern.size() <= Pos)
+    struct regex_parser<Pattern, Pos>
+    {
+        static constexpr std::size_t max_capture_count = 0;
+
+        static constexpr auto exec(std::string_view subject, std::size_t offset = 0, bool is_pos_lock = false)
+        {
+            return std::pair{regex_capture_store<max_capture_count>{}, regex_match_result{offset, 0}};
+        }
     };
 }
 

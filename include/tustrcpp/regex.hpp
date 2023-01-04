@@ -194,6 +194,11 @@ namespace tustr
             return std::pair{cs, re};
         }
 
+        static constexpr auto exec(std::string_view s, std::size_t offset = 0, bool is_pos_lock = false)
+        {
+            return Parser<Pattern, 0>::exec(s, offset, is_pos_lock);
+        }
+
         /**
          * @fn
          * @brief 引数の文字列内に、パターンマッチする部分が内包されていれば真

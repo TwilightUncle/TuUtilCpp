@@ -98,6 +98,13 @@ namespace tustr
         {
             static constexpr std::size_t min_count = 1;
             static constexpr std::size_t max_count = 1;
+            static constexpr bool negative = true;
+
+            template <std::size_t N>
+            static constexpr regex_match_result generated_func2(std::string_view s, std::size_t offset, bool is_pos_lock, regex_capture_store<N>& cs)
+            {
+                return T::generated_func<N>(s, offset, is_pos_lock, cs);
+            }
         };
     };
 
@@ -116,6 +123,13 @@ namespace tustr
 
             // end_posè„èëÇ´
             static constexpr auto end_pos = parsed_quantifier::end_pos;
+            static constexpr bool negative = parsed_quantifier::negative;
+
+            template <std::size_t N>
+            static constexpr regex_match_result generated_func2(std::string_view s, std::size_t offset, bool is_pos_lock, regex_capture_store<N>& cs)
+            {
+                return T::generated_func<N>(s, offset, is_pos_lock, cs);
+            }
 
             /**
              * @fn
