@@ -52,7 +52,7 @@ namespace tustr
         using pref_regex = regex<pref_str, regex_parser>;
         using suf_regex = regex<suf_str, regex_parser>;
         using inner_regex = std::conditional_t<
-            (pref_regex::max_capture_count > suf_regex::max_capture_count),
+            (pref_regex::parser::max_capture_count > suf_regex::parser::max_capture_count),
             pref_regex,
             suf_regex
         >;
@@ -62,19 +62,19 @@ namespace tustr
          * @brief ‰ğÍŒ‹‰Ê¶¬‚³‚ê‚½ˆ—(cs‚ÌXV‚à‚¢‚éH)
         */
         template <std::size_t N>
-        static constexpr regex_match_range generated_func(std::string_view s, std::size_t offset, bool is_pos_lock, regex_capture_store<N>& cs)
+        static constexpr regex_match_result generated_func(std::string_view s, std::size_t offset, bool is_pos_lock, regex_capture_store<N>& cs)
         {
-            const auto [cs1, re1] = pref_regex::run(s, offset, is_pos_lock);
+            const auto [cs1, re1] = pref_regex::exec(s, offset, is_pos_lock);
             if (re1) {
                 cs.push_back(cs1);
                 return re1;
             }
-            const auto [cs2, re2] = suf_regex::run(s, offset, is_pos_lock);
+            const auto [cs2, re2] = suf_regex::exec(s, offset, is_pos_lock);
             if (re2) {
                 cs.push_back(cs2);
                 return re2;
             }
-            return regex_match_range::make_unmatch();
+            return regex_match_result::make_unmatch();
         }
     };
 }

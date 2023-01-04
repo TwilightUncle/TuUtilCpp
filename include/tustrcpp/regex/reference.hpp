@@ -19,12 +19,12 @@ namespace tustr
          * @brief 解析結果生成された処理。既にキャプチャが存在することが前提のため、is_pos_lockの真偽に関わらず位置は常に固定でOK
         */
         template <std::size_t N>
-        static constexpr regex_match_range generated_func(std::string_view s, std::size_t offset, bool is_pos_lock, regex_capture_store<N>& cs)
+        static constexpr regex_match_result generated_func(std::string_view s, std::size_t offset, bool is_pos_lock, regex_capture_store<N>& cs)
         {
             const auto search_str = cs.get(reference_index);
             return exists_in_position(search_str, s, offset)
-                ? regex_match_range{offset, search_str.size()}
-                : regex_match_range::make_unmatch();
+                ? regex_match_result{offset, search_str.size()}
+                : regex_match_result::make_unmatch();
         }
     };
 }

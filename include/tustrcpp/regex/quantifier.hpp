@@ -98,6 +98,7 @@ namespace tustr
         {
             static constexpr std::size_t min_count = 1;
             static constexpr std::size_t max_count = 1;
+            static constexpr bool negative = true;
         };
     };
 
@@ -116,31 +117,7 @@ namespace tustr
 
             // end_pos上書き
             static constexpr auto end_pos = parsed_quantifier::end_pos;
-
-            /**
-             * @fn
-             * @brief 解析結果生成された処理(上書き)
-            */
-            template <std::size_t N>
-            static constexpr regex_match_range generated_func(std::string_view s, std::size_t offset, bool is_pos_lock, regex_capture_store<N>& cs)
-            {
-                std::size_t cnt = 0;
-                auto range = regex_match_range::make_unmatch();
-
-                // 何回連続でマッチするかカウントする
-                for (regex_match_range temp_range{offset, 0}; temp_range.get_end_pos() < s.size() && cnt < max_count; cnt++) {
-                    if (!(temp_range = T::generated_func<N>(s, temp_range.get_end_pos(), std::exchange(is_pos_lock, true), cs))) break;
-                    range.set_begin_pos((std::min)(range.get_begin_pos(), temp_range.get_begin_pos()));
-                    range.set_end_pos(temp_range);
-                }
-
-                // 0回マッチでもOKの場合
-                if (!cnt && !min_count) range.set_begin_pos(offset);
-
-                return (cnt < min_count)
-                    ? regex_match_range::make_unmatch()
-                    : range;
-            }
+            static constexpr bool negative = parsed_quantifier::negative;
         };
     };
 }

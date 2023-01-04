@@ -15,7 +15,7 @@ namespace tustr
      * @brief forやwhileで回せるように、関数へ変換する際の型
     */
     template <std::size_t N>
-    using regex_generated_function_ptr_type = regex_match_range(*)(std::string_view, std::size_t, bool, regex_capture_store<N>&);
+    using regex_generated_function_ptr_type = regex_match_result(*)(std::string_view, std::size_t, bool, regex_capture_store<N>&);
 
     template <class T>
     concept RegexParseable = requires {
@@ -29,7 +29,7 @@ namespace tustr
                 std::declval<bool>(),
                 std::declval<regex_capture_store<0>&>()
             )
-        } -> std::same_as<regex_match_range>;
+        } -> std::same_as<regex_match_result>;
         {
             T::template generated_func<1>(
                 std::declval<std::string_view>(),
@@ -37,7 +37,7 @@ namespace tustr
                 std::declval<bool>(),
                 std::declval<regex_capture_store<1>&>()
             )
-        } -> std::same_as<regex_match_range>;
+        } -> std::same_as<regex_match_result>;
         {
             T::template generated_func<10>(
                 std::declval<std::string_view>(),
@@ -45,7 +45,7 @@ namespace tustr
                 std::declval<bool>(),
                 std::declval<regex_capture_store<10>&>()
             )
-        } -> std::same_as<regex_match_range>;
+        } -> std::same_as<regex_match_result>;
 
         // 違反している場合、無限再帰が発生してしまう
         requires T::begin_pos < T::end_pos;
@@ -98,99 +98,17 @@ namespace tustr
     template <cstr Pattern, template <cstr, std::size_t> class Parser = regex_parser>
     struct regex
     {
-        // キャプチャ可能な最大数(静的に格納結果のキャプチャ領域を確保したいため、上限を設ける)
-        static constexpr std::size_t allowed_max_capture_count = 65535;
-    private:
         // 文法上おかしいバックスラッシュの出現はここで検出、エラーとする
         static_assert(is_collect_regex_back_slash(Pattern.view()));
 
-        /**
-         * @fn
-         * @brief 各解析結果における想定される最大のキャプチャ数を計算する
-        */
-        template <RegexParseable ParserPart>
-        static consteval auto get_parser_max_capture_count()
+        using parser = Parser<Pattern, 0>;
+        using capture_store_type = regex_capture_store<parser::max_capture_count>;
+        using function_ptr_type = regex_generated_function_ptr_type<parser::max_capture_count>;
+
+        static constexpr auto exec(std::string_view s, std::size_t offset = 0, bool is_pos_lock = false)
         {
-            std::size_t cnt{};
-            // 再帰的にregexが定義されている場合
-            if constexpr (InnerRegexReferable<ParserPart>)
-                cnt += (ParserPart::max_count == std::string_view::npos)
-                    ? allowed_max_capture_count
-                    : ParserPart::inner_regex::max_capture_count * ParserPart::max_count;
-            // 自身がキャプチャ
-            if constexpr (RegexParserCaptureable<ParserPart>)
-                cnt += (std::min)(allowed_max_capture_count, ParserPart::max_count);
-            return cnt;
-        }
-
-        /**
-         * @fn
-         * @brief 正規表現の解析
-        */
-        template <std::size_t Pos, std::size_t N, std::size_t MaxCaptureCnt>
-        static consteval auto parse()
-        {
-            // あらかじめ、Pattern[Pos]の値によって部分特殊化し、
-            // 呼び出される処理をオーバーロードできるようにする
-            using parser = Parser<Pattern, Pos>;
-
-            static_assert(RegexParseable<parser>, "Invaild template argment [Parser]. See concept [RegexParseable].");
-
-            auto [f_arr, capture_cnt] = parse<
-                parser::end_pos,
-                N + 1,
-                (std::min)(MaxCaptureCnt + get_parser_max_capture_count<parser>(), allowed_max_capture_count)
-            >();
-
-            f_arr[N] = parser::generated_func;
-            return std::pair{f_arr, capture_cnt};
-        }
-
-        /**
-         * @fn
-         * @brief 再帰の終端
-        */
-        template <std::size_t Pos, std::size_t N, std::size_t MaxCaptureCnt>
-        requires (Pattern.size() <= Pos)
-        static consteval auto parse()
-        {
-            // 各perserで以下関数ポインタに格納可能な関数を定義することで、
-            // 解析結果を関数ポインタの配列として保持できるようにする
-            return std::pair{
-                std::array<regex_generated_function_ptr_type<MaxCaptureCnt>, N>{nullptr},
-                MaxCaptureCnt
-            };
-        }
-
-        // 解析を実行し、悔過を格納
-        static constexpr auto parse_result = parse<0, 0, 0>();
-
-    public:
-        // 正規表現のパターンを解析した結果のルールを関数集合としたもの
-        static constexpr auto& match_rules = parse_result.first;
-
-        // 想定される最大キャプチャ数
-        static constexpr auto max_capture_count = parse_result.second;
-
-        using capture_store_type = regex_capture_store<max_capture_count>;
-        using function_ptr_type = regex_generated_function_ptr_type<max_capture_count>;
-
-        /**
-         * @fn
-         * @brief パターンマッチの基本。実行後の結果はPtternのsizeとなるが、一致しなかった場合はstd::string_view::nposが返される
-        */
-        static constexpr auto run(std::string_view s, std::size_t offset = 0, bool is_pos_lock = false)
-        {
-            auto cs = capture_store_type{};
-            auto re = regex_match_range::make_unmatch();
-            for(const auto& f : match_rules) {
-                const auto part_range = f(s, offset, std::exchange(is_pos_lock, true), cs);
-                if (!part_range)
-                    return std::pair{cs, regex_match_range::make_unmatch()};
-                re.set_begin_pos((std::min)(part_range.get_begin_pos(), re.get_begin_pos()));
-                offset = part_range.get_end_pos();
-            }
-            re.set_end_pos(offset);
+            auto cs = regex_capture_store<parser::max_capture_count>{};
+            auto re = parser::exec<parser::max_capture_count>(s, offset, is_pos_lock, cs);
             return std::pair{cs, re};
         }
 
@@ -198,23 +116,23 @@ namespace tustr
          * @fn
          * @brief 引数の文字列内に、パターンマッチする部分が内包されていれば真
         */
-        static constexpr bool search(std::string_view s) { return bool(run(s, 0).second); }
+        static constexpr bool search(std::string_view s) { return bool(exec(s, 0).second); }
 
         /**
          * @fn
          * @brief 引数の文字列の全体がパターンマッチしている場合真
         */
-        static constexpr bool match(std::string_view s) { return run(s, 0, true).second.match_length() == s.size(); }
+        static constexpr bool match(std::string_view s) { return exec(s, 0, true).second.match_length() == s.size(); }
 
     private:
         // 結果キャプチャリストを格納
         const capture_store_type capture_list;
         // 結果のマッチ範囲を格納
-        const regex_match_range match_range;
+        const regex_match_result match_range;
         // テスト対象
         const std::string_view test_target;
 
-        constexpr regex(std::string_view test_target, const std::pair<capture_store_type, regex_match_range>& run_result)
+        constexpr regex(std::string_view test_target, const std::pair<capture_store_type, regex_match_result>& run_result)
             : capture_list(run_result.first)
             , match_range(run_result.second)
             , test_target(test_target)
@@ -229,7 +147,7 @@ namespace tustr
          * @param is_pos_lock 真の場合パターンマッチの位置をoffsetで固定する。offsetの位置から一致していない場合一致なしとなる
         */
         constexpr regex(std::string_view test_target, std::size_t offset = 0, bool is_pos_lock = false)
-            : regex(test_target, run(test_target, offset, is_pos_lock))
+            : regex(test_target, exec(test_target, offset, is_pos_lock))
         {}
 
         /**
