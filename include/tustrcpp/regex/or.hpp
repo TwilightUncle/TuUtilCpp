@@ -64,12 +64,12 @@ namespace tustr
         template <std::size_t N>
         static constexpr regex_match_result generated_func(std::string_view s, std::size_t offset, bool is_pos_lock, regex_capture_store<N>& cs)
         {
-            const auto [cs1, re1] = pref_regex::run(s, offset, is_pos_lock);
+            const auto [cs1, re1] = pref_regex::exec(s, offset, is_pos_lock);
             if (re1) {
                 cs.push_back(cs1);
                 return re1;
             }
-            const auto [cs2, re2] = suf_regex::run(s, offset, is_pos_lock);
+            const auto [cs2, re2] = suf_regex::exec(s, offset, is_pos_lock);
             if (re2) {
                 cs.push_back(cs2);
                 return re2;

@@ -169,47 +169,31 @@ namespace tustr
         // 正規表現のパターンを解析した結果のルールを関数集合としたもの
         static constexpr auto& match_rules = parse_result.first;
 
-        // 想定される最大キャプチャ数
+        // 想定される最大キャプチャ数(いらないから消すこと)
         static constexpr auto max_capture_count = parse_result.second;
 
-        using capture_store_type = regex_capture_store<max_capture_count>;
-        using function_ptr_type = regex_generated_function_ptr_type<max_capture_count>;
-
-        /**
-         * @fn
-         * @brief パターンマッチの基本。実行後の結果はPtternのsizeとなるが、一致しなかった場合はstd::string_view::nposが返される
-        */
-        static constexpr auto run(std::string_view s, std::size_t offset = 0, bool is_pos_lock = false)
-        {
-            auto cs = capture_store_type{};
-            auto re = regex_match_result::make_unmatch();
-            for(const auto& f : match_rules) {
-                const auto part_range = f(s, offset, std::exchange(is_pos_lock, true), cs);
-                if (!part_range)
-                    return std::pair{cs, regex_match_result::make_unmatch()};
-                re.set_begin_pos((std::min)(part_range.get_begin_pos(), re.get_begin_pos()));
-                offset = part_range.get_end_pos();
-            }
-            re.set_end_pos(offset);
-            return std::pair{cs, re};
-        }
+        using parser = Parser<Pattern, 0>;
+        using capture_store_type = regex_capture_store<parser::max_capture_count>;
+        using function_ptr_type = regex_generated_function_ptr_type<parser::max_capture_count>;
 
         static constexpr auto exec(std::string_view s, std::size_t offset = 0, bool is_pos_lock = false)
         {
-            return Parser<Pattern, 0>::exec(s, offset, is_pos_lock);
+            auto cs = regex_capture_store<parser::max_capture_count>{};
+            auto re = parser::exec<parser::max_capture_count>(s, offset, is_pos_lock, cs);
+            return std::pair{cs, re};
         }
 
         /**
          * @fn
          * @brief 引数の文字列内に、パターンマッチする部分が内包されていれば真
         */
-        static constexpr bool search(std::string_view s) { return bool(run(s, 0).second); }
+        static constexpr bool search(std::string_view s) { return bool(exec(s, 0).second); }
 
         /**
          * @fn
          * @brief 引数の文字列の全体がパターンマッチしている場合真
         */
-        static constexpr bool match(std::string_view s) { return run(s, 0, true).second.match_length() == s.size(); }
+        static constexpr bool match(std::string_view s) { return exec(s, 0, true).second.match_length() == s.size(); }
 
     private:
         // 結果キャプチャリストを格納
@@ -234,7 +218,7 @@ namespace tustr
          * @param is_pos_lock 真の場合パターンマッチの位置をoffsetで固定する。offsetの位置から一致していない場合一致なしとなる
         */
         constexpr regex(std::string_view test_target, std::size_t offset = 0, bool is_pos_lock = false)
-            : regex(test_target, run(test_target, offset, is_pos_lock))
+            : regex(test_target, exec(test_target, offset, is_pos_lock))
         {}
 
         /**

@@ -90,7 +90,7 @@ namespace tustr
             {
                 const auto get_range = [s](std::size_t ofs) {
                     using assertion_matcher = regex<inner_match_pattern, regex_parser>;
-                    return assertion_matcher::run(s, ofs, true).second;
+                    return assertion_matcher::exec(s, ofs, true).second;
                 };
                 const auto check_behind = [&get_range](std::size_t ofs) {
                     std::size_t result_pos = ofs + 1;

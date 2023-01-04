@@ -154,11 +154,10 @@ namespace tustr
         using parsed_type = regex_or_parser<Pattern, get_or_pos_regex_pattern(Pattern)>;
         static constexpr std::size_t max_capture_count = parsed_type::inner_regex::max_capture_count;
 
-        static constexpr auto exec(std::string_view subject, std::size_t offset = 0, bool is_pos_lock = false)
+        template <std::size_t MaxCaptureCount>
+        static constexpr auto exec(std::string_view subject, std::size_t offset, bool is_pos_lock, regex_capture_store<MaxCaptureCount>& capture_store)
         {
-            regex_capture_store<max_capture_count> capture_store{};
-            auto result = parsed_type::template generated_func<max_capture_count>(subject, offset, is_pos_lock, capture_store);
-            return std::pair{capture_store, result};
+            return parsed_type::template generated_func<MaxCaptureCount>(subject, offset, is_pos_lock, capture_store);
         }
     };
 
@@ -203,50 +202,47 @@ namespace tustr
             return cnt + parsed_next_type::max_capture_count;
         }();
 
-        static constexpr auto exec(std::string_view subject, std::size_t offset = 0, bool is_pos_lock = false)
+        template <std::size_t MaxCaptureCount>
+        static constexpr auto exec(std::string_view subject, std::size_t offset, bool is_pos_lock, regex_capture_store<MaxCaptureCount>& capture_store)
         {
             std::size_t cnt = 0;
-            regex_capture_store<max_capture_count> capture_store{};
-            regex_capture_store<parsed_next_type::max_capture_count> temp_capture_store{};
+            regex_capture_store<MaxCaptureCount> temp_capture_store = capture_store;
             auto result = regex_match_result::make_unmatch();
             bool is_lock = is_pos_lock;
 
-            for (
-                auto end_pos = offset, begin_pos = std::string_view::npos;
-                end_pos < subject.size() && cnt < parsed_type::max_count;
-            ) {
-                const auto temp_result = parsed_type::template generated_func2<max_capture_count>(
+            for (auto end_pos = offset, begin_pos = std::string_view::npos; end_pos < subject.size() && cnt < parsed_type::max_count;) {
+                // 判定が真の時のみ値が更新されるよう、一旦一時変数に更新値を記録
+                auto cs = temp_capture_store;
+                const auto temp_result = parsed_type::template generated_func2<MaxCaptureCount>(
                     subject,
                     end_pos,
                     std::exchange(is_lock, true),
-                    capture_store // captureの接続がおかしい？
+                    cs
                 );
                 if (!temp_result) break;
+
+                // 判定通ったので更新
                 begin_pos = (std::min)(begin_pos, temp_result.get_begin_pos());
                 end_pos = temp_result.get_end_pos();
+                temp_capture_store = cs;
 
                 if (++cnt >= parsed_type::min_count ) {
-                    const auto [rc, re] = parsed_next_type::exec(subject, end_pos, true);
+                    const auto re = parsed_next_type::exec<MaxCaptureCount>(subject, end_pos, true, temp_capture_store);
                     if (!re) continue;
                     result.set_begin_pos(begin_pos);
                     result.set_end_pos(re);
-                    temp_capture_store = rc;
+                    capture_store = temp_capture_store;
                     if constexpr (parsed_type::negative) break;
                 }
             }
 
             // 0回マッチでもOKの場合
             if (!cnt && !parsed_type::min_count)
-                std::tie(temp_capture_store, result) = parsed_next_type::exec(subject, offset, is_pos_lock);
+                result = parsed_next_type::exec<MaxCaptureCount>(subject, offset, is_pos_lock, capture_store);
 
-            capture_store.push_back(temp_capture_store);
-
-            return std::pair{
-                capture_store,
-                (cnt < parsed_type::min_count)
+            return (cnt < parsed_type::min_count)
                     ? regex_match_result::make_unmatch()
-                    : result
-            };
+                    : result;
         }
     };
 
@@ -260,9 +256,10 @@ namespace tustr
     {
         static constexpr std::size_t max_capture_count = 0;
 
-        static constexpr auto exec(std::string_view subject, std::size_t offset = 0, bool is_pos_lock = false)
+        template <std::size_t MaxCaptureCount>
+        static constexpr auto exec(std::string_view subject, std::size_t offset, bool is_pos_lock, regex_capture_store<MaxCaptureCount>&)
         {
-            return std::pair{regex_capture_store<max_capture_count>{}, regex_match_result{offset, 0}};
+            return regex_match_result{offset, 0};
         }
     };
 }

@@ -433,101 +433,6 @@ TEST(tustrcpptest, RegexParseTest)
     EXPECT_EQ(case17, 18);
 }
 
-TEST(tustrcpptest, RegexRunTest)
-{
-    using type1 = tustr::regex<"abcdef[ghi].\\daz[$%&_1]\\[+\\^?">;
-    constexpr auto case1 = type1::run("abcdefg#5az&[^");
-    constexpr auto case2 = type1::run("abcdefv#5az&[^");
-    constexpr auto case3 = type1::run("nnnabcdefg#5az&[^nnn");
-    constexpr auto case4 = type1::run("nnnabcdefng#5az&[^nnn");
-    constexpr auto case5 = type1::run("abcdefg#5az&[[[");
-    constexpr auto case6 = type1::run("abcdefg#5az&[^^");
-    constexpr auto case7 = type1::run("abcdefg#5az&^^");
-
-    EXPECT_EQ(case1.second.get_end_pos(), 14);
-    EXPECT_EQ(case2.second.get_end_pos(), std::string_view::npos);
-    EXPECT_EQ(case3.second.get_end_pos(), 17);
-    EXPECT_EQ(case4.second.get_end_pos(), std::string_view::npos);
-    EXPECT_EQ(case5.second.get_end_pos(), 15);
-    EXPECT_EQ(case6.second.get_end_pos(), 14);
-    EXPECT_EQ(case7.second.get_end_pos(), std::string_view::npos);
-
-    using type2 = tustr::regex<"abcdef(ghi[jkl].\\d\\]m){2}\\)nop">;
-    // グループ二回繰り返し
-    constexpr auto case8 = type2::run("abcdefghij%1]mghil<9]m)nop");
-    constexpr auto case9 = type2::run("nnnabcdefghij%1]mghil<9]m)nopnnn");
-    // グループ一回繰り返し
-    constexpr auto case10 = type2::run("abcdefghij%1]m)nop");
-    // グループ三回繰り返し
-    constexpr auto case11 = type2::run("abcdefghij%1]mghil<9]mghik#0]m)nop");
-
-    EXPECT_EQ(case8.second.get_end_pos(), 26);
-    EXPECT_EQ(case9.second.get_end_pos(), 29);
-    EXPECT_EQ(case10.second.get_end_pos(), std::string_view::npos);
-    EXPECT_EQ(case11.second.get_end_pos(), std::string_view::npos);
-
-    EXPECT_EQ(case8.first.get(0), "ghij%1]m"sv);
-    EXPECT_EQ(case8.first.get(1), "ghil<9]m"sv);
-
-    using type3 = tustr::regex<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}(aa)\\)nop">;
-    constexpr auto case12 = type3::run("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nop");
-
-    EXPECT_EQ(case12.second.get_end_pos(), 43);
-    ASSERT_EQ(case12.first.size(), 12);
-    EXPECT_EQ(case12.first.get(0), "ghij@ghij$ghij%1]m"sv);
-    EXPECT_EQ(case12.first.get(1), "ghij@"sv);
-    EXPECT_EQ(case12.first.get(2), "ghij$"sv);
-    EXPECT_EQ(case12.first.get(3), "ghij%"sv);
-    EXPECT_EQ(case12.first.get(4), "1]m"sv);
-    EXPECT_EQ(case12.first.get(5), "]m"sv);
-    EXPECT_EQ(case12.first.get(6), "ghij/ghij|2]m"sv);
-    EXPECT_EQ(case12.first.get(7), "ghij/"sv);
-    EXPECT_EQ(case12.first.get(8), "ghij|"sv);
-    EXPECT_EQ(case12.first.get(9), "2]m"sv);
-    EXPECT_EQ(case12.first.get(10), "]m"sv);
-    EXPECT_EQ(case12.first.get(11), "aa"sv);
-
-    using type4 = tustr::regex<"(?=.{0,4}[A-Z]).{5}">;
-    constexpr auto case13 = type4::run("abcde1234f");
-    constexpr auto case14 = type4::run("aBcde1234f");
-    constexpr auto case15 = type4::run("abcdE1234f");
-    constexpr auto case16 = type4::run("abcde1234F");
-
-    EXPECT_EQ(case13.second.get_begin_pos(), std::string_view::npos);
-    // EXPECT_EQ(case14.second.get_begin_pos(), 0); // 繰り返し終了位置の判定がおかしいため、修正すること
-    EXPECT_EQ(case15.second.get_begin_pos(), 0);
-    EXPECT_EQ(case16.second.get_begin_pos(), 5);
-
-    using type5 = tustr::regex<"abcde|\\d{3}|ab(hij|klmn)">;
-    constexpr auto case17 = type5::run("abcde");
-    constexpr auto case18 = type5::run("123");
-    constexpr auto case19 = type5::run("abhij");
-    constexpr auto case20 = type5::run("abklmn");
-    
-    ASSERT_EQ(case17.first.size(), 0);
-    EXPECT_EQ(case17.second.get_end_pos(), 5);
-    ASSERT_EQ(case18.first.size(), 0);
-    EXPECT_EQ(case18.second.get_end_pos(), 3);
-    ASSERT_EQ(case19.first.size(), 1);
-    EXPECT_EQ(case19.second.get_end_pos(), 5);
-    EXPECT_EQ(case19.first.get(0), "hij"sv);
-    ASSERT_EQ(case20.first.size(), 1);
-    EXPECT_EQ(case20.second.get_end_pos(), 6);
-    EXPECT_EQ(case20.first.get(0), "klmn"sv);
-
-    using type6 = tustr::regex<"ab(bbb|aa)">;
-    constexpr auto case21 = type6::run("abaa");
-    constexpr auto case22 = type6::run("abbbb");
-
-    ASSERT_EQ(case21.first.size(), 1);
-    EXPECT_EQ(case21.second.get_end_pos(), 4);
-    EXPECT_EQ(case21.first.get(0), "aa"sv);
-    ASSERT_EQ(case22.first.size(), 1);
-    EXPECT_EQ(case22.second.get_end_pos(), 5);
-    EXPECT_EQ(case22.first.get(0), "bbb"sv);
-
-}
-
 TEST(tustrcpptest, RegexExecTest)
 {
     using type1 = tustr::regex<"abcdef[ghi].\\daz[$%&_1]\\[+\\^?">;
@@ -589,7 +494,7 @@ TEST(tustrcpptest, RegexExecTest)
     constexpr auto case16 = type4::exec("abcde1234F");
 
     EXPECT_EQ(case13.second.get_begin_pos(), std::string_view::npos);
-    // EXPECT_EQ(case14.second.get_begin_pos(), 0); // 繰り返し終了位置の判定がおかしいため、修正すること
+    EXPECT_EQ(case14.second.get_begin_pos(), 0);
     EXPECT_EQ(case15.second.get_begin_pos(), 0);
     EXPECT_EQ(case16.second.get_begin_pos(), 5);
 
