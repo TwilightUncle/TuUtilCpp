@@ -62,7 +62,7 @@ namespace tustr
          * @brief ‰ğÍŒ‹‰Ê¶¬‚³‚ê‚½ˆ—(cs‚ÌXV‚à‚¢‚éH)
         */
         template <std::size_t N>
-        static constexpr regex_match_range generated_func(std::string_view s, std::size_t offset, bool is_pos_lock, regex_capture_store<N>& cs)
+        static constexpr regex_match_result generated_func(std::string_view s, std::size_t offset, bool is_pos_lock, regex_capture_store<N>& cs)
         {
             const auto [cs1, re1] = pref_regex::run(s, offset, is_pos_lock);
             if (re1) {
@@ -74,7 +74,7 @@ namespace tustr
                 cs.push_back(cs2);
                 return re2;
             }
-            return regex_match_range::make_unmatch();
+            return regex_match_result::make_unmatch();
         }
     };
 }

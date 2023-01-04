@@ -78,14 +78,14 @@ namespace tustr
          * @brief 解析結果生成された処理
         */
         template <std::size_t N>
-        static constexpr regex_match_range generated_func(std::string_view s, std::size_t offset, bool is_pos_lock, regex_capture_store<N>& cs)
+        static constexpr regex_match_result generated_func(std::string_view s, std::size_t offset, bool is_pos_lock, regex_capture_store<N>& cs)
         {
             // 任意パターンの先読み、後読み共に前後に何かしらの文字列が存在することが前提と思われるため、
             // 空文字の場合は全て処理を返す
             if (s.empty()) return (check_flag & EMPTY)
-                ? regex_match_range{0, 0}
-                : regex_match_range::make_unmatch();
-            if ((check_flag & BEGIN) && offset == 0) return regex_match_range{0, 0};
+                ? regex_match_result{0, 0}
+                : regex_match_result::make_unmatch();
+            if ((check_flag & BEGIN) && offset == 0) return regex_match_result{0, 0};
             
             {
                 const auto get_range = [s](std::size_t ofs) {
@@ -112,12 +112,12 @@ namespace tustr
                         match = ahead_match = (get_range(offset).get_begin_pos() != std::string_view::npos);
 
                     if constexpr (check_flag & IN_WORD) {
-                        if (behind_match && ahead_match) return regex_match_range{offset, 0};
+                        if (behind_match && ahead_match) return regex_match_result{offset, 0};
                     }
                     else if constexpr (check_flag & WORD_BOUNDARY) {
-                        if (behind_match != ahead_match) return regex_match_range{offset, 0};
+                        if (behind_match != ahead_match) return regex_match_result{offset, 0};
                     }
-                    else if (bool(check_flag & NEGATIVE) != match) return regex_match_range{offset, 0};
+                    else if (bool(check_flag & NEGATIVE) != match) return regex_match_result{offset, 0};
 
                     if (is_pos_lock) break;
                     // 文字サイズと位置が等しい場合、位置をインクリメントさせない
@@ -126,8 +126,8 @@ namespace tustr
             }
 
             return (check_flag & END) && offset == s.size()
-                ? regex_match_range{offset, 0}
-                : regex_match_range::make_unmatch();
+                ? regex_match_result{offset, 0}
+                : regex_match_result::make_unmatch();
         }
     };
 }

@@ -72,9 +72,9 @@ namespace tustr
      * @class
      * @brief ³‹K•\Œ»‚Éˆê’v‚µ‚½”ÍˆÍ‚ğŠi”[‚·‚é
     */
-    struct regex_match_range : public std::array<std::size_t, 2>
+    struct regex_match_result : public std::array<std::size_t, 2>
     {
-        inline static constexpr auto make_unmatch() { return regex_match_range{std::string_view::npos, 0}; }
+        inline static constexpr auto make_unmatch() { return regex_match_result{std::string_view::npos, 0}; }
 
         inline constexpr bool is_match() const noexcept { return this->at(0) != std::string_view::npos; }
         inline constexpr explicit operator bool() const noexcept { return this->is_match(); }
@@ -83,9 +83,9 @@ namespace tustr
         inline constexpr auto get_end_pos() const noexcept { return bool(*this) ? this->at(0) + this->at(1) : std::string_view::npos; }
 
         inline constexpr void set_begin_pos(std::size_t pos) noexcept { this->at(0) = pos; }
-        inline constexpr void set_begin_pos(const regex_match_range& range) noexcept { this->at(0) = range[0]; }
+        inline constexpr void set_begin_pos(const regex_match_result& range) noexcept { this->at(0) = range[0]; }
         inline constexpr void set_match_length(std::size_t len) noexcept { this->at(1) = len; }
-        inline constexpr void set_match_length(const regex_match_range& range) noexcept { this->at(1) = range[1]; }
+        inline constexpr void set_match_length(const regex_match_result& range) noexcept { this->at(1) = range[1]; }
         inline constexpr void set_end_pos(std::size_t pos) noexcept
         {
             if (pos == std::string_view::npos) (*this) = make_unmatch();
@@ -95,7 +95,7 @@ namespace tustr
             }
             else this->at(1) = pos - this->at(0);
         }
-        inline constexpr void set_end_pos(const regex_match_range& range) noexcept { this->set_end_pos(range.get_end_pos()); }
+        inline constexpr void set_end_pos(const regex_match_result& range) noexcept { this->set_end_pos(range.get_end_pos()); }
     };
 }
 

@@ -15,7 +15,7 @@ namespace tustr
      * @brief forやwhileで回せるように、関数へ変換する際の型
     */
     template <std::size_t N>
-    using regex_generated_function_ptr_type = regex_match_range(*)(std::string_view, std::size_t, bool, regex_capture_store<N>&);
+    using regex_generated_function_ptr_type = regex_match_result(*)(std::string_view, std::size_t, bool, regex_capture_store<N>&);
 
     template <class T>
     concept RegexParseable = requires {
@@ -29,7 +29,7 @@ namespace tustr
                 std::declval<bool>(),
                 std::declval<regex_capture_store<0>&>()
             )
-        } -> std::same_as<regex_match_range>;
+        } -> std::same_as<regex_match_result>;
         {
             T::template generated_func<1>(
                 std::declval<std::string_view>(),
@@ -37,7 +37,7 @@ namespace tustr
                 std::declval<bool>(),
                 std::declval<regex_capture_store<1>&>()
             )
-        } -> std::same_as<regex_match_range>;
+        } -> std::same_as<regex_match_result>;
         {
             T::template generated_func<10>(
                 std::declval<std::string_view>(),
@@ -45,7 +45,7 @@ namespace tustr
                 std::declval<bool>(),
                 std::declval<regex_capture_store<10>&>()
             )
-        } -> std::same_as<regex_match_range>;
+        } -> std::same_as<regex_match_result>;
 
         // 違反している場合、無限再帰が発生してしまう
         requires T::begin_pos < T::end_pos;
@@ -182,11 +182,11 @@ namespace tustr
         static constexpr auto run(std::string_view s, std::size_t offset = 0, bool is_pos_lock = false)
         {
             auto cs = capture_store_type{};
-            auto re = regex_match_range::make_unmatch();
+            auto re = regex_match_result::make_unmatch();
             for(const auto& f : match_rules) {
                 const auto part_range = f(s, offset, std::exchange(is_pos_lock, true), cs);
                 if (!part_range)
-                    return std::pair{cs, regex_match_range::make_unmatch()};
+                    return std::pair{cs, regex_match_result::make_unmatch()};
                 re.set_begin_pos((std::min)(part_range.get_begin_pos(), re.get_begin_pos()));
                 offset = part_range.get_end_pos();
             }
@@ -210,11 +210,11 @@ namespace tustr
         // 結果キャプチャリストを格納
         const capture_store_type capture_list;
         // 結果のマッチ範囲を格納
-        const regex_match_range match_range;
+        const regex_match_result match_range;
         // テスト対象
         const std::string_view test_target;
 
-        constexpr regex(std::string_view test_target, const std::pair<capture_store_type, regex_match_range>& run_result)
+        constexpr regex(std::string_view test_target, const std::pair<capture_store_type, regex_match_result>& run_result)
             : capture_list(run_result.first)
             , match_range(run_result.second)
             , test_target(test_target)
