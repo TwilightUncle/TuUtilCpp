@@ -210,7 +210,7 @@ namespace tustr
             for (auto end_pos = offset, begin_pos = std::string_view::npos; end_pos < subject.size() && cnt < parsed_type::max_count;) {
                 // 判定が真の時のみ値が更新されるよう、一旦一時変数に更新値を記録
                 auto cs = temp_capture_store;
-                const auto temp_result = parsed_type::template generated_func2<MaxCaptureCount>(
+                const auto temp_result = parsed_type::template generated_func<MaxCaptureCount>(
                     subject,
                     end_pos,
                     std::exchange(is_lock, true),
