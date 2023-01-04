@@ -98,79 +98,8 @@ namespace tustr
     template <cstr Pattern, template <cstr, std::size_t> class Parser = regex_parser>
     struct regex
     {
-        // キャプチャ可能な最大数(静的に格納結果のキャプチャ領域を確保したいため、上限を設ける)
-        static constexpr std::size_t allowed_max_capture_count = 65535;
-    private:
         // 文法上おかしいバックスラッシュの出現はここで検出、エラーとする
         static_assert(is_collect_regex_back_slash(Pattern.view()));
-
-        /**
-         * @fn
-         * @brief 各解析結果における想定される最大のキャプチャ数を計算する
-        */
-        template <RegexParseable ParserPart>
-        static consteval auto get_parser_max_capture_count()
-        {
-            std::size_t cnt{};
-            // 再帰的にregexが定義されている場合
-            if constexpr (InnerRegexReferable<ParserPart>)
-                cnt += (ParserPart::max_count == std::string_view::npos)
-                    ? allowed_max_capture_count
-                    : ParserPart::inner_regex::max_capture_count * ParserPart::max_count;
-            // 自身がキャプチャ
-            if constexpr (RegexParserCaptureable<ParserPart>)
-                cnt += (std::min)(allowed_max_capture_count, ParserPart::max_count);
-            return cnt;
-        }
-
-        /**
-         * @fn
-         * @brief 正規表現の解析
-        */
-        template <std::size_t Pos, std::size_t N, std::size_t MaxCaptureCnt>
-        static consteval auto parse()
-        {
-            // あらかじめ、Pattern[Pos]の値によって部分特殊化し、
-            // 呼び出される処理をオーバーロードできるようにする
-            using parser = Parser<Pattern, Pos>;
-
-            static_assert(RegexParseable<parser>, "Invaild template argment [Parser]. See concept [RegexParseable].");
-
-            auto [f_arr, capture_cnt] = parse<
-                parser::end_pos,
-                N + 1,
-                (std::min)(MaxCaptureCnt + get_parser_max_capture_count<parser>(), allowed_max_capture_count)
-            >();
-
-            f_arr[N] = parser::generated_func;
-            return std::pair{f_arr, capture_cnt};
-        }
-
-        /**
-         * @fn
-         * @brief 再帰の終端
-        */
-        template <std::size_t Pos, std::size_t N, std::size_t MaxCaptureCnt>
-        requires (Pattern.size() <= Pos)
-        static consteval auto parse()
-        {
-            // 各perserで以下関数ポインタに格納可能な関数を定義することで、
-            // 解析結果を関数ポインタの配列として保持できるようにする
-            return std::pair{
-                std::array<regex_generated_function_ptr_type<MaxCaptureCnt>, N>{nullptr},
-                MaxCaptureCnt
-            };
-        }
-
-        // 解析を実行し、悔過を格納
-        static constexpr auto parse_result = parse<0, 0, 0>();
-
-    public:
-        // 正規表現のパターンを解析した結果のルールを関数集合としたもの
-        static constexpr auto& match_rules = parse_result.first;
-
-        // 想定される最大キャプチャ数(いらないから消すこと)
-        static constexpr auto max_capture_count = parse_result.second;
 
         using parser = Parser<Pattern, 0>;
         using capture_store_type = regex_capture_store<parser::max_capture_count>;

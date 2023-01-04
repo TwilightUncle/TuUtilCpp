@@ -152,7 +152,7 @@ namespace tustr
     struct regex_parser : public regex_or_parser<Pattern, get_or_pos_regex_pattern(Pattern)>
     {
         using parsed_type = regex_or_parser<Pattern, get_or_pos_regex_pattern(Pattern)>;
-        static constexpr std::size_t max_capture_count = parsed_type::inner_regex::max_capture_count;
+        static constexpr std::size_t max_capture_count = parsed_type::inner_regex::parser::max_capture_count;
 
         template <std::size_t MaxCaptureCount>
         static constexpr auto exec(std::string_view subject, std::size_t offset, bool is_pos_lock, regex_capture_store<MaxCaptureCount>& capture_store)
@@ -195,11 +195,11 @@ namespace tustr
             if constexpr (InnerRegexReferable<parsed_type>)
                 cnt += (parsed_type::max_count == std::string_view::npos)
                     ? allowed_max_capture_count
-                    : parsed_type::inner_regex::max_capture_count * parsed_type::max_count;
+                    : parsed_type::inner_regex::parser::max_capture_count * parsed_type::max_count;
             // 自身がキャプチャ
             if constexpr (RegexParserCaptureable<parsed_type>)
                 cnt += (std::min)(allowed_max_capture_count, parsed_type::max_count);
-            return cnt + parsed_next_type::max_capture_count;
+            return (std::min)(allowed_max_capture_count, cnt + parsed_next_type::max_capture_count);
         }();
 
         template <std::size_t MaxCaptureCount>
@@ -226,7 +226,7 @@ namespace tustr
                 end_pos = temp_result.get_end_pos();
                 temp_capture_store = cs;
 
-                if (++cnt >= parsed_type::min_count ) {
+                if (++cnt >= parsed_type::min_count) {
                     const auto re = parsed_next_type::exec<MaxCaptureCount>(subject, end_pos, true, temp_capture_store);
                     if (!re) continue;
                     result.set_begin_pos(begin_pos);

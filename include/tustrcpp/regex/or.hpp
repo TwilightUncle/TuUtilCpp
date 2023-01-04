@@ -52,7 +52,7 @@ namespace tustr
         using pref_regex = regex<pref_str, regex_parser>;
         using suf_regex = regex<suf_str, regex_parser>;
         using inner_regex = std::conditional_t<
-            (pref_regex::max_capture_count > suf_regex::max_capture_count),
+            (pref_regex::parser::max_capture_count > suf_regex::parser::max_capture_count),
             pref_regex,
             suf_regex
         >;

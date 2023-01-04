@@ -209,7 +209,7 @@ TEST(tustrcpptest, RegexCaptureParserTest)
     EXPECT_STREQ(type2::capture_pattern.data(), "cdefg");
     EXPECT_STREQ(type3::capture_pattern.data(), "cdefg");
     EXPECT_STREQ(type4::capture_pattern.data(), "(ghi[jkl].){2,4}(\\d(\\]m))");
-    EXPECT_EQ(type4::inner_regex::max_capture_count, 6);
+    EXPECT_EQ(type4::inner_regex::parser::max_capture_count, 6);
 
     EXPECT_TRUE(tustr::RegexParserCaptureable<type1>);
     EXPECT_FALSE(tustr::RegexParserCaptureable<type2>);
@@ -261,15 +261,15 @@ TEST(tustrcpptest, RegexOrTest)
 
     EXPECT_STREQ(type1::pref_str.data(), "abc");
     EXPECT_STREQ(type1::suf_str.data(), "(de)(fg)|h(i)");
-    EXPECT_EQ(type1::pref_regex::max_capture_count, 0);
-    EXPECT_EQ(type1::suf_regex::max_capture_count, 2);
-    EXPECT_EQ(type1::inner_regex::max_capture_count, 2);
+    EXPECT_EQ(type1::pref_regex::parser::max_capture_count, 0);
+    EXPECT_EQ(type1::suf_regex::parser::max_capture_count, 2);
+    EXPECT_EQ(type1::inner_regex::parser::max_capture_count, 2);
 
     EXPECT_STREQ(type2::pref_str.data(), "(de)(fg)");
     EXPECT_STREQ(type2::suf_str.data(), "h(i)");
-    EXPECT_EQ(type2::pref_regex::max_capture_count, 2);
-    EXPECT_EQ(type2::suf_regex::max_capture_count, 1);
-    EXPECT_EQ(type2::inner_regex::max_capture_count, 2);
+    EXPECT_EQ(type2::pref_regex::parser::max_capture_count, 2);
+    EXPECT_EQ(type2::suf_regex::parser::max_capture_count, 1);
+    EXPECT_EQ(type2::inner_regex::parser::max_capture_count, 2);
 }
 
 TEST(tustrcpptest, RegexAssertionTest)
@@ -368,69 +368,10 @@ TEST(tustrcpptest, RegexParseTest)
     using type3 = tustr::regex<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}(aa)\\)nop">;
     using type4 = tustr::regex<"abcdef(ghi[jkl].\\d\\]m){2,}\\)nop">;
 
-    EXPECT_EQ(type1::max_capture_count, 0);
-    EXPECT_EQ(type2::max_capture_count, 2);
-    EXPECT_EQ(type3::max_capture_count, 15);
-    EXPECT_EQ(type4::max_capture_count, type4::allowed_max_capture_count);
-
-    constexpr auto f_arr = type1::match_rules;
-    // {'abcdef', '[ghi]', '.', '\\d', 'az', '[$%&_1]', '\\[+', '\\^?']}ÇªÇÍÇºÇÍÇ…ëŒÇµÇƒ8Ç¬ÇÃä÷êîÇ™ê∂ê¨Ç≥ÇÍÇÈ
-    ASSERT_EQ(f_arr.size(), 8);
-
-    constexpr auto check_func1 = [](auto f, std::string_view sv, std::size_t offset, bool is_fixed) {
-        using capture_store_type1 = tustr::regex_capture_store<type1::max_capture_count>;
-        capture_store_type1 dummy_cs{};
-        return f(sv, offset, is_fixed, dummy_cs).get_end_pos();
-    };
-
-    constexpr auto case1 = check_func1(f_arr[0], "abgbzabcdefrrr", 0, false);
-    constexpr auto case2 = check_func1(f_arr[1], "abgbzabcdefrrr", 0, false);
-    constexpr auto case3 = check_func1(f_arr[1], "abgbzabcdefrrr", 2, false);
-    constexpr auto case4 = check_func1(f_arr[2], "a\\%1", 0, false);
-    constexpr auto case5 = check_func1(f_arr[2], "a\\%1", 1, false);
-    constexpr auto case6 = check_func1(f_arr[2], "a\\%1", 2, false);
-    constexpr auto case7 = check_func1(f_arr[2], "a\\%1", 3, false);
-    constexpr auto case8 = check_func1(f_arr[3], "a\\%1", 0, false);
-    constexpr auto case9 = check_func1(f_arr[3], "a\\%1", 1, false);
-    constexpr auto case10 = check_func1(f_arr[3], "a\\%1", 3, false);
-
-    EXPECT_EQ(case1, 5 + tustr::cstr{"abcdef"}.size());
-    EXPECT_EQ(case2, 2 + 1);
-    EXPECT_EQ(case3, 2 + 1);
-    EXPECT_EQ(case4, 0 + 1);
-    EXPECT_EQ(case5, 1 + 1);
-    EXPECT_EQ(case6, 2 + 1);
-    EXPECT_EQ(case7, 3 + 1);
-    EXPECT_EQ(case8, std::string_view::npos);
-    EXPECT_EQ(case9, std::string_view::npos);
-    EXPECT_EQ(case10, 3 + 1);
-
-    constexpr auto case11 = check_func1(f_arr[0], "abgbzabcdefrrr", 0, true);
-    constexpr auto case12 = check_func1(f_arr[0], "abgbzabcdefrrr", 5, true);
-    constexpr auto case13 = check_func1(f_arr[1], "abgbzabcdefrrr", 0, true);
-    constexpr auto case14 = check_func1(f_arr[1], "abgbzabcdefrrr", 2, true);
-
-    EXPECT_EQ(case11, std::string_view::npos);
-    EXPECT_EQ(case12, 5 + tustr::cstr{"abcdef"}.size());
-    EXPECT_EQ(case13, std::string_view::npos);
-    EXPECT_EQ(case14, 2 + 1);
-
-    constexpr auto f_arr2 = type2::match_rules;
-    ASSERT_EQ(f_arr2.size(), 3);
-
-    constexpr auto check_func2 = [](auto f, std::string_view sv, std::size_t offset, bool is_fixed) {
-        using capture_store_type2 = tustr::regex_capture_store<type2::max_capture_count>;
-        capture_store_type2 dummy_cs{};
-        return f(sv, offset, is_fixed, dummy_cs).get_end_pos();
-    };
-    
-    constexpr auto case15 = check_func2(f_arr2[1], "ghij%1]m", 0, false);
-    constexpr auto case16 = check_func2(f_arr2[1], "ghij%1]mghil<9]m", 0, false);
-    constexpr auto case17 = check_func2(f_arr2[1], "aaghij%1]mghil<9]mghik#0]m", 0, false);
-
-    EXPECT_EQ(case15, std::string_view::npos);
-    EXPECT_EQ(case16, 16);
-    EXPECT_EQ(case17, 18);
+    EXPECT_EQ(type1::parser::max_capture_count, 0);
+    EXPECT_EQ(type2::parser::max_capture_count, 2);
+    EXPECT_EQ(type3::parser::max_capture_count, 15);
+    EXPECT_EQ(type4::parser::max_capture_count, 65535);
 }
 
 TEST(tustrcpptest, RegexExecTest)
