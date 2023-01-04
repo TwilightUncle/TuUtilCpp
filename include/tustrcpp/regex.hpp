@@ -15,21 +15,37 @@ namespace tustr
      * @brief forやwhileで回せるように、関数へ変換する際の型
     */
     template <std::size_t N>
-    using regex_generated_function_type = regex_match_range(std::string_view, std::size_t, bool, regex_capture_store<N>&);
-    template <std::size_t N>
     using regex_generated_function_ptr_type = regex_match_range(*)(std::string_view, std::size_t, bool, regex_capture_store<N>&);
 
     template <class T>
     concept RegexParseable = requires {
-        // 静的メンバが定義済みか
-        T::begin_pos;
-        T::end_pos;
-        // T::generated_func<0>;
+        { T::begin_pos } -> std::convertible_to<std::size_t>;
+        { T::end_pos } -> std::convertible_to<std::size_t>;
 
-        // 上記メンバの型チェック
-        requires std::is_same_v<decltype(T::begin_pos), const std::size_t>;
-        requires std::is_same_v<decltype(T::end_pos), const std::size_t>;
-        // requires is_regex_generated_function_type<decltype(T::generated_func)>::value; // 関数
+        {
+            T::template generated_func<0>(
+                std::declval<std::string_view>(),
+                std::declval<std::size_t>(),
+                std::declval<bool>(),
+                std::declval<regex_capture_store<0>&>()
+            )
+        } -> std::same_as<regex_match_range>;
+        {
+            T::template generated_func<1>(
+                std::declval<std::string_view>(),
+                std::declval<std::size_t>(),
+                std::declval<bool>(),
+                std::declval<regex_capture_store<1>&>()
+            )
+        } -> std::same_as<regex_match_range>;
+        {
+            T::template generated_func<10>(
+                std::declval<std::string_view>(),
+                std::declval<std::size_t>(),
+                std::declval<bool>(),
+                std::declval<regex_capture_store<10>&>()
+            )
+        } -> std::same_as<regex_match_range>;
 
         // 違反している場合、無限再帰が発生してしまう
         requires T::begin_pos < T::end_pos;
@@ -54,8 +70,7 @@ namespace tustr
     // キャプチャを行うものか
     template <class T>
     concept RegexParserCaptureable = requires {
-        T::is_capture;
-        requires std::is_same_v<decltype(T::is_capture), const bool>;
+        { T::is_capture } -> std::convertible_to<bool>;
         requires T::is_capture;
     };
 }
@@ -77,7 +92,7 @@ namespace tustr
     /**
      * @class
      * @brief 正規表現格納オブジェクト。動的に生成されたパターンについては考慮しない。インスタンスにはパターンマッチの結果が格納される。
-     * @tparam Pttern 正規表現の文字列リテラルを指定
+     * @tparam Pattern 正規表現の文字列リテラルを指定
      * @tparam Parser 正規表現を解析するテンプレートクラスを指定(option)
     */
     template <cstr Pattern, template <cstr, std::size_t> class Parser = regex_parser>
