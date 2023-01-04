@@ -11,34 +11,50 @@ namespace tustr
     {
         /**
          * @fn
-         * @brief どの機能の解析を行っているか、部分特殊化で名前解決
+         * @brief どの機能の解析を行っているか、部分特殊化で解決
         */
         template <cstr Pattern, std::size_t Pos>
         struct resolve_regex_parser : public regex_general<Pattern, Pos> {};
 
-        /**
-         * @fn
-         * @brief 文字集合の場合
-        */
-        template <cstr Pattern, std::size_t Pos>
-        requires (bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::CHARSET))
-        struct resolve_regex_parser<Pattern, Pos> : public regex_char_set_parser<Pattern, Pos> {};
+        namespace sp
+        {
+            /**
+             * @fn
+             * @brief 文字クラスの場合
+            */
+            template <cstr Pattern, std::size_t Pos>
+            // requires (bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::CLASS))
+            struct resolve_regex_parser : public regex_char_class_parser<Pattern, Pos> {};
+
+            /**
+             * @fn
+             * @brief 文字集合の場合
+            */
+            template <cstr Pattern, std::size_t Pos>
+            requires (bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::CHARSET))
+            struct resolve_regex_parser<Pattern, Pos> : public regex_char_set_parser<Pattern, Pos> {};
+
+            /**
+             * @fn
+             * @brief 言明($と^)の場合
+            */
+            template <cstr Pattern, std::size_t Pos>
+            requires (bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::ANCHOR))
+            struct resolve_regex_parser<Pattern, Pos> : public regex_assertion_parser<Pattern, Pos> {};
+        }
 
         /**
          * @fn
-         * @brief 文字クラスの場合
+         * @brief 通常の特殊文字
         */
         template <cstr Pattern, std::size_t Pos>
-        requires (bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::CLASS))
-        struct resolve_regex_parser<Pattern, Pos> : public regex_char_class_parser<Pattern, Pos> {};
-
-        /**
-         * @fn
-         * @brief 言明($と^)の場合
-        */
-        template <cstr Pattern, std::size_t Pos>
-        requires (bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::ANCHOR) && Pattern[Pos] != '(')
-        struct resolve_regex_parser<Pattern, Pos> : public regex_assertion_parser<Pattern, Pos> {};
+        requires (
+            bool(regex_char_attribute::attributes[Pattern[Pos]])
+            && !bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::BK)
+            && Pattern[Pos] != '\\'
+            && Pattern[Pos] != '('
+        )
+        struct resolve_regex_parser<Pattern, Pos> : public sp::resolve_regex_parser<Pattern, Pos> {};
 
         namespace br
         {

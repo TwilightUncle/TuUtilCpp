@@ -436,11 +436,6 @@ TEST(tustrcpptest, RegexParseTest)
 TEST(tustrcpptest, RegexRunTest)
 {
     using type1 = tustr::regex<"abcdef[ghi].\\daz[$%&_1]\\[+\\^?">;
-    using type2 = tustr::regex<"abcdef(ghi[jkl].\\d\\]m){2}\\)nop">;
-    using type3 = tustr::regex<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}(aa)\\)nop">;
-    using type4 = tustr::regex<"(?=.{0,4}[A-Z]).{5}">;
-    using type5 = tustr::regex<"abcde|\\d{3}|ab(hij|klmn)">;
-
     constexpr auto case1 = type1::run("abcdefg#5az&[^");
     constexpr auto case2 = type1::run("abcdefv#5az&[^");
     constexpr auto case3 = type1::run("nnnabcdefg#5az&[^nnn");
@@ -457,6 +452,7 @@ TEST(tustrcpptest, RegexRunTest)
     EXPECT_EQ(case6.second.get_end_pos(), 14);
     EXPECT_EQ(case7.second.get_end_pos(), std::string_view::npos);
 
+    using type2 = tustr::regex<"abcdef(ghi[jkl].\\d\\]m){2}\\)nop">;
     // グループ二回繰り返し
     constexpr auto case8 = type2::run("abcdefghij%1]mghil<9]m)nop");
     constexpr auto case9 = type2::run("nnnabcdefghij%1]mghil<9]m)nopnnn");
@@ -473,6 +469,7 @@ TEST(tustrcpptest, RegexRunTest)
     EXPECT_EQ(case8.first.get(0), "ghij%1]m"sv);
     EXPECT_EQ(case8.first.get(1), "ghil<9]m"sv);
 
+    using type3 = tustr::regex<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}(aa)\\)nop">;
     constexpr auto case12 = type3::run("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nop");
 
     EXPECT_EQ(case12.second.get_end_pos(), 43);
@@ -490,6 +487,7 @@ TEST(tustrcpptest, RegexRunTest)
     EXPECT_EQ(case12.first.get(10), "]m"sv);
     EXPECT_EQ(case12.first.get(11), "aa"sv);
 
+    using type4 = tustr::regex<"(?=.{0,4}[A-Z]).{5}">;
     constexpr auto case13 = type4::run("abcde1234f");
     constexpr auto case14 = type4::run("aBcde1234f");
     constexpr auto case15 = type4::run("abcdE1234f");
@@ -500,6 +498,7 @@ TEST(tustrcpptest, RegexRunTest)
     EXPECT_EQ(case15.second.get_begin_pos(), 0);
     EXPECT_EQ(case16.second.get_begin_pos(), 5);
 
+    using type5 = tustr::regex<"abcde|\\d{3}|ab(hij|klmn)">;
     constexpr auto case17 = type5::run("abcde");
     constexpr auto case18 = type5::run("123");
     constexpr auto case19 = type5::run("abhij");
@@ -515,13 +514,25 @@ TEST(tustrcpptest, RegexRunTest)
     ASSERT_EQ(case20.first.size(), 1);
     EXPECT_EQ(case20.second.get_end_pos(), 6);
     EXPECT_EQ(case20.first.get(0), "klmn"sv);
+
+    using type6 = tustr::regex<"ab(bbb|aa)">;
+    constexpr auto case21 = type6::run("abaa");
+    constexpr auto case22 = type6::run("abbbb");
+
+    ASSERT_EQ(case21.first.size(), 1);
+    EXPECT_EQ(case21.second.get_end_pos(), 4);
+    EXPECT_EQ(case21.first.get(0), "aa"sv);
+    ASSERT_EQ(case22.first.size(), 1);
+    EXPECT_EQ(case22.second.get_end_pos(), 5);
+    EXPECT_EQ(case22.first.get(0), "bbb"sv);
+
 }
 
 TEST(tustrcpptest, RegexMatchTest)
 {
-    using type1 = tustr::regex<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}(aa|bbb)\\)nop\\2\\6">;
+    using type1 = tustr::regex<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}(aa)\\)nop\\2\\6">;
     constexpr auto case1 = type1::search("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]m");
-    constexpr auto case2 = type1::search("aabcdefghij@ghij$ghij%1]mghij/ghij|2]mbbb)nopghij@]m");
+    constexpr auto case2 = type1::search("aabcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]m");
     constexpr auto case3 = type1::search("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]ma");
     constexpr auto case4 = type1::match("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]m");
     constexpr auto case5 = type1::match("aabcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]m");
@@ -529,7 +540,7 @@ TEST(tustrcpptest, RegexMatchTest)
     constexpr auto case7 = type1::search("abcdefghij@ghij$ghij%1]mghij/ghij|2]mc)nopghij@]ma");
 
     EXPECT_TRUE(case1);
-    EXPECT_TRUE(case2); // なぜかキャプチャ内のorが効いてない？
+    EXPECT_TRUE(case2);
     EXPECT_TRUE(case3);
     EXPECT_TRUE(case4);
     EXPECT_FALSE(case5);
