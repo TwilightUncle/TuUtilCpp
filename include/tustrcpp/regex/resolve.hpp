@@ -12,7 +12,7 @@ namespace tustr::_regex
      * @brief どの機能の解析を行っているか、部分特殊化で解決
     */
     template <cstr Pattern, std::size_t Pos>
-    struct resolve_regex_parser : public regex_general<Pattern, Pos> {};
+    struct resolve_parser : public general<Pattern, Pos> {};
 
     namespace sp
     {
@@ -22,7 +22,7 @@ namespace tustr::_regex
         */
         template <cstr Pattern, std::size_t Pos>
         // requires (bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::CLASS))
-        struct resolve_regex_parser : public regex_char_class_parser<Pattern, Pos> {};
+        struct resolve_parser : public char_class_parser<Pattern, Pos> {};
 
         /**
          * @fn
@@ -30,7 +30,7 @@ namespace tustr::_regex
         */
         template <cstr Pattern, std::size_t Pos>
         requires (bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::CHARSET))
-        struct resolve_regex_parser<Pattern, Pos> : public regex_char_set_parser<Pattern, Pos> {};
+        struct resolve_parser<Pattern, Pos> : public char_set_parser<Pattern, Pos> {};
 
         /**
          * @fn
@@ -38,7 +38,7 @@ namespace tustr::_regex
         */
         template <cstr Pattern, std::size_t Pos>
         requires (bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::ANCHOR))
-        struct resolve_regex_parser<Pattern, Pos> : public regex_assertion_parser<Pattern, Pos> {};
+        struct resolve_parser<Pattern, Pos> : public assertion_parser<Pattern, Pos> {};
     }
 
     /**
@@ -52,7 +52,7 @@ namespace tustr::_regex
         && Pattern[Pos] != '\\'
         && Pattern[Pos] != '('
     )
-    struct resolve_regex_parser<Pattern, Pos> : public sp::resolve_regex_parser<Pattern, Pos> {};
+    struct resolve_parser<Pattern, Pos> : public sp::resolve_parser<Pattern, Pos> {};
 
     namespace br
     {
@@ -61,7 +61,7 @@ namespace tustr::_regex
          * @brief 括弧に続く文字に対して解決する(デフォルトはキャプチャ)
         */
         template <cstr Pattern, std::size_t Pos>
-        struct resolve_regex_parser : public regex_capture_parser<Pattern, Pos> {};
+        struct resolve_parser : public capture_parser<Pattern, Pos> {};
 
         /**
          * @fn
@@ -74,7 +74,7 @@ namespace tustr::_regex
             || exists_in_position("(?<=", Pattern, Pos)
             || exists_in_position("(?<!", Pattern, Pos)
         )
-        struct resolve_regex_parser<Pattern, Pos> : public regex_assertion_parser<Pattern, Pos> {};
+        struct resolve_parser<Pattern, Pos> : public assertion_parser<Pattern, Pos> {};
     }
 
     /**
@@ -83,7 +83,7 @@ namespace tustr::_regex
     */
     template <cstr Pattern, std::size_t Pos>
     requires (Pattern[Pos] == '(')
-    struct resolve_regex_parser<Pattern, Pos> : public br::resolve_regex_parser<Pattern, Pos> {};
+    struct resolve_parser<Pattern, Pos> : public br::resolve_parser<Pattern, Pos> {};
 
     namespace bk
     {
@@ -92,7 +92,7 @@ namespace tustr::_regex
          * @brief バックスラッシュに続く文字に対して解決する(デフォルトはエスケープ)
         */
         template <cstr Pattern, std::size_t Pos>
-        struct resolve_regex_parser : public regex_general<Pattern, Pos> {};
+        struct resolve_parser : public general<Pattern, Pos> {};
 
         /**
          * @fn
@@ -100,7 +100,7 @@ namespace tustr::_regex
         */
         template <cstr Pattern, std::size_t Pos>
         requires (bool(regex_char_attribute::attributes[Pattern[Pos]] & regex_char_attribute::REFERENCE))
-        struct resolve_regex_parser<Pattern, Pos> : public regex_reference_parser<Pattern, Pos> {};
+        struct resolve_parser<Pattern, Pos> : public reference_parser<Pattern, Pos> {};
 
         /**
          * @fn
@@ -108,7 +108,7 @@ namespace tustr::_regex
         */
         template <cstr Pattern, std::size_t Pos>
         requires (regex_char_attribute::check_attrs_conjuction<regex_char_attribute::CLASS, regex_char_attribute::BK>(Pattern[Pos]))
-        struct resolve_regex_parser<Pattern, Pos> : public regex_char_class_parser<Pattern, Pos> {};
+        struct resolve_parser<Pattern, Pos> : public char_class_parser<Pattern, Pos> {};
 
         /**
          * @fn
@@ -116,7 +116,7 @@ namespace tustr::_regex
         */
         template <cstr Pattern, std::size_t Pos>
         requires (regex_char_attribute::check_attrs_conjuction<regex_char_attribute::ANCHOR, regex_char_attribute::BK>(Pattern[Pos]))
-        struct resolve_regex_parser<Pattern, Pos> : public regex_assertion_parser<Pattern, Pos> {};
+        struct resolve_parser<Pattern, Pos> : public assertion_parser<Pattern, Pos> {};
     }
 
     /**
@@ -125,7 +125,7 @@ namespace tustr::_regex
     */
     template <cstr Pattern, std::size_t Pos>
     requires (Pattern[Pos] == '\\' && Pattern.size() - 1 > Pos)
-    struct resolve_regex_parser<Pattern, Pos> : public bk::resolve_regex_parser<Pattern, Pos + 1> { static constexpr auto begin_pos = Pos; };
+    struct resolve_parser<Pattern, Pos> : public bk::resolve_parser<Pattern, Pos + 1> { static constexpr auto begin_pos = Pos; };
 
     /**
      * @fn

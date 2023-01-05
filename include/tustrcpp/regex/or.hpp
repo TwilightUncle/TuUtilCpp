@@ -5,7 +5,7 @@
 #ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_OR_HPP
 #define TUSTRCPP_INCLUDE_GUARD_REGEX_OR_HPP
 
-namespace tustr
+namespace tustr::_regex
 {
     /**
      * @fn
@@ -40,7 +40,7 @@ namespace tustr
      * @brief 「|」で分割されたパターンをそれぞれ正規表現とし、いずれか一つでもマッチすれば真とするよう、処理を解析する
     */
     template <cstr Pattern, std::size_t Pos>
-    struct regex_or_parser
+    struct or_parser
     {
         static_assert(Pattern[Pos] == '|');
         static constexpr std::size_t begin_pos = 0;

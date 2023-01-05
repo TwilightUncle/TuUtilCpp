@@ -5,14 +5,14 @@
 #ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_GENERAL_HPP
 #define TUSTRCPP_INCLUDE_GUARD_REGEX_GENERAL_HPP
 
-namespace tustr
+namespace tustr::_regex
 {
     /**
      * @class
      * @brief 通常の文字列のマッチング(とじ括弧のような単体で存在しない者の検証もここで)
     */
     template <cstr Pattern, std::size_t Pos>
-    struct regex_general
+    struct general
         : public regex_char_attribute
     {
         static constexpr auto begin_pos = Pos;

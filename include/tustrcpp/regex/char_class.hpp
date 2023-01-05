@@ -5,9 +5,9 @@
 #ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_CHAR_CLASS_HPP
 #define TUSTRCPP_INCLUDE_GUARD_REGEX_CHAR_CLASS_HPP
 
-namespace tustr
+namespace tustr::_regex
 {
-    struct regex_char_class
+    struct char_class
     {
     private:
         static constexpr auto digits            = cstr{"0123456789"};
@@ -80,11 +80,11 @@ namespace tustr
     };
 
     template <cstr Pattern, std::size_t Pos>
-    struct regex_char_class_parser
+    struct char_class_parser
     {
         static constexpr auto begin_pos = Pos;
         static constexpr auto end_pos = Pos + 1;
-        static constexpr auto value = regex_char_class::get_const_char_set<Pattern[Pos]>();
+        static constexpr auto value = char_class::get_const_char_set<Pattern[Pos]>();
 
         /**
          * @fn

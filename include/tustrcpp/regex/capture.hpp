@@ -5,16 +5,16 @@
 #ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_CAPUTURE_HPP
 #define TUSTRCPP_INCLUDE_GUARD_REGEX_CAPUTURE_HPP
 
-namespace tustr
+namespace tustr::_regex
 {
     /**
      * @class
      * @brief キャプチャグループの解析
     */
     template <cstr Pattern, std::size_t Pos>
-    struct regex_capture_parser
+    struct capture_parser
     {
-        using brancket_inner = regex_bracket_inner<Pattern, Pos>;
+        using brancket_inner = bracket_inner<Pattern, Pos>;
         static constexpr auto inner_pattern = brancket_inner::value;
 
         static_assert(inner_pattern.size() > 0 && is_collect_regex_back_slash(inner_pattern.view()));
@@ -32,12 +32,12 @@ namespace tustr
         template <char C> requires (C == '?' && exists_in_position("?<", inner_pattern, 0))
         static constexpr auto extract_capture_name()
         {
-            using named_bracket = regex_bracket_inner<inner_pattern, 1>;
+            using named_bracket = bracket_inner<inner_pattern, 1>;
             constexpr auto named_inner = named_bracket::value;
 
             static_assert(
-                named_inner.size() > 0 && named_inner.match_all_charset(regex_char_class::get_const_char_set<'w'>()),
-                "An error has occurred. [regex_capture_parser]"
+                named_inner.size() > 0 && named_inner.match_all_charset(char_class::get_const_char_set<'w'>()),
+                "An error has occurred. [capture_parser]"
             );
 
             return named_inner;

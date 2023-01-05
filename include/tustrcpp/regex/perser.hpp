@@ -18,7 +18,7 @@ namespace tustr
     template <cstr Pattern, std::size_t Pos>
     struct regex_parser
     {
-        using parsed_type = regex_or_parser<Pattern, get_or_pos_regex_pattern(Pattern)>;
+        using parsed_type = _regex::or_parser<Pattern, _regex::get_or_pos_regex_pattern(Pattern)>;
 
         // 静的に領域を確保するため、正規表現パターンからわかる最大キャプチャ数を取得
         static constexpr std::size_t max_capture_count = parsed_type::inner_regex::parser::max_capture_count;
@@ -45,7 +45,7 @@ namespace tustr
      * @tparam Pos Patternの解析する開始位置を指定
     */
     template <cstr Pattern, std::size_t Pos>
-    requires (get_or_pos_regex_pattern(Pattern) == std::string_view::npos && Pattern.size() > Pos)
+    requires (_regex::get_or_pos_regex_pattern(Pattern) == std::string_view::npos && Pattern.size() > Pos)
     struct regex_parser<Pattern, Pos>
     {
         // 単体で指定してはいけない文字か検証
@@ -56,8 +56,8 @@ namespace tustr
 
         using parsed_type = tudb::foldr_t<
             tudb::quote<tudb::apply>,
-            _regex::bind_regex_pattern_t<add_quantifier, Pattern>,
-            _regex::resolve_regex_parser<Pattern, Pos>
+            _regex::bind_regex_pattern_t<_regex::add_quantifier, Pattern>,
+            _regex::resolve_parser<Pattern, Pos>
         >;
 
         // 以降の位置の解析
@@ -115,7 +115,7 @@ namespace tustr
                     result.set_begin_pos(begin_pos);
                     result.set_end_pos(re);
                     capture_store = cs;
-                    if (parsed_type::negative) break;
+                    if constexpr (parsed_type::negative) break;
                 }
             }
 

@@ -5,14 +5,14 @@
 #ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_ASSERTION_HPP
 #define TUSTRCPP_INCLUDE_GUARD_REGEX_ASSERTION_HPP
 
-namespace tustr
+namespace tustr::_regex
 {
     /**
      * @fn
      * @brief Œ¾–¾‚É‚Â‚¢‚Ä‰ğÍ
     */
     template <cstr Pattern, std::size_t Pos>
-    struct regex_assertion_parser
+    struct assertion_parser
     {
         static constexpr auto begin_pos = Pos;
 
@@ -52,7 +52,7 @@ namespace tustr
         requires (C == '(')
         static consteval auto extract_assertion()
         {
-            return regex_bracket_inner<Pattern, Pos>::value_with_bracket;
+            return bracket_inner<Pattern, Pos>::value_with_bracket;
         }
 
     public:

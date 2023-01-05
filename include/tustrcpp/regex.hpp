@@ -112,18 +112,6 @@ namespace tustr
             return std::pair{cs, re};
         }
 
-        /**
-         * @fn
-         * @brief 引数の文字列内に、パターンマッチする部分が内包されていれば真
-        */
-        static constexpr bool search(std::string_view s) { return bool(exec(s, 0).second); }
-
-        /**
-         * @fn
-         * @brief 引数の文字列の全体がパターンマッチしている場合真
-        */
-        static constexpr bool match(std::string_view s) { return exec(s, 0, true).second.match_length() == s.size(); }
-
     private:
         // 結果キャプチャリストを格納
         const capture_store_type capture_list;
@@ -154,7 +142,7 @@ namespace tustr
          * @fn
          * @brief 検査対象文字列にパターンマッチしている部分が存在したら真
         */
-        constexpr bool is_find() const noexcept { return bool(match_range); }
+        constexpr bool exists() const noexcept { return bool(match_range); }
 
         /**
          * @fn
@@ -162,17 +150,34 @@ namespace tustr
         */
         constexpr bool is_match() const noexcept { return match_range.match_length() == test_target.size(); }
 
+        constexpr bool empty() const noexcept { return !this->exists(); }
+        constexpr std::size_t size() const noexcept { return this->exists() ? this->capture_list.size() + 1 : 0; }
+
         /**
          * @fn
          * @brief パターンマッチした部分の文字列を取得する。抽出結果なしの場合空文字を返却
          * @param index 0を指定すると、一致個所全体、1以上の値を設定すると該当するキャプチャのマッチを取得
         */
-        constexpr std::string_view get_match_part(std::size_t index = 0) const
+        constexpr std::string_view get_match_string_view(std::size_t index = 0) const
         {
-            if (!this->is_find() || this->capture_list.size() < index) return std::string_view{};
+            if (!this->exists() || this->capture_list.size() < index) return std::string_view{};
             if (!index) return test_target.substr(match_range.get_begin_pos(), match_range.match_length());
             return this->capture_list.get(index - 1);
         }
+
+        constexpr std::string_view operator[](std::size_t n) const { return this->get_match_string_view(n); }
+
+        /**
+         * @fn
+         * @brief 引数の文字列内に、パターンマッチする部分が存在していれば真
+        */
+        static constexpr bool search(std::string_view s) { return regex(s).exists(); }
+
+        /**
+         * @fn
+         * @brief 引数の文字列の全体がマッチしている場合真
+        */
+        static constexpr bool match(std::string_view s) { return regex(s).is_match(); }
     };
 
     using empty_regex = regex<"">;

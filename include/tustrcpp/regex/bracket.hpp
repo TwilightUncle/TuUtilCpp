@@ -5,14 +5,14 @@
 #ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_BRACKET_HPP
 #define TUSTRCPP_INCLUDE_GUARD_REGEX_BRACKET_HPP
 
-namespace tustr
+namespace tustr::_regex
 {
     /**
      * @class
      * @brief 開始or終了括弧を渡し、対応する括弧の情報とエラー内容を提供する
     */
     template <char BrancketChar, bool IsBegin>
-    struct regex_bracket_info
+    struct bracket_info
     {
         // 開始括弧の文字
         static constexpr auto begin = []() {
@@ -55,9 +55,9 @@ namespace tustr
     };
 
     template <cstr Pattern, std::size_t BrancketBeginPos>
-    struct regex_bracket_inner
+    struct bracket_inner
     {
-        using bracket_info = regex_bracket_info<Pattern[BrancketBeginPos], true>;
+        using bracket_info = bracket_info<Pattern[BrancketBeginPos], true>;
 
         // 開始括弧の位置
         static constexpr auto begin_pos = BrancketBeginPos;

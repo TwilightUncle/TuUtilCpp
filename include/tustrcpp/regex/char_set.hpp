@@ -5,16 +5,16 @@
 #ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_CHAR_SET_HPP
 #define TUSTRCPP_INCLUDE_GUARD_REGEX_CHAR_SET_HPP
 
-namespace tustr
+namespace tustr::_regex
 {
     /**
      * @class
      * @brief •¶šW‡‚ğ‰ğÍ‚·‚é
     */
     template <cstr Pattern, std::size_t Pos>
-    struct regex_char_set_parser
+    struct char_set_parser
     {
-        using brancket_inner = regex_bracket_inner<Pattern, Pos>;
+        using brancket_inner = bracket_inner<Pattern, Pos>;
         static constexpr auto char_range = brancket_inner::value;
 
         static_assert(char_range.size() > 0 && is_collect_regex_back_slash(char_range.view()));
@@ -56,7 +56,7 @@ namespace tustr
         {
             // •¶š”ÍˆÍ‚ÌŠ‡ŒÊ“à‚Å‚Íu.v‚Í“Áê•¶š‚Å‚Í‚È‚¢
             if constexpr (char_range[N + 1] != '.')
-                return concat(regex_char_class::get_const_char_set<char_range[N + 1]>(), make_regex_char_list<N + 2>());
+                return concat(char_class::get_const_char_set<char_range[N + 1]>(), make_regex_char_list<N + 2>());
             else return concat(cstr{"."}, make_regex_char_list<N + 2>());
         }
 
@@ -69,7 +69,7 @@ namespace tustr
         {
             if constexpr (N >= size) return cstr{""};
             else if constexpr (char_range[N] == '\\' && char_range[N + 1] != '.')
-                return concat(regex_char_class::get_const_bk_char_set<char_range[N + 1]>(), make_regex_bk_char_list<N + 2>());
+                return concat(char_class::get_const_bk_char_set<char_range[N + 1]>(), make_regex_bk_char_list<N + 2>());
             else return make_regex_bk_char_list<N + 1>();
         }
 

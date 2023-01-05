@@ -5,7 +5,7 @@
 #ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_QUANTIFIER_HPP
 #define TUSTRCPP_INCLUDE_GUARD_REGEX_QUANTIFIER_HPP
 
-namespace tustr
+namespace tustr::_regex
 {
     /**
      * @class
@@ -14,7 +14,7 @@ namespace tustr
     */
     template <cstr Pattern, std::size_t Pos>
     requires (Pos > 0)
-    struct regex_quantifier_perser
+    struct quantifier_perser
         : public regex_char_attribute
     {
         static_assert(
@@ -33,7 +33,7 @@ namespace tustr
         template <char C> requires (C == '{')
         static constexpr auto extract_quantifier()
         {
-            using bracket_inner = regex_bracket_inner<Pattern, Pos>;
+            using bracket_inner = bracket_inner<Pattern, Pos>;
             constexpr auto inner_str = bracket_inner::value;
 
             // 数量子の構文チェック
@@ -42,7 +42,7 @@ namespace tustr
                 inner_str[0] != ','
                 && inner_str.match_all_charset("0123456789,")
                 && std::ranges::count(inner_str, ',') <= 1,
-                "An error has occurred. [regex_quantifier_perser]"
+                "An error has occurred. [quantifier_perser]"
             );
 
             return bracket_inner::value_with_bracket;
@@ -111,7 +111,7 @@ namespace tustr
     {
         struct type : public T
         {
-            using parsed_quantifier = regex_quantifier_perser<Pattern, T::end_pos>;
+            using parsed_quantifier = quantifier_perser<Pattern, T::end_pos>;
             static constexpr auto min_count = parsed_quantifier::min_count;
             static constexpr auto max_count = parsed_quantifier::max_count;
 

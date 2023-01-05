@@ -5,10 +5,10 @@
 #ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_REFERENCE_HPP
 #define TUSTRCPP_INCLUDE_GUARD_REGEX_REFERENCE_HPP
 
-namespace tustr
+namespace tustr::_regex
 {
     template <cstr Pattern, std::size_t Pos>
-    struct regex_reference_parser
+    struct reference_parser
     {
         static constexpr auto begin_pos = Pos;
         static constexpr auto end_pos = Pos + Pattern.get_charset_match_range("0123456789", Pos)[1];
