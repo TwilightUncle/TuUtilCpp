@@ -55,13 +55,13 @@ namespace tustr::_regex
         static constexpr auto quantifier = extract_quantifier<Pattern[Pos]>();
 
         // ”ñæÃ—~‚Ìê‡^
-        static constexpr bool negative = []() {
+        static constexpr bool greedy = []() {
             const auto check_pos = Pos + quantifier.size();
-            return check_pos < Pattern.size() && Pattern[check_pos] == '?';
+            return !(check_pos < Pattern.size() && Pattern[check_pos] == '?');
         }();
 
         // ”—Êq‚Ì––”ö‚ÌŸ‚ÌˆÊ’u
-        static constexpr auto end_pos = Pos + quantifier.size() + std::size_t(negative);
+        static constexpr auto end_pos = Pos + quantifier.size() + std::size_t(!greedy);
 
         // Å¬ŒJ‚è•Ô‚µ‰ñ”
         static constexpr auto min_count = []()->std::size_t {
@@ -98,7 +98,7 @@ namespace tustr::_regex
         {
             static constexpr std::size_t min_count = 1;
             static constexpr std::size_t max_count = 1;
-            static constexpr bool negative = true;
+            static constexpr bool greedy = false;
         };
     };
 
@@ -117,7 +117,7 @@ namespace tustr::_regex
 
             // end_posã‘‚«
             static constexpr auto end_pos = parsed_quantifier::end_pos;
-            static constexpr bool negative = parsed_quantifier::negative;
+            static constexpr bool greedy = parsed_quantifier::greedy;
         };
     };
 }

@@ -152,17 +152,17 @@ TEST(tustrcpptest, RegexQuantifierParseTest)
     using type10 = tustr::_regex::quantifier_perser<"abcd{2,}?", 4>;
     using type11 = tustr::_regex::quantifier_perser<"abcd{25,512}?", 4>;
 
-    EXPECT_FALSE(type1::negative);
-    EXPECT_FALSE(type2::negative);
-    EXPECT_TRUE(type3::negative);
-    EXPECT_FALSE(type4::negative);
-    EXPECT_FALSE(type5::negative);
-    EXPECT_FALSE(type6::negative);
-    EXPECT_FALSE(type7::negative);
-    EXPECT_FALSE(type8::negative);
-    EXPECT_TRUE(type9::negative);
-    EXPECT_TRUE(type10::negative);
-    EXPECT_TRUE(type11::negative);
+    EXPECT_TRUE(type1::greedy);
+    EXPECT_TRUE(type2::greedy);
+    EXPECT_FALSE(type3::greedy);
+    EXPECT_TRUE(type4::greedy);
+    EXPECT_TRUE(type5::greedy);
+    EXPECT_TRUE(type6::greedy);
+    EXPECT_TRUE(type7::greedy);
+    EXPECT_TRUE(type8::greedy);
+    EXPECT_FALSE(type9::greedy);
+    EXPECT_FALSE(type10::greedy);
+    EXPECT_FALSE(type11::greedy);
 
     EXPECT_EQ(type1::min_count, 0);
     EXPECT_EQ(type1::max_count, std::string_view::npos);

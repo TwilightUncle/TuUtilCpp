@@ -115,13 +115,14 @@ namespace tustr
                     result.set_begin_pos(begin_pos);
                     result.set_end_pos(re);
                     capture_store = cs;
-                    if constexpr (parsed_type::negative) break;
+                    if constexpr (!parsed_type::greedy) break;
                 }
             }
 
             // 0‰ñƒ}ƒbƒ`‚Å‚àOK‚Ìê‡
             if (!cnt && !parsed_type::min_count)
                 result = parsed_next_type::exec<MaxCaptureCount>(subject, offset, is_pos_lock, capture_store);
+            // 0
 
             return (cnt < parsed_type::min_count)
                     ? regex_match_result::make_unmatch()
