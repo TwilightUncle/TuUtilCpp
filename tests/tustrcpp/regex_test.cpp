@@ -522,4 +522,13 @@ TEST(tustrcpptest, RegexResultTest)
     using type3 = tustr::regex<"<.*?>">;
     constexpr auto case6 = type3("some <foo> <bar> new </bar> </foo> thing");
     EXPECT_EQ(case6.get_match_string_view(), "<foo>"sv);
+    
+    using type4 = tustr::regex<"ab?\\w">;
+    constexpr auto case7 = type4("abb");
+    EXPECT_EQ(case7.get_match_string_view(), "abb"sv);
+
+    // ”ñæÃ—~‚Ì0‰ñƒ}ƒbƒ`ŒŸ¸
+    using type5 = tustr::regex<"ab??\\w">;
+    constexpr auto case8 = type5("abb");
+    EXPECT_EQ(case8.get_match_string_view(), "ab"sv);
 }

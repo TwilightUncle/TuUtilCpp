@@ -90,7 +90,7 @@ namespace tustr
         static constexpr auto exec(std::string_view subject, std::size_t offset, bool is_pos_lock, regex_capture_store<MaxCaptureCount>& capture_store)
         {
             std::size_t cnt = 0;
-            regex_capture_store<MaxCaptureCount> temp_capture_store = capture_store;
+            regex_capture_store<MaxCaptureCount> temp_capture_store = capture_store, init_capture_store = capture_store;
             auto result = regex_match_result::make_unmatch();
             bool is_lock = is_pos_lock;
 
@@ -120,9 +120,11 @@ namespace tustr
             }
 
             // 0âÒÉ}ÉbÉ`Ç≈Ç‡OKÇÃèÍçá
-            if (!cnt && !parsed_type::min_count)
-                result = parsed_next_type::exec<MaxCaptureCount>(subject, offset, is_pos_lock, capture_store);
-            // 0
+            if ((!cnt || !parsed_type::greedy) && !parsed_type::min_count)
+                if (const auto re = parsed_next_type::exec<MaxCaptureCount>(subject, offset, is_pos_lock, init_capture_store)) {
+                    result = re;
+                    capture_store = init_capture_store;
+                }
 
             return (cnt < parsed_type::min_count)
                     ? regex_match_result::make_unmatch()
