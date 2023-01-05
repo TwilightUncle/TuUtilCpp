@@ -514,4 +514,12 @@ TEST(tustrcpptest, RegexResultTest)
     EXPECT_EQ(case1.get_match_part(12), "aa"sv);
     EXPECT_EQ(case1.get_match_part(13), ""sv);
     EXPECT_EQ(case1.get_match_part(99), ""sv);
+
+    using type2 = tustr::regex<"<.*>">;
+    constexpr auto case5 = type2("some <foo> <bar> new </bar> </foo> thing");
+    EXPECT_EQ(case5.get_match_part(), "<foo> <bar> new </bar> </foo>"sv);
+
+    using type3 = tustr::regex<"<.*?>">;
+    constexpr auto case6 = type3("some <foo> <bar> new </bar> </foo> thing");
+    EXPECT_EQ(case6.get_match_part(), "<foo>"sv);
 }

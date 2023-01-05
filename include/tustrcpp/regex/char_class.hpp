@@ -12,7 +12,7 @@ namespace tustr
     private:
         static constexpr auto digits            = cstr{"0123456789"};
         static constexpr auto words             = cstr{"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_"};
-        static constexpr auto space             = cstr{"\f\t\v"};
+        static constexpr auto space             = cstr{"\f\t\v "};
         static constexpr auto strends           = cstr{"\n\r"};
         static constexpr auto bk_space          = cstr{"ftv"};
         static constexpr auto bk_strends        = cstr{"nr"};
