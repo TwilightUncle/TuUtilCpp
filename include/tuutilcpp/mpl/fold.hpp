@@ -14,8 +14,8 @@ namespace tuutil::mpl
     template <MetaCallable F, class... Parameters> struct foldl_impl;
     template <MetaCallable F, class Init, class Head, class... Parameters>
     struct foldl_impl<F, Init, Head, Parameters...> : public foldl_impl<F, apply_t<F, Init, Head>, Parameters...> {};
-    template <MetaCallable F, class Init, class Head>
-    struct foldl_impl<F, Init, Head> : public apply<F, Init, Head> {};
+    template <MetaCallable F, class Init>
+    struct foldl_impl<F, Init> : public std::type_identity<Init> {};
 
     /**
      * @fn
