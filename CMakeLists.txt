@@ -8,6 +8,7 @@ target_include_directories(tudbcpp PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 # テストを追加していく
 set(TUGAMECPP_TESTS
+    ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/mpl_test.cpp
     ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/algorithm_test.cpp
     ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/carry_over_test.cpp
     ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/big_int_test.cpp
