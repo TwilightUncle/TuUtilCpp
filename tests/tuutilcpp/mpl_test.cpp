@@ -117,3 +117,29 @@ TEST(tuutilcpp_mpl_test, FoldTest)
     EXPECT_TRUE(case3);
     EXPECT_TRUE(case4);
 }
+
+TEST(tuutilcpp_mpl_test, FindIfTest)
+{
+    using type_list = dummy_non_metafunction<double, long long, char, int>;
+    using find_type_int = find_if_t<bind<quote<std::is_same>, int>, type_list>;
+    using not_find_type = find_if_t<bind<quote<std::is_same>, short>, type_list>;
+
+    constexpr auto case1 = std::is_same_v<find_type_int, int>;
+    constexpr auto case2 = std::is_same_v<not_find_type, ignore_type>;
+
+    ASSERT_TRUE(case1);
+    ASSERT_TRUE(case2);
+}
+
+TEST(tuutilcpp_mpl_test, ExtractIfTest)
+{
+    using type_list = dummy_non_metafunction<void, std::string, int, unsigned char, short, std::nullptr_t, long long>;
+    using extracted_integral_list = extract_if_t<quote<std::is_integral>, type_list>;
+    using not_extracted_type = extract_if_t<quote<std::is_floating_point>, type_list>;
+
+    constexpr auto case1 = std::is_same_v<extracted_integral_list, dummy_non_metafunction<int, unsigned char, short, long long>>;
+    constexpr auto case2 = std::is_same_v<not_extracted_type, ignore_type>;
+
+    ASSERT_TRUE(case1);
+    ASSERT_TRUE(case2);
+}
