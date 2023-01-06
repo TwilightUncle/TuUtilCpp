@@ -40,6 +40,24 @@ namespace tuutil::mpl
      * @tparam TypeList 型のパラメータパックを持つ型
     */
     template <MetaCallable Pred, class TypeList> using extract_if_t = extract_if<Pred, TypeList>::type;
+
+    /**
+     * @fn
+     * @brief メタ関数による判定が真である型を除外(extract_ifの判定式の結果を反転させている)
+     * @tparam Pred 判定用メタ関数
+     * @tparam TypeList 型のパラメータパックを持つ型
+    */
+    template <MetaCallable Pred, class TypeList> struct remove_if
+        : public extract_if<bind<quote<apply_with>, quote<std::negation>, Pred>, TypeList>
+    {};
+
+    /**
+     * @fn
+     * @brief メタ関数による判定が真である型を抽出
+     * @tparam Pred 判定用メタ関数
+     * @tparam TypeList 型のパラメータパックを持つ型
+    */
+    template <MetaCallable Pred, class TypeList> using remove_if_t = remove_if<Pred, TypeList>::type;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_MPL_EXTRACT_IF_HPP

@@ -88,6 +88,16 @@ namespace tuutil::mpl
     template <MetaCallable F, class... Args>
     requires (ReturenValueMetaFunction<apply<F, Args...>>)
     constexpr auto apply_v = apply<F, Args...>::value;
+
+    /**
+     * @fn
+     * @brief F<Args...>を実行した結果に対してWithFを適用する
+     * @tparam WithF 適用結果に追加で適用する処理を指定
+     * @tparam F メインの処理
+     * @tparam Args Fに渡される引数
+    */
+    template <MetaCallable WithF, MetaCallable F, class... Args>
+    struct apply_with : public apply<WithF, apply<F, Args...>> {};
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_MPL_META_CALLBACK_HPP

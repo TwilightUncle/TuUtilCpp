@@ -81,6 +81,8 @@ TEST(tuutilcpp_mpl_test, MetaCallbackTest)
     ASSERT_TRUE(case23);
     ASSERT_TRUE(case24);
     ASSERT_TRUE(case25);
+
+    // apply_withはremove_ifの実装に利用しているため、そちらのテストで問題なければOK
 }
 
 TEST(tuutilcpp_mpl_test, MapTest)
@@ -155,10 +157,16 @@ TEST(tuutilcpp_mpl_test, ExtractIfTest)
     using type_list = dummy_non_metafunction<void, std::string, int, unsigned char, short, std::nullptr_t, long long>;
     using extracted_integral_list = extract_if_t<quote<std::is_integral>, type_list>;
     using not_extracted_type = extract_if_t<quote<std::is_floating_point>, type_list>;
+    using removed_integral_list = remove_if_t<quote<std::is_integral>, type_list>;
+    using not_removed_list = remove_if_t<quote<std::is_floating_point>, type_list>;
 
     constexpr auto case1 = std::is_same_v<extracted_integral_list, dummy_non_metafunction<int, unsigned char, short, long long>>;
     constexpr auto case2 = std::is_same_v<not_extracted_type, ignore_type>;
+    constexpr auto case3 = std::is_same_v<removed_integral_list, dummy_non_metafunction<void, std::string, std::nullptr_t>>;
+    constexpr auto case4 = std::is_same_v<not_removed_list, type_list>;
 
     ASSERT_TRUE(case1);
     ASSERT_TRUE(case2);
+    ASSERT_TRUE(case3);
+    ASSERT_TRUE(case4);
 }
