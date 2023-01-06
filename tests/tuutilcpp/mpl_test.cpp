@@ -83,6 +83,16 @@ TEST(tuutilcpp_mpl_test, MetaCallbackTest)
     ASSERT_TRUE(case25);
 }
 
+TEST(tuutilcpp_mpl_test, MapTest)
+{
+    using type_list = dummy_non_metafunction<long long, short, unsigned short, unsigned long long, unsigned long>;
+    using expect_type_list = dummy_non_metafunction<const long long, const short, const unsigned short, const unsigned long long, const unsigned long>;
+    using maped_type_list = map_t<quote<std::add_const>, type_list>;
+
+    constexpr auto case1 = std::is_same_v<maped_type_list, expect_type_list>;
+    EXPECT_TRUE(case1);
+}
+
 template <class T1, class T2> struct get_max_size_type : public std::conditional<(sizeof(T1) > sizeof(T2)), T1, T2> {};
 template <class T1, class T2> struct get_min_size_type : public std::conditional<(sizeof(T1) <= sizeof(T2)), T1, T2> {};
 

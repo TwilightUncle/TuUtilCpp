@@ -8,6 +8,7 @@
 #include <concepts>
 
 #include <tuutilcpp/mpl/meta_callback.hpp>
+#include <tuutilcpp/mpl/map.hpp>
 #include <tuutilcpp/mpl/fold.hpp>
 
 #endif // TUUTILCPP_INCLUDE_GUARD_MPL_META_HPP
