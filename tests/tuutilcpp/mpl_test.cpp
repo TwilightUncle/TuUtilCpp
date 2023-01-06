@@ -139,6 +139,13 @@ TEST(tuutilcpp_mpl_test, PushTest)
     EXPECT_TRUE(case6);
 }
 
+TEST(tuutilcpp_mpl_test, ReverseTest)
+{
+    using type_list = dummy_non_metafunction<double, long long, char, int>;
+    constexpr auto case1 = std::is_same_v<reverse_t<type_list>, dummy_non_metafunction<int, char, long long, double>>;
+    EXPECT_TRUE(case1);
+}
+
 TEST(tuutilcpp_mpl_test, FindIfTest)
 {
     using type_list = dummy_non_metafunction<double, long long, char, int>;
@@ -150,6 +157,21 @@ TEST(tuutilcpp_mpl_test, FindIfTest)
 
     ASSERT_TRUE(case1);
     ASSERT_TRUE(case2);
+}
+
+TEST(tuutilcpp_mpl_test, ArgmentTest)
+{
+    using type_list = dummy_non_metafunction<void, std::string, int, unsigned char, short, std::nullptr_t, long long>;
+    constexpr auto case1 = std::is_same_v<
+        apply_t<quote<find_if>, quote<std::is_integral>, type_list>,
+        flip_t<quote<find_if>, type_list, quote<std::is_integral>>
+    >;
+
+    using relaied_type = relay_t<int, dummy_non_metafunction<quote<std::add_const>, quote<std::add_pointer>>>;
+    using nested_type = std::add_pointer_t<std::add_const_t<int>>;
+    constexpr auto case2 = std::is_same_v<relaied_type, nested_type>;
+
+    ASSERT_TRUE(case1);
 }
 
 TEST(tuutilcpp_mpl_test, ExtractIfTest)

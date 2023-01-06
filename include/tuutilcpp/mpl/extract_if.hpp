@@ -48,7 +48,7 @@ namespace tuutil::mpl
      * @tparam TypeList 型のパラメータパックを持つ型
     */
     template <MetaCallable Pred, class TypeList> struct remove_if
-        : public extract_if<bind<quote<apply_with>, quote<std::negation>, Pred>, TypeList>
+        : public extract_if<bind<quote<flip>, quote<relay>, type_list<Pred, quote<std::negation>>>, TypeList>
     {};
 
     /**
