@@ -1,5 +1,5 @@
 ///----------------------------------
-/// @file mpl/fold.hpp 
+/// @file mpl/map.hpp 
 /// @brief メタ関数による型パラメータパックの一括適用
 ///----------------------------------
 #ifndef TUUTILCPP_INCLUDE_GUARD_MPL_MAP_HPP

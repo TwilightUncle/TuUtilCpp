@@ -118,6 +118,25 @@ TEST(tuutilcpp_mpl_test, FoldTest)
     EXPECT_TRUE(case4);
 }
 
+TEST(tuutilcpp_mpl_test, PushTest)
+{
+    using type_list = dummy_non_metafunction<int, float>;
+
+    constexpr auto case1 = std::is_same_v<push_back_t<type_list, void>, dummy_non_metafunction<int, float, void>>;
+    constexpr auto case2 = std::is_same_v<push_front_t<type_list, void>, dummy_non_metafunction<void, int, float>>;
+    constexpr auto case3 = std::is_same_v<push_back_if_t<quote<std::is_integral>, type_list, char>, dummy_non_metafunction<int, float, char>>;
+    constexpr auto case4 = std::is_same_v<push_back_if_t<quote<std::is_integral>, type_list, void>, type_list>;
+    constexpr auto case5 = std::is_same_v<push_front_if_t<quote<std::is_integral>, type_list, char>, dummy_non_metafunction<char, int, float>>;
+    constexpr auto case6 = std::is_same_v<push_front_if_t<quote<std::is_integral>, type_list, void>, type_list>;
+
+    EXPECT_TRUE(case1);
+    EXPECT_TRUE(case2);
+    EXPECT_TRUE(case3);
+    EXPECT_TRUE(case4);
+    EXPECT_TRUE(case5);
+    EXPECT_TRUE(case6);
+}
+
 TEST(tuutilcpp_mpl_test, FindIfTest)
 {
     using type_list = dummy_non_metafunction<double, long long, char, int>;

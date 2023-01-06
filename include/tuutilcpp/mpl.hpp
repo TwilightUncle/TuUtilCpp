@@ -19,6 +19,7 @@ namespace tuutil::mpl
 #include <tuutilcpp/mpl/meta_callback.hpp>
 #include <tuutilcpp/mpl/map.hpp>
 #include <tuutilcpp/mpl/fold.hpp>
+#include <tuutilcpp/mpl/push.hpp>
 #include <tuutilcpp/mpl/find_if.hpp>
 #include <tuutilcpp/mpl/extract_if.hpp>
 
