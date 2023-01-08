@@ -49,13 +49,8 @@ namespace tuutil::mpl
      * @tparam TypeList 型のパラメータパックを持つ型
      * @tparam T 追加する型
     */
-    template <MetaCallable Pred, class TypeList, class T> struct push_back_if;
-    template <MetaCallable Pred, class T, template <class...> class List, class... Parameters>
-    struct push_back_if<Pred, List<Parameters...>, T> : public std::conditional<
-        apply_v<Pred, T>,
-        List<Parameters..., T>,
-        List<Parameters...>
-    > {};
+    template <MetaCallable Pred, class TypeList, class T>
+    struct push_back_if : public std::conditional<apply_v<Pred, T>, push_back_t<TypeList, T>, TypeList> {};
 
     /**
      * @fn
@@ -71,13 +66,8 @@ namespace tuutil::mpl
      * @tparam TypeList 型のパラメータパックを持つ型
      * @tparam T 追加する型
     */
-    template <MetaCallable Pred, class TypeList, class T> struct push_front_if;
-    template <MetaCallable Pred, class T, template <class...> class List, class... Parameters>
-    struct push_front_if<Pred, List<Parameters...>, T> : public std::conditional<
-        apply_v<Pred, T>,
-        List<T, Parameters...>,
-        List<Parameters...>
-    > {};
+    template <MetaCallable Pred, class TypeList, class T>
+    struct push_front_if : public std::conditional<apply_v<Pred, T>, push_front_t<TypeList, T>, TypeList> {};
 
     /**
      * @fn

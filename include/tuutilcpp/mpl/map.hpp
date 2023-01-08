@@ -24,6 +24,25 @@ namespace tuutil::mpl
      * @tparam TypeList 型のパラメータパックを持つ型
     */
     template <MetaCallable F, class TypeList> using map_t = map<F, TypeList>::type;
+
+    /**
+     * @fn
+     * @brief 条件に合致するパラメータパック全てにメタ関数を適用する
+     * @tparam Pred 判定用関数
+     * @tparam F 適用するメタ関数
+     * @tparam TypeList 型のパラメータパックを持つ型
+    */
+    template <MetaCallable Pred, MetaCallable F, class TypeList>
+    struct map_if : public map<bind<quote<apply_if>, Pred, F>, TypeList> {};
+
+    /**
+     * @fn
+     * @brief 条件に合致するパラメータパック全てにメタ関数を適用する
+     * @tparam Pred 判定用関数
+     * @tparam F 適用するメタ関数
+     * @tparam TypeList 型のパラメータパックを持つ型
+    */
+    template <MetaCallable Pred, MetaCallable F, class TypeList> using map_if_t = map_if<Pred, F, TypeList>::type;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_MPL_MAP_HPP

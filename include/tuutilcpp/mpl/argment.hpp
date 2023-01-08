@@ -45,6 +45,24 @@ namespace tuutil::mpl
      * @tparam MetaFuncList メタ関数リスト
     */
     template <class Arg, class MetaFuncList> using relay_t = relay<Arg, MetaFuncList>::type;
+
+    /**
+     * @fn
+     * @brief リストとして渡された型リストを引数として関数に適用する
+     * @tparam F メタ関数
+     * @tparam ArgList 型のパラメータパックを持つ型
+    */
+    template <MetaCallable F, class ArgList> struct apply_list {};
+    template <MetaCallable F, template <class...> class List, class... Args>
+    struct apply_list<F, List<Args...>> : public apply<F, Args...> {};
+
+    /**
+     * @fn
+     * @brief リストとして渡された型リストを引数として関数に適用する
+     * @tparam F メタ関数
+     * @tparam ArgList 型のパラメータパックを持つ型
+    */
+    template <MetaCallable F, class ArgList> using apply_list_t = apply_list<F, ArgList>::type;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_MPL_ARGMENT_HPP

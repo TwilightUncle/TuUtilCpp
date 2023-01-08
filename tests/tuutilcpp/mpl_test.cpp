@@ -81,8 +81,6 @@ TEST(tuutilcpp_mpl_test, MetaCallbackTest)
     ASSERT_TRUE(case23);
     ASSERT_TRUE(case24);
     ASSERT_TRUE(case25);
-
-    // apply_withはremove_ifの実装に利用しているため、そちらのテストで問題なければOK
 }
 
 TEST(tuutilcpp_mpl_test, MapTest)
@@ -93,6 +91,12 @@ TEST(tuutilcpp_mpl_test, MapTest)
 
     constexpr auto case1 = std::is_same_v<maped_type_list, expect_type_list>;
     EXPECT_TRUE(case1);
+
+    using expect_type_list2 = dummy_non_metafunction<const long long, const short, unsigned short, unsigned long long, unsigned long>;
+    using maped_type_list2 = map_if_t<quote<std::is_signed>, quote<std::add_const>, type_list>;
+
+    constexpr auto case2 = std::is_same_v<maped_type_list2, expect_type_list2>;
+    EXPECT_TRUE(case2);
 }
 
 template <class T1, class T2> struct get_max_size_type : public std::conditional<(sizeof(T1) > sizeof(T2)), T1, T2> {};
@@ -139,11 +143,15 @@ TEST(tuutilcpp_mpl_test, PushTest)
     EXPECT_TRUE(case6);
 }
 
-TEST(tuutilcpp_mpl_test, ReverseTest)
+TEST(tuutilcpp_mpl_test, SortTest)
 {
     using type_list = dummy_non_metafunction<double, long long, char, int>;
     constexpr auto case1 = std::is_same_v<reverse_t<type_list>, dummy_non_metafunction<int, char, long long, double>>;
+    constexpr auto case2 = std::is_same_v<rotatel_t<type_list>, dummy_non_metafunction<long long, char, int, double>>;
+    constexpr auto case3 = std::is_same_v<rotater_t<type_list>, dummy_non_metafunction<int, double, long long, char>>;
     EXPECT_TRUE(case1);
+    EXPECT_TRUE(case2);
+    EXPECT_TRUE(case3);
 }
 
 TEST(tuutilcpp_mpl_test, FindIfTest)
