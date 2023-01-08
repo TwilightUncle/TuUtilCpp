@@ -143,15 +143,17 @@ TEST(tuutilcpp_mpl_test, PushTest)
     EXPECT_TRUE(case6);
 }
 
-TEST(tuutilcpp_mpl_test, SortTest)
+TEST(tuutilcpp_mpl_test, ParameterPackTest)
 {
     using type_list = dummy_non_metafunction<double, long long, char, int>;
     constexpr auto case1 = std::is_same_v<reverse_t<type_list>, dummy_non_metafunction<int, char, long long, double>>;
     constexpr auto case2 = std::is_same_v<rotatel_t<type_list>, dummy_non_metafunction<long long, char, int, double>>;
     constexpr auto case3 = std::is_same_v<rotater_t<type_list>, dummy_non_metafunction<int, double, long long, char>>;
+    constexpr auto case4 = std::is_same_v<copy_t<type_list, lift<tuutil::mpl::type_list>>, tuutil::mpl::type_list<double, long long, char, int>>;
     EXPECT_TRUE(case1);
     EXPECT_TRUE(case2);
     EXPECT_TRUE(case3);
+    EXPECT_TRUE(case4);
 }
 
 TEST(tuutilcpp_mpl_test, FindIfTest)

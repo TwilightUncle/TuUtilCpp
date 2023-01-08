@@ -70,7 +70,7 @@ namespace tuutil::mpl
      * @tparam F quoteまたはbindされたメタ関数
      * @tparam Args 適用する引数
     */
-    template <MetaCallable F, class... Args> struct apply;
+    template <class T, class... Args> struct apply;
     // 引数を渡してメタ関数実行
     template <template <class...> class MetaF, class... Args>
     struct apply<quote<MetaF>, Args...> : public MetaF<Args...>
@@ -81,9 +81,8 @@ namespace tuutil::mpl
     template <class QuotedMetaF, class... PartialArgs, class... Args>
     struct apply<bind<QuotedMetaF, PartialArgs...>, Args...> : public apply<QuotedMetaF, PartialArgs..., Args...> {};
 
-    template <MetaCallable F, class... Args>
-    requires (ReturenTypeMetaFunction<apply<F, Args...>>)
-    using apply_t = apply<F, Args...>::type;
+    template <class T, class... Args>
+    using apply_t = apply<T, Args...>::type;
 
     template <MetaCallable F, class... Args>
     requires (ReturenValueMetaFunction<apply<F, Args...>>)
