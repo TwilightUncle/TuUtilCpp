@@ -134,6 +134,8 @@ TEST(tuutilcpp_mpl_test, PushTest)
     constexpr auto case4 = std::is_same_v<push_back_if_t<quote<std::is_integral>, type_list, void>, type_list>;
     constexpr auto case5 = std::is_same_v<push_front_if_t<quote<std::is_integral>, type_list, char>, dummy_non_metafunction<char, int, float>>;
     constexpr auto case6 = std::is_same_v<push_front_if_t<quote<std::is_integral>, type_list, void>, type_list>;
+    constexpr auto case7 = std::is_same_v<push_back_t<lift<dummy_non_metafunction>, void>, dummy_non_metafunction<void>>;
+    constexpr auto case8 = std::is_same_v<push_front_t<lift<dummy_non_metafunction>, void>, dummy_non_metafunction<void>>;
 
     EXPECT_TRUE(case1);
     EXPECT_TRUE(case2);
@@ -141,6 +143,8 @@ TEST(tuutilcpp_mpl_test, PushTest)
     EXPECT_TRUE(case4);
     EXPECT_TRUE(case5);
     EXPECT_TRUE(case6);
+    EXPECT_TRUE(case7);
+    EXPECT_TRUE(case8);
 }
 
 TEST(tuutilcpp_mpl_test, ParameterPackTest)
@@ -150,10 +154,21 @@ TEST(tuutilcpp_mpl_test, ParameterPackTest)
     constexpr auto case2 = std::is_same_v<rotatel_t<type_list>, dummy_non_metafunction<long long, char, int, double>>;
     constexpr auto case3 = std::is_same_v<rotater_t<type_list>, dummy_non_metafunction<int, double, long long, char>>;
     constexpr auto case4 = std::is_same_v<copy_t<type_list, lift<tuutil::mpl::type_list>>, tuutil::mpl::type_list<double, long long, char, int>>;
+    constexpr auto case5 = count_v<type_list>;
+    constexpr auto case6 = is_same_params_v<dummy_non_metafunction<int, int, int>>;
+    constexpr auto case7 = is_same_params_v<dummy_non_metafunction<int, int, char>>;
+    constexpr auto case8 = contains_v<int, dummy_non_metafunction<char, long long, int, void>>;
+    constexpr auto case9 = contains_v<int, dummy_non_metafunction<char, long long, void>>;
+
     EXPECT_TRUE(case1);
     EXPECT_TRUE(case2);
     EXPECT_TRUE(case3);
     EXPECT_TRUE(case4);
+    EXPECT_EQ(case5, 4);
+    EXPECT_TRUE(case6);
+    EXPECT_FALSE(case7);
+    EXPECT_TRUE(case8);
+    EXPECT_FALSE(case9);
 }
 
 TEST(tuutilcpp_mpl_test, FindIfTest)
@@ -201,4 +216,17 @@ TEST(tuutilcpp_mpl_test, ExtractIfTest)
     ASSERT_TRUE(case2);
     ASSERT_TRUE(case3);
     ASSERT_TRUE(case4);
+}
+
+TEST(tuutilcpp_mpl_test, UniqueTest)
+{
+    using type_list = dummy_non_metafunction<void, std::string, int, int, void, std::string, int>;
+    using expect_type_list = dummy_non_metafunction<void, std::string, int>;
+    constexpr auto case1 = std::is_same_v<unique_t<type_list>, expect_type_list>;
+    constexpr auto case2 = is_unique_v<expect_type_list>;
+    constexpr auto case3 = is_unique_v<type_list>;
+    
+    ASSERT_TRUE(case1);
+    ASSERT_TRUE(case2);
+    ASSERT_FALSE(case3);
 }

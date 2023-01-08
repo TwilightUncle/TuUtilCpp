@@ -14,6 +14,12 @@ namespace tuutil::mpl
     */
     template <template <class...> class List> struct lift {};
 
+    template <template <class...> class List, class T>
+    struct push_back<lift<List>, T> : public std::type_identity<List<T>> {};
+
+    template <template <class...> class List, class T>
+    struct push_front<lift<List>, T> : public std::type_identity<List<T>> {};
+
     /**
      * @fn
      * @brief liftで包まれたテンプレート型か判定
@@ -114,6 +120,60 @@ namespace tuutil::mpl
      * @tparam Dest コピー対象のテンプレートクラス
     */
     template <class Src, LiftedList Dest> using copy_t = copy<Src, Dest>::type;
+
+    /**
+     * @fn
+     * @brief パラメータパックの数を数える
+     * @tparam T 型パラメータパックを持つ型
+    */
+    template <class T> struct count;
+    template <template <class...> class List, class... Parameters>
+    struct count<List<Parameters...>> : public std::integral_constant<std::size_t, sizeof...(Parameters)> {};
+    template <template <auto...> class List, auto... Parameters>
+    struct count<List<Parameters...>> : public std::integral_constant<std::size_t, sizeof...(Parameters)> {};
+
+    /**
+     * @fn
+     * @brief パラメータパックの数を数える
+     * @tparam T 型パラメータパックを持つ型
+    */
+    template <class T> constexpr auto count_v = count<T>::value;
+
+    /**
+     * @fn
+     * @brief パラメータパックの型が全て同じとき真
+     * @tparam T 検査対象の型パラメータパックを持つ型
+    */
+    template <class T> struct is_same_params;
+    template <template <class...> class List, class Head, class... Parameters>
+    struct is_same_params<List<Head, Parameters...>> : public std::bool_constant<(std::is_same_v<Head, Parameters> && ...)> {};
+    template <template <auto...> class List, auto... Parameters>
+    struct is_same_params<List<Parameters...>> : public is_same_params<type_list<decltype(Parameters)...>> {};
+
+    /**
+     * @fn
+     * @brief パラメータパックの型が全て同じとき真
+     * @tparam T 検査対象の型パラメータパックを持つ型
+    */
+    template <class T> constexpr auto is_same_params_v = is_same_params<T>::value;
+
+    /**
+     * @fn
+     * @brief 型TがListのパラメータパックに含まれているとき真
+     * @tparam T 含まれているか確認したい型
+     * @tparam List パラメータパックを持つ型
+    */
+    template <class T, class List> struct contains;
+    template <class T, template <class...> class List, class... Parameters>
+    struct contains<T, List<Parameters...>> : public std::bool_constant<(std::is_same_v<T, Parameters> || ...)> {};
+
+    /**
+     * @fn
+     * @brief 型TがListのパラメータパックに含まれているとき真
+     * @tparam T 含まれているか確認したい型
+     * @tparam List パラメータパックを持つ型
+    */
+    template <class T, class List> constexpr auto contains_v = contains<T, List>::value;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_MPL_REVERSE_HPP
