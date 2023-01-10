@@ -25,33 +25,37 @@ namespace tuutil::mpl
     /**
      * @fn
      * @brief パラメータパックの重複を排除する
-     * @tparam TypeList 型のパラメータパックを持つ型
+     * @tparam List パラメータパックを持つ型
     */
-    template <class TypeList> struct unique;
+    template <class List> struct unique;
+    // 型バージョン
     template <template <class...> class List, class... Parameters>
     struct unique<List<Parameters...>> : public unique_impl<List<Parameters...>, lift<List>> {};
+    // 非型バージョン
+    template <template <auto...> class List, auto... Parameters>
+    struct unique<List<Parameters...>> : public unpack_type<typename unique<pack_type_t<List<Parameters...>>>::type> {};
 
     /**
      * @fn
      * @brief パラメータパックの重複を排除する
-     * @tparam TypeList 型のパラメータパックを持つ型
+     * @tparam List パラメータパックを持つ型
     */
-    template <class TypeList> using unique_t = unique<TypeList>::type;
+    template <class List> using unique_t = unique<List>::type;
 
     /**
      * @fn
      * @brief パラメータパックが一意か判定
-     * @tparam TypeList 型パラメータパックをもつ型
+     * @tparam List パラメータパックをもつ型
     */
-    template <class TypeList>
-    struct is_unique : public std::is_same<TypeList, unique_t<TypeList>> {};
+    template <class List>
+    struct is_unique : public std::is_same<List, unique_t<List>> {};
 
     /**
      * @fn
      * @brief パラメータパックが一意か判定
-     * @tparam TypeList 型パラメータパックをもつ型
+     * @tparam List パラメータパックをもつ型
     */
-    template <class TypeList> constexpr auto is_unique_v = is_unique<TypeList>::value;
+    template <class List> constexpr auto is_unique_v = is_unique<List>::value;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_MPL_UNIQUE_HPP

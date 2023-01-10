@@ -222,17 +222,6 @@ namespace tudb
 
     /**
      * @fn
-     * @brief 受け取った非型テンプレートパラメータパックの要素に重複が存在しないか判定するメタ関数
-     * @details 型が異なっていれば不一致とする。型が一致していた場合は値を比較し、異なっていれば不一致とする
-    */
-    template <auto Head, auto... Parameters>
-    struct is_unique_values
-        : public std::bool_constant<!include_value<Head, Parameters...>::value && is_unique_values<Parameters...>::value>
-    {};
-    template <auto Param> struct is_unique_values<Param> : public std::true_type {};
-
-    /**
-     * @fn
      * @brief パラメータパックの型が全て同じとき真
     */
     template <class Head, class... Parameters>
@@ -317,12 +306,6 @@ namespace tudb
 
     template <auto Test, auto... Parameters>
     constexpr auto include_value_v = include_value<Test, Parameters...>::value;
-
-    template <class... Parameters>
-    constexpr auto is_unique_v = is_unique<Parameters...>::value;
-
-    template <auto... Parameters>
-    constexpr auto is_unique_values_v = is_unique_values<Parameters...>::value;
 
     template <class... Parameters>
     constexpr auto is_same_types_v = is_same_types<Parameters...>::value;

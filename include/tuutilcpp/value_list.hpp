@@ -62,9 +62,6 @@ namespace tudb
     struct count_parameters<pass_values<Container<Parameters...>>> : public count_value_parameters<Parameters...> {};
 
     template <template <auto...> class Container, auto... Parameters>
-    struct is_unique<pass_values<Container<Parameters...>>> : public is_unique_values<Parameters...> {};
-
-    template <template <auto...> class Container, auto... Parameters>
     struct is_same_types<pass_values<Container<Parameters...>>> : public is_same_value_types<Parameters...> {};
 }
 

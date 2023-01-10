@@ -20,8 +20,15 @@ namespace tuutil::mpl
      * @brief とりあえずパラメータパックを保持したいときに利用
     */
     template <class... Types> struct type_list {};
+
+    /**
+     * @class
+     * @brief とりあえず、値のパラメータパックを保持したいときに利用
+    */
+    template <auto... Values> struct value_list {};
 }
 
+#include <tuutilcpp/mpl/value_constant.hpp>
 #include <tuutilcpp/mpl/meta_callback.hpp>
 #include <tuutilcpp/mpl/mpl_if.hpp>
 #include <tuutilcpp/mpl/map.hpp>

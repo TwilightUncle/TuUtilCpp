@@ -155,10 +155,13 @@ TEST(tuutilcpp_mpl_test, ParameterPackTest)
     constexpr auto case3 = std::is_same_v<rotater_t<type_list>, dummy_non_metafunction<int, double, long long, char>>;
     constexpr auto case4 = std::is_same_v<copy_t<type_list, lift<tuutil::mpl::type_list>>, tuutil::mpl::type_list<double, long long, char, int>>;
     constexpr auto case5 = count_v<type_list>;
-    constexpr auto case6 = is_same_params_v<dummy_non_metafunction<int, int, int>>;
-    constexpr auto case7 = is_same_params_v<dummy_non_metafunction<int, int, char>>;
+    constexpr auto case6 = is_same_types_v<dummy_non_metafunction<int, int, int>>;
+    constexpr auto case7 = is_same_types_v<dummy_non_metafunction<int, int, char>>;
     constexpr auto case8 = contains_v<int, dummy_non_metafunction<char, long long, int, void>>;
     constexpr auto case9 = contains_v<int, dummy_non_metafunction<char, long long, void>>;
+    constexpr auto case10 = count_v<tuutil::mpl::value_list<int(1), int(2), int(3)>>;
+    constexpr auto case11 = is_same_types_v<tuutil::mpl::value_list<int(1), int(2), int(3)>>;
+    constexpr auto case12 = is_same_types_v<tuutil::mpl::value_list<int(1), char(2), int(3)>>;
 
     EXPECT_TRUE(case1);
     EXPECT_TRUE(case2);
@@ -169,6 +172,9 @@ TEST(tuutilcpp_mpl_test, ParameterPackTest)
     EXPECT_FALSE(case7);
     EXPECT_TRUE(case8);
     EXPECT_FALSE(case9);
+    EXPECT_EQ(case10, 3);
+    EXPECT_TRUE(case11);
+    EXPECT_FALSE(case12);
 }
 
 TEST(tuutilcpp_mpl_test, FindIfTest)
@@ -225,8 +231,17 @@ TEST(tuutilcpp_mpl_test, UniqueTest)
     constexpr auto case1 = std::is_same_v<unique_t<type_list>, expect_type_list>;
     constexpr auto case2 = is_unique_v<expect_type_list>;
     constexpr auto case3 = is_unique_v<type_list>;
+
+    using val_list = value_list<int(1), int(2), char(1), int(1), char(1)>;
+    using expect_val_list = value_list<int(1), int(2), char(1)>;
+    constexpr auto case4 = std::is_same_v<unique_t<val_list>, expect_val_list>;
+    constexpr auto case5 = is_unique_v<expect_val_list>;
+    constexpr auto case6 = is_unique_v<val_list>;
     
     ASSERT_TRUE(case1);
     ASSERT_TRUE(case2);
     ASSERT_FALSE(case3);
+    ASSERT_TRUE(case4);
+    ASSERT_TRUE(case5);
+    ASSERT_FALSE(case6);
 }

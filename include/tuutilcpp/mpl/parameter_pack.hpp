@@ -98,10 +98,26 @@ namespace tuutil::mpl
 
     /**
      * @fn
+     * @brief 非型のパラメータパックを持つか判定
+     * @tparam T 対象
+    */
+    template <class T> struct has_value_parameters : public std::false_type {};
+    template <template <auto...> class List, auto... Parameters>
+    struct has_value_parameters<List<Parameters...>> : public std::true_type {};
+
+    /**
+     * @fn
      * @brief 型のパラメータパックを持つか判定
      * @tparam T 検査対象
     */
     template <class T> constexpr auto has_type_parameters_v = has_type_parameters<T>::value;
+
+    /**
+     * @fn
+     * @brief 非型のパラメータパックを持つか判定
+     * @tparam T 対象
+    */
+    template <class T> constexpr auto has_value_parameters_v = has_value_parameters<T>::value;
 
     /**
      * @fn
@@ -144,18 +160,19 @@ namespace tuutil::mpl
      * @brief パラメータパックの型が全て同じとき真
      * @tparam T 検査対象の型パラメータパックを持つ型
     */
-    template <class T> struct is_same_params;
+    template <class T> struct is_same_types;
     template <template <class...> class List, class Head, class... Parameters>
-    struct is_same_params<List<Head, Parameters...>> : public std::bool_constant<(std::is_same_v<Head, Parameters> && ...)> {};
+    struct is_same_types<List<Head, Parameters...>> : public std::bool_constant<(std::is_same_v<Head, Parameters> && ...)> {};
+    // 非型テンプレートパラメータの型部分のみの比較(具体的な値については関知しない)
     template <template <auto...> class List, auto... Parameters>
-    struct is_same_params<List<Parameters...>> : public is_same_params<type_list<decltype(Parameters)...>> {};
+    struct is_same_types<List<Parameters...>> : public is_same_types<type_list<decltype(Parameters)...>> {};
 
     /**
      * @fn
      * @brief パラメータパックの型が全て同じとき真
      * @tparam T 検査対象の型パラメータパックを持つ型
     */
-    template <class T> constexpr auto is_same_params_v = is_same_params<T>::value;
+    template <class T> constexpr auto is_same_types_v = is_same_types<T>::value;
 
     /**
      * @fn

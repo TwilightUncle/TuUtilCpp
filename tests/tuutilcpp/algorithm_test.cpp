@@ -105,20 +105,6 @@ TEST(tudbcpptest, IncludeTest)
     ASSERT_FALSE(case4);
 }
 
-TEST(tudbcpptest, IsUniqueTest)
-{
-    // ˆê‚Â‚Å‚àˆê’v‚·‚é‚à‚Ì‚ªŠÜ‚Ü‚ê‚Ä‚¢‚½‚ç‹U
-    constexpr auto case1 = tudb::is_unique_v<int, void, short, long>;
-    constexpr auto case2 = tudb::is_unique_v<int, void, short, void>;
-    constexpr auto case3 = tudb::is_unique_values_v<(int)1, (int)2, (short)1, (short)2>;
-    constexpr auto case4 = tudb::is_unique_values_v<(int)1, (int)2, (short)1, (int)2>;
-
-    ASSERT_TRUE(case1);
-    ASSERT_FALSE(case2);
-    ASSERT_TRUE(case3);
-    ASSERT_FALSE(case4);
-}
-
 TEST(tudbcpptest, IsSameTest)
 {
     // ˆê‚Â‚Å‚àˆÙ‚È‚é‚à‚Ì‚ªŠÜ‚Ü‚ê‚Ä‚¢‚½‚ç‹U
