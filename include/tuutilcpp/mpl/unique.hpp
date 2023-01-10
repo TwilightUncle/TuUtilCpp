@@ -33,7 +33,10 @@ namespace tuutil::mpl
     struct unique<List<Parameters...>> : public unique_impl<List<Parameters...>, lift<List>> {};
     // ”ñŒ^ƒo[ƒWƒ‡ƒ“
     template <template <auto...> class List, auto... Parameters>
-    struct unique<List<Parameters...>> : public unpack_type<typename unique<pack_type_t<List<Parameters...>>>::type> {};
+    struct unique<List<Parameters...>> : public relay<
+        List<Parameters...>,
+        type_list<quote<pack_type>, quote<unique>, quote<unpack_type>>
+    > {};
 
     /**
      * @fn
