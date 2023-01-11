@@ -64,6 +64,9 @@ namespace tuutil::mpl
     */
     template <class T> constexpr auto is_liftedv_v = is_liftedv<T>::value;
 
+    template <class T>
+    concept LiftedvList = is_liftedv<T>::value;
+
     /**
      * @fn
      * @brief liftした非型テンプレートに非型テンプレートパラメータを適用する
@@ -77,37 +80,6 @@ namespace tuutil::mpl
      * @brief liftした非型テンプレートに非型テンプレートパラメータを適用する
     */
     template <class LiftedList, auto... Parameters> using applyv_t = applyv<LiftedList, Parameters...>::type;
-
-    /**
-     * @fn
-     * @brief 値リストの各要素をvalue_constantで型に持ち上げたリストを返す
-    */
-    template <class ValueList> struct pack_type;
-    template <template <auto...> class List, auto... Parameters>
-    struct pack_type<List<Parameters...>>
-        : public std::type_identity<type_list<liftv<List>, value_constant<Parameters>...>>
-    {};
-
-    /**
-     * @fn
-     * @brief 値リストの各要素をvalue_constantで型に持ち上げたリストを返す
-    */
-    template <class ValueList> using pack_type_t = pack_type<ValueList>::type;
-
-    /**
-     * @fn
-     * @brief pack_typeされた値をもとに戻す
-    */
-    template <class TypeList> struct unpack_type;
-    template <template <class...> class List, class Head, class... Parameters>
-    requires (is_liftedv_v<Head> && (is_value_constant_v<Parameters> && ...))
-    struct unpack_type<List<Head, Parameters...>> : public applyv<Head, Parameters::value...> {};
-
-    /**
-     * @fn
-     * @brief pack_typeされた値をもとに戻す
-    */
-    template <class TypeList> using unpack_type_t = unpack_type<TypeList>::type;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_MPL_VALUE_CONSTANT_HPP

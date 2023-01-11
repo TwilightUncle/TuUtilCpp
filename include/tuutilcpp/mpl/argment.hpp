@@ -63,6 +63,64 @@ namespace tuutil::mpl
      * @tparam ArgList 型のパラメータパックを持つ型
     */
     template <MetaCallable F, class ArgList> using apply_list_t = apply_list<F, ArgList>::type;
+
+    /**
+     * @fn
+     * @brief 値リストの全ての要素を型として扱えるようにvalue_constantで包む
+     * @tparam ValueList 非型テンプレートパラメータパックを持つ型
+     * @tparam NewList value_constantで包んだ要素を受け取る、型テンプレートパラメータパックを指定可能なテンプレート型
+    */
+    template <class ValueList, LiftedList NewList> struct wrap_value_elements;
+    template <template <auto...> class List, template <class...> class NewList, auto... ValueElements>
+    struct wrap_value_elements<List<ValueElements...>, lift<NewList>>
+        : public std::type_identity<NewList<value_constant<ValueElements>...>>
+    {};
+
+    /**
+     * @fn
+     * @brief 値リストの全ての要素を型として扱えるようにvalue_constantで包む
+     * @tparam ValueList 非型テンプレートパラメータパックを持つ型
+     * @tparam NewList value_constantで包んだ要素を受け取る、型テンプレートパラメータパックを指定可能なテンプレート型
+    */
+    template <class ValueList, LiftedList NewList> using wrap_value_elements_t = wrap_value_elements<ValueList, NewList>::type;
+
+    /**
+     * @fn
+     * @brief 型リストの全ての要素を値へ変換する。全ての要素型がconstexpr valueメンバ変数を持っていないとコンパイルエラー
+     * @tparam TypeList 型テンプレートパラメータパックを持つ型
+     * @tparam NewList 値の要素を格納可能なテンプレート型
+    */
+    template <class TypeList, LiftedvList NewList> struct unwrap_value_elements;
+    template <template <class...> class List, template <auto...> class NewList, class... TypeElements>
+    requires (has_constexpr_value_member_v<TypeElements> && ...)
+    struct unwrap_value_elements<List<TypeElements...>, liftv<NewList>>
+        : public std::type_identity<NewList<TypeElements::value...>>
+    {};
+    template <template <auto...> class NewList>
+    struct unwrap_value_elements<ignore_type, liftv<NewList>> : public std::type_identity<ignore_type> {};
+
+    /**
+     * @fn
+     * @brief 型リストの全ての要素を値へ変換する。全ての要素型がconstexpr valueメンバ変数を持っていないとコンパイルエラー
+     * @tparam TypeList 型テンプレートパラメータパックを持つ型
+     * @tparam NewList 値の要素を格納可能なテンプレート型
+    */
+    template <class TypeList, LiftedvList NewList> using unwrap_value_elements_t = unwrap_value_elements<TypeList, NewList>::type;
+
+    /**
+     * @fn
+     * @brief 値リストを型リストとして扱うことによって、リスト操作用メタ関数を適用できるようにする
+    */
+    template <MetaCallable F, class ValueList> struct behave_as_type_list_arg;
+    template <MetaCallable F, template <auto...> class List, auto... Parameters>
+    struct behave_as_type_list_arg<F, List<Parameters...>> : public relay<
+        List<Parameters...>,
+        type_list<
+            bind<quote<flip>, quote<wrap_value_elements>, lift<type_list>>,
+            F,
+            bind<quote<flip>, quote<unwrap_value_elements>, liftv<List>>
+        >
+    > {};
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_MPL_ARGMENT_HPP

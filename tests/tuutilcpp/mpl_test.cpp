@@ -217,11 +217,26 @@ TEST(tuutilcpp_mpl_test, ExtractIfTest)
     constexpr auto case2 = std::is_same_v<not_extracted_type, ignore_type>;
     constexpr auto case3 = std::is_same_v<removed_integral_list, dummy_non_metafunction<void, std::string, std::nullptr_t>>;
     constexpr auto case4 = std::is_same_v<not_removed_list, type_list>;
+    
+    using val_list = value_list<int(1), nullptr, short(2), int(1)>;
+    using extracted_val_list = extract_if_t<bind<quote<std::is_same>, value_constant<int(1)>>, val_list>;
+    using not_extracted_type2 = extract_if_t<bind<quote<std::is_same>, value_constant<int(2)>>, val_list>;
+    using removed_val_list = remove_if_t<bind<quote<std::is_same>, value_constant<int(1)>>, val_list>;
+    using not_removed_list2 = remove_if_t<bind<quote<std::is_same>, value_constant<int(2)>>, val_list>;
+
+    constexpr auto case5 = std::is_same_v<extracted_val_list, value_list<int(1), int(1)>>;
+    constexpr auto case6 = std::is_same_v<not_extracted_type2, ignore_type>;
+    constexpr auto case7 = std::is_same_v<removed_val_list, value_list<nullptr, short(2)>>;
+    constexpr auto case8 = std::is_same_v<not_removed_list2, val_list>;
 
     ASSERT_TRUE(case1);
     ASSERT_TRUE(case2);
     ASSERT_TRUE(case3);
     ASSERT_TRUE(case4);
+    ASSERT_TRUE(case5);
+    ASSERT_TRUE(case6);
+    ASSERT_TRUE(case7);
+    ASSERT_TRUE(case8);
 }
 
 TEST(tuutilcpp_mpl_test, UniqueTest)
