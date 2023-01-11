@@ -2,10 +2,10 @@
 /// @file bracket.hpp 
 /// @brief regex.hppŠÖ˜A
 ///----------------------------------
-#ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_BRACKET_HPP
-#define TUSTRCPP_INCLUDE_GUARD_REGEX_BRACKET_HPP
+#ifndef TUUTILCPP_INCLUDE_GUARD_STR_REGEX_BRACKET_HPP
+#define TUUTILCPP_INCLUDE_GUARD_STR_REGEX_BRACKET_HPP
 
-namespace tustr::_regex
+namespace tuutil::str::_regex
 {
     /**
      * @class
@@ -94,4 +94,4 @@ namespace tustr::_regex
     };
 }
 
-#endif // TUSTRCPP_INCLUDE_GUARD_REGEX_BRACKET_HPP
+#endif // TUUTILCPP_INCLUDE_GUARD_STR_REGEX_BRACKET_HPP

@@ -1,13 +1,11 @@
 ///----------------------------------
-/// @file cstr.hpp 
+/// @file str/cstr.hpp 
 /// @brief 定数式に置ける文字列
 ///----------------------------------
-#ifndef TUSTRCPP_INCLUDE_GUARD_CSTR_HPP
-#define TUSTRCPP_INCLUDE_GUARD_CSTR_HPP
+#ifndef TUUTILCPP_INCLUDE_GUARD_STR_CSTR_HPP
+#define TUUTILCPP_INCLUDE_GUARD_STR_CSTR_HPP
 
-#include <tuutilcpp/utility.hpp>
-
-namespace tustr
+namespace tuutil::str
 {
     /**
      * @fn
@@ -106,7 +104,7 @@ namespace tustr
          * @fn
          * @brief 文字列が最初に出現する場所を検索する
         */
-        constexpr auto find(std::string_view s, std::size_t offset = 0) const { return tustr::find(s, this->view(), offset); }
+        constexpr auto find(std::string_view s, std::size_t offset = 0) const { return str::find(s, this->view(), offset); }
 
         /**
          * @fn
@@ -279,11 +277,11 @@ namespace tustr
      * @brief テンプレート引数で渡した整数値をcstrに変換する。進数を渡すことで、(2,8,16)進数リテラルのような文字列に変換する
     */
     template <auto V, int Hex = 10, bool UsePrefix = false>
-    requires (V >= 0 && Hex >= 2 && (std::integral<decltype(V)> || tudb::is_big_int<decltype(V)>::value))
+    requires (V >= 0 && Hex >= 2 && (std::integral<decltype(V)> || utility::is_big_int<decltype(V)>::value))
     constexpr auto to_string()
     {
         // 10進数として桁数を取得
-        constexpr auto len = tudb::get_digit<V, Hex>();
+        constexpr auto len = utility::get_digit<V, Hex>();
         // 終端文字の長さも配列の要素数に含める
         cstr<len + 1> s{};
         auto val = V;
@@ -332,4 +330,4 @@ namespace tustr
     template <std::size_t N> struct is_cstr<cstr<N>> : public std::true_type{};
 }
 
-#endif // TUSTRCPP_INCLUDE_GUARD_CSTR_HPP
+#endif // TUUTILCPP_INCLUDE_GUARD_STR_CSTR_HPP

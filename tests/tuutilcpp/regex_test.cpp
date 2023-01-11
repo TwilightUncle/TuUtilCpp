@@ -1,7 +1,8 @@
 #include <gtest/gtest.h>
-#include <tustrcpp/regex.hpp>
+#include <tuutilcpp/str.hpp>
 
 using namespace std::string_view_literals;
+using namespace tuutil::str;
 
 /**
  * @fn
@@ -30,12 +31,12 @@ static constexpr bool is_allowed_string(
     return true;
 }
 
-TEST(tustrcpptest, RegexFunctionTest)
+TEST(TuutilcppStrTest, RegexFunctionTest)
 {
-    constexpr auto case1 = tustr::is_collect_regex_back_slash("a\\0\\\\a\\\\");
-    constexpr auto case2 = tustr::is_collect_regex_back_slash("a\\0\\\\a\\");
-    constexpr auto case3 = tustr::is_collect_regex_back_slash("\\a\\0\\\\a\\\\");
-    constexpr auto case4 = tustr::is_collect_regex_back_slash("a\\0\\\\\\a\\\\");
+    constexpr auto case1 = is_collect_regex_back_slash("a\\0\\\\a\\\\");
+    constexpr auto case2 = is_collect_regex_back_slash("a\\0\\\\a\\");
+    constexpr auto case3 = is_collect_regex_back_slash("\\a\\0\\\\a\\\\");
+    constexpr auto case4 = is_collect_regex_back_slash("a\\0\\\\\\a\\\\");
     constexpr auto case5 = is_allowed_string("aaaab", true, "ab", "");
     constexpr auto case6 = is_allowed_string("\\0\\n\\\\", true, "", "0n\\");
     constexpr auto case7 = is_allowed_string("a\\0\\\\a\\\\", true, "a", "\\0");
@@ -54,24 +55,24 @@ TEST(tustrcpptest, RegexFunctionTest)
     ASSERT_FALSE(case10);
 }
 
-TEST(tustrcpptest, RegexExtractBrancketTest)
+TEST(TuutilcppStrTest, RegexExtractBrancketTest)
 {
     // 正常
-    constexpr auto case11 = tustr::_regex::bracket_inner<"abc[defg{hijk}lm\\](opq)]rs", 3>::value;
-    constexpr auto case12 = tustr::_regex::bracket_inner<"abc{defg\\{hijk\\}lm](opq)}rs", 3>::value;
-    constexpr auto case13 = tustr::_regex::bracket_inner<"abc(defg{hijk\\}lm](opq\\)))rs", 3>::value;
-    constexpr auto case14 = tustr::_regex::bracket_inner<"abc<defg{hijk\\}lm](opq\\)>rs", 3>::value;
+    constexpr auto case11 = _regex::bracket_inner<"abc[defg{hijk}lm\\](opq)]rs", 3>::value;
+    constexpr auto case12 = _regex::bracket_inner<"abc{defg\\{hijk\\}lm](opq)}rs", 3>::value;
+    constexpr auto case13 = _regex::bracket_inner<"abc(defg{hijk\\}lm](opq\\)))rs", 3>::value;
+    constexpr auto case14 = _regex::bracket_inner<"abc<defg{hijk\\}lm](opq\\)>rs", 3>::value;
     EXPECT_STREQ(case11.data(), "defg{hijk}lm\\](opq)");
     EXPECT_STREQ(case12.data(), "defg\\{hijk\\}lm](opq)");
     EXPECT_STREQ(case13.data(), "defg{hijk\\}lm](opq\\))");
     EXPECT_STREQ(case14.data(), "defg{hijk\\}lm](opq\\)");
 
     // 異常(対応する閉じ括弧が存在しない) コメントアウトを外すとコンパイルエラーが発生
-    // constexpr auto case15 = tustr::_regex::bracket_inner<"abc[defg{hijk}lm\\](opq)\\]rs", 3>::value;
-    // constexpr auto case16 = tustr::_regex::bracket_inner<"abc{defg\\{hijk\\}lm](opq)\\}rs", 3>::value;
-    // constexpr auto case17 = tustr::_regex::bracket_inner<"abc(defg{hijk\\}lm](opq\\)\\)rs", 3>::value;
-    // constexpr auto case18 = tustr::_regex::bracket_inner<"abc<defg{hijk\\}lm](opq\\)\\>rs", 3>::value;
-    // constexpr auto case19 = tustr::_regex::bracket_inner<"abc(defg{hijk\\}lm](opq\\))rs", 3>::value;
+    // constexpr auto case15 = _regex::bracket_inner<"abc[defg{hijk}lm\\](opq)\\]rs", 3>::value;
+    // constexpr auto case16 = _regex::bracket_inner<"abc{defg\\{hijk\\}lm](opq)\\}rs", 3>::value;
+    // constexpr auto case17 = _regex::bracket_inner<"abc(defg{hijk\\}lm](opq\\)\\)rs", 3>::value;
+    // constexpr auto case18 = _regex::bracket_inner<"abc<defg{hijk\\}lm](opq\\)\\>rs", 3>::value;
+    // constexpr auto case19 = _regex::bracket_inner<"abc(defg{hijk\\}lm](opq\\))rs", 3>::value;
 }
 
 /**
@@ -79,11 +80,11 @@ TEST(tustrcpptest, RegexExtractBrancketTest)
  * @brief 渡された文字範囲を許可/拒否リストに展開し、与えられた文字列がマッチするか判定する関数オブジェクトを返却する
  * TODO: いらないのでいつかテストの修正と本関数を削除する
 */
-template <tustr::cstr Pattern, std::size_t Pos>
+template <cstr Pattern, std::size_t Pos>
 static constexpr auto get_regex_char_range_matcher()
 {
     return [](const std::string& comp) -> bool {
-        using range_parser = tustr::_regex::char_set_parser<Pattern, Pos>;
+        using range_parser = _regex::char_set_parser<Pattern, Pos>;
         return is_allowed_string(
             comp,
             range_parser::allow_or_deny,
@@ -94,7 +95,7 @@ static constexpr auto get_regex_char_range_matcher()
     };
 }
 
-TEST(tustrcpptest, RegexCharRangeParseTest)
+TEST(TuutilcppStrTest, RegexCharRangeParseTest)
 {
     // 文字クラス,バックスラッシュ,文字範囲指定なし
     constexpr auto case19 = get_regex_char_range_matcher<"ab[-abc.]", 2>()(".c-aba");
@@ -138,19 +139,19 @@ TEST(tustrcpptest, RegexCharRangeParseTest)
     EXPECT_FALSE(range_matcher1("0123451bcdABCDE"));
 }
 
-TEST(tustrcpptest, RegexQuantifierParseTest)
+TEST(TuutilcppStrTest, RegexQuantifierParseTest)
 {
-    using type1 = tustr::_regex::quantifier_perser<"abcd*e", 4>;
-    using type2 = tustr::_regex::quantifier_perser<"abcd*", 4>;
-    using type3 = tustr::_regex::quantifier_perser<"abcd*?", 4>;
-    using type4 = tustr::_regex::quantifier_perser<"abcd+", 4>;
-    using type5 = tustr::_regex::quantifier_perser<"abcd?", 4>;
-    using type6 = tustr::_regex::quantifier_perser<"abcd{20}e", 4>;
-    using type7 = tustr::_regex::quantifier_perser<"abcd{2,}", 4>;
-    using type8 = tustr::_regex::quantifier_perser<"abcd{25,512}", 4>;
-    using type9 = tustr::_regex::quantifier_perser<"abcd{20}?e", 4>;
-    using type10 = tustr::_regex::quantifier_perser<"abcd{2,}?", 4>;
-    using type11 = tustr::_regex::quantifier_perser<"abcd{25,512}?", 4>;
+    using type1 = _regex::quantifier_perser<"abcd*e", 4>;
+    using type2 = _regex::quantifier_perser<"abcd*", 4>;
+    using type3 = _regex::quantifier_perser<"abcd*?", 4>;
+    using type4 = _regex::quantifier_perser<"abcd+", 4>;
+    using type5 = _regex::quantifier_perser<"abcd?", 4>;
+    using type6 = _regex::quantifier_perser<"abcd{20}e", 4>;
+    using type7 = _regex::quantifier_perser<"abcd{2,}", 4>;
+    using type8 = _regex::quantifier_perser<"abcd{25,512}", 4>;
+    using type9 = _regex::quantifier_perser<"abcd{20}?e", 4>;
+    using type10 = _regex::quantifier_perser<"abcd{2,}?", 4>;
+    using type11 = _regex::quantifier_perser<"abcd{25,512}?", 4>;
 
     EXPECT_TRUE(type1::greedy);
     EXPECT_TRUE(type2::greedy);
@@ -189,12 +190,12 @@ TEST(tustrcpptest, RegexQuantifierParseTest)
     EXPECT_EQ(type11::end_pos, 13);
 }
 
-TEST(tustrcpptest, RegexCaptureParserTest)
+TEST(TuutilcppStrTest, RegexCaptureParserTest)
 {
-    using type1 = tustr::_regex::capture_parser<"ab(cdefg)", 2>;
-    using type2 = tustr::_regex::capture_parser<"ab(?:cdefg)", 2>;
-    using type3 = tustr::_regex::capture_parser<"ab(?<a_1>cdefg)", 2>;
-    using type4 = tustr::_regex::capture_parser<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}(aa)\\)nop", 6>;
+    using type1 = _regex::capture_parser<"ab(cdefg)", 2>;
+    using type2 = _regex::capture_parser<"ab(?:cdefg)", 2>;
+    using type3 = _regex::capture_parser<"ab(?<a_1>cdefg)", 2>;
+    using type4 = _regex::capture_parser<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}(aa)\\)nop", 6>;
 
     EXPECT_TRUE(type1::is_capture);
     EXPECT_FALSE(type2::is_capture);
@@ -211,23 +212,23 @@ TEST(tustrcpptest, RegexCaptureParserTest)
     EXPECT_STREQ(type4::capture_pattern.data(), "(ghi[jkl].){2,4}(\\d(\\]m))");
     EXPECT_EQ(type4::inner_regex::parser::max_capture_count, 6);
 
-    EXPECT_TRUE(tustr::RegexParserCaptureable<type1>);
-    EXPECT_FALSE(tustr::RegexParserCaptureable<type2>);
-    EXPECT_TRUE(tustr::RegexParserCaptureable<type3>);
+    EXPECT_TRUE(RegexParserCaptureable<type1>);
+    EXPECT_FALSE(RegexParserCaptureable<type2>);
+    EXPECT_TRUE(RegexParserCaptureable<type3>);
 }
 
-TEST(tustrcpptest, RegexGeneralTest)
+TEST(TuutilcppStrTest, RegexGeneralTest)
 {
-    using type1 = tustr::_regex::general<"abcdef[g", 0>;
+    using type1 = _regex::general<"abcdef[g", 0>;
     EXPECT_STREQ(type1::value.data(), "abcdef");
     EXPECT_EQ(type1::begin_pos, 0);
     EXPECT_EQ(type1::end_pos, 6);
 }
 
-TEST(tustrcpptest, RegexReferenceTest)
+TEST(TuutilcppStrTest, RegexReferenceTest)
 {
-    using type1 = tustr::_regex::reference_parser<"\\1", 1>;
-    using type2 = tustr::_regex::reference_parser<"\\345", 1>;
+    using type1 = _regex::reference_parser<"\\1", 1>;
+    using type2 = _regex::reference_parser<"\\345", 1>;
 
     EXPECT_EQ(type1::end_pos, 2);
     EXPECT_EQ(type1::reference_index, 0);
@@ -235,11 +236,11 @@ TEST(tustrcpptest, RegexReferenceTest)
     EXPECT_EQ(type2::reference_index, 344);
 }
 
-TEST(tustrcpptest, RegexAddQuantifierTest)
+TEST(TuutilcppStrTest, RegexAddQuantifierTest)
 {
-    using type1 = tustr::_regex::add_quantifier<"abcdef[g", tustr::_regex::general<"abcdef[g", 0>>::type;
-    using type2 = tustr::_regex::add_quantifier<"abcdef+[g", tustr::_regex::general<"abcdef+[g", 0>>::type;
-    using type3 = tustr::_regex::add_quantifier<"abcdef+[g", tustr::_regex::general<"abcdef+[g", 5>>::type;
+    using type1 = _regex::add_quantifier<"abcdef[g", _regex::general<"abcdef[g", 0>>::type;
+    using type2 = _regex::add_quantifier<"abcdef+[g", _regex::general<"abcdef+[g", 0>>::type;
+    using type3 = _regex::add_quantifier<"abcdef+[g", _regex::general<"abcdef+[g", 5>>::type;
 
     EXPECT_EQ(type1::begin_pos, 0);
     EXPECT_EQ(type1::end_pos, 6);
@@ -251,13 +252,13 @@ TEST(tustrcpptest, RegexAddQuantifierTest)
     EXPECT_EQ(type3::max_count, std::string_view::npos);
 }
 
-TEST(tustrcpptest, RegexOrTest)
+TEST(TuutilcppStrTest, RegexOrTest)
 {
-    EXPECT_EQ(tustr::_regex::get_or_pos_regex_pattern("abc|(de)(fg)|h(i)"), 3);
-    EXPECT_EQ(tustr::_regex::get_or_pos_regex_pattern("(a|b)[|]\\|{abc|}|abc"), 16);
+    EXPECT_EQ(_regex::get_or_pos_regex_pattern("abc|(de)(fg)|h(i)"), 3);
+    EXPECT_EQ(_regex::get_or_pos_regex_pattern("(a|b)[|]\\|{abc|}|abc"), 16);
 
-    using type1 = tustr::_regex::or_parser<"abc|(de)(fg)|h(i)", 3>;
-    using type2 = tustr::_regex::or_parser<"(de)(fg)|h(i)", 8>;
+    using type1 = _regex::or_parser<"abc|(de)(fg)|h(i)", 3>;
+    using type2 = _regex::or_parser<"(de)(fg)|h(i)", 8>;
 
     EXPECT_STREQ(type1::pref_str.data(), "abc");
     EXPECT_STREQ(type1::suf_str.data(), "(de)(fg)|h(i)");
@@ -272,15 +273,15 @@ TEST(tustrcpptest, RegexOrTest)
     EXPECT_EQ(type2::inner_regex::parser::max_capture_count, 2);
 }
 
-TEST(tustrcpptest, RegexAssertionTest)
+TEST(TuutilcppStrTest, RegexAssertionTest)
 {
 
     constexpr auto check_func = [](auto t, std::string_view sv, std::size_t offset, bool is_lock_pos) {
-        tustr::regex_capture_store<0> cs;
+        regex_capture_store<0> cs;
         return t.generated_func<0>(sv, offset, is_lock_pos, cs).get_begin_pos();
     };
 
-    using type1 = tustr::_regex::assertion_parser<"^", 0>;
+    using type1 = _regex::assertion_parser<"^", 0>;
     EXPECT_EQ(check_func(type1{}, "", 0, true), 0);
     EXPECT_EQ(check_func(type1{}, "a", 0, true), 0);
     EXPECT_EQ(check_func(type1{}, "a", 1, true), std::string_view::npos);
@@ -291,7 +292,7 @@ TEST(tustrcpptest, RegexAssertionTest)
     EXPECT_EQ(check_func(type1{}, "\na", 1, true), 1);
     EXPECT_EQ(check_func(type1{}, "a\na", 1, false), 2);
 
-    using type2 = tustr::_regex::assertion_parser<"$", 0>;
+    using type2 = _regex::assertion_parser<"$", 0>;
     EXPECT_EQ(check_func(type2{}, "", 0, true), 0);
     EXPECT_EQ(check_func(type2{}, "a", 0, true), std::string_view::npos);
     EXPECT_EQ(check_func(type2{}, "a", 0, false), 1);
@@ -302,7 +303,7 @@ TEST(tustrcpptest, RegexAssertionTest)
     EXPECT_EQ(check_func(type2{}, "\na", 0, true), 0);
     EXPECT_EQ(check_func(type2{}, "\na", 1, true), std::string_view::npos);
 
-    using type3 = tustr::_regex::assertion_parser<"b", 0>;
+    using type3 = _regex::assertion_parser<"b", 0>;
     EXPECT_EQ(check_func(type3{}, "", 0, true), std::string_view::npos);
     EXPECT_EQ(check_func(type3{}, "a", 0, true), 0);
     EXPECT_EQ(check_func(type3{}, "a", 1, true), 1);
@@ -313,7 +314,7 @@ TEST(tustrcpptest, RegexAssertionTest)
     EXPECT_EQ(check_func(type3{}, "ab_@12d xy", 8, true), 8);
     EXPECT_EQ(check_func(type3{}, "ab_@12d xy", 1, false), 3);
 
-    using type4 = tustr::_regex::assertion_parser<"B", 0>;
+    using type4 = _regex::assertion_parser<"B", 0>;
     EXPECT_EQ(check_func(type4{}, "", 0, true), 0);
     EXPECT_EQ(check_func(type4{}, "a", 0, true), std::string_view::npos);
     EXPECT_EQ(check_func(type4{}, "a", 1, true), std::string_view::npos);
@@ -324,7 +325,7 @@ TEST(tustrcpptest, RegexAssertionTest)
     EXPECT_EQ(check_func(type4{}, "ab_@12d xy", 8, true), std::string_view::npos);
     EXPECT_EQ(check_func(type4{}, "ab_@12d xy", 7, false), 9);
 
-    using type5 = tustr::_regex::assertion_parser<"(?=abc)", 0>;
+    using type5 = _regex::assertion_parser<"(?=abc)", 0>;
     EXPECT_STREQ(type5::inner_match_pattern.data(), "abc");
     EXPECT_EQ(check_func(type5{}, "ab", 0, false), std::string_view::npos);
     EXPECT_EQ(check_func(type5{}, "abc", 0, true), 0);
@@ -332,7 +333,7 @@ TEST(tustrcpptest, RegexAssertionTest)
     EXPECT_EQ(check_func(type5{}, "aaabc", 0, true), std::string_view::npos);
     EXPECT_EQ(check_func(type5{}, "aaabc", 0, false), 2);
 
-    using type6 = tustr::_regex::assertion_parser<"(?!abc)", 0>;
+    using type6 = _regex::assertion_parser<"(?!abc)", 0>;
     EXPECT_STREQ(type6::inner_match_pattern.data(), "abc");
     EXPECT_EQ(check_func(type6{}, "ab", 0, false), 0);
     EXPECT_EQ(check_func(type6{}, "abc", 0, true), std::string_view::npos);
@@ -342,7 +343,7 @@ TEST(tustrcpptest, RegexAssertionTest)
     EXPECT_EQ(check_func(type6{}, "aaabc", 2, false), 3);
     EXPECT_EQ(check_func(type6{}, "aaabc", 2, true), std::string_view::npos);
 
-    using type7 = tustr::_regex::assertion_parser<"(?<=abc)", 0>;
+    using type7 = _regex::assertion_parser<"(?<=abc)", 0>;
     EXPECT_STREQ(type7::inner_match_pattern.data(), "abc");
     EXPECT_EQ(check_func(type7{}, "ab", 0, false), std::string_view::npos);
     EXPECT_EQ(check_func(type7{}, "abc", 0, false), 3);
@@ -352,7 +353,7 @@ TEST(tustrcpptest, RegexAssertionTest)
     EXPECT_EQ(check_func(type7{}, "abcc", 3, true), 3);
     EXPECT_EQ(check_func(type7{}, "aabc", 0, false), 4);
 
-    using type8 = tustr::_regex::assertion_parser<"(?<!abc)", 0>;
+    using type8 = _regex::assertion_parser<"(?<!abc)", 0>;
     EXPECT_STREQ(type8::inner_match_pattern.data(), "abc");
     EXPECT_EQ(check_func(type8{}, "ab", 0, false), 0);
     EXPECT_EQ(check_func(type8{}, "abc", 0, false), 0);
@@ -361,12 +362,12 @@ TEST(tustrcpptest, RegexAssertionTest)
     EXPECT_EQ(check_func(type8{}, "abcc", 3, true), std::string_view::npos);
 }
 
-TEST(tustrcpptest, RegexParseTest)
+TEST(TuutilcppStrTest, RegexParseTest)
 {
-    using type1 = tustr::regex<R"(abcdef[ghi].\daz[$%&_1]\[+\^?)">;
-    using type2 = tustr::regex<R"(abcdef(ghi[jkl].\d\]m){2}\)nop)">;
-    using type3 = tustr::regex<R"(abcdef((ghi[jkl].){2,4}(\d(\]m))){2}(aa)\)nop)">;
-    using type4 = tustr::regex<R"(abcdef(ghi[jkl].\d\]m){2,}\)nop)">;
+    using type1 = regex<R"(abcdef[ghi].\daz[$%&_1]\[+\^?)">;
+    using type2 = regex<R"(abcdef(ghi[jkl].\d\]m){2}\)nop)">;
+    using type3 = regex<R"(abcdef((ghi[jkl].){2,4}(\d(\]m))){2}(aa)\)nop)">;
+    using type4 = regex<R"(abcdef(ghi[jkl].\d\]m){2,}\)nop)">;
 
     EXPECT_EQ(type1::parser::max_capture_count, 0);
     EXPECT_EQ(type2::parser::max_capture_count, 2);
@@ -374,9 +375,9 @@ TEST(tustrcpptest, RegexParseTest)
     EXPECT_EQ(type4::parser::max_capture_count, 65535);
 }
 
-TEST(tustrcpptest, RegexExecTest)
+TEST(TuutilcppStrTest, RegexExecTest)
 {
-    using type1 = tustr::regex<"abcdef[ghi].\\daz[$%&_1]\\[+\\^?">;
+    using type1 = regex<"abcdef[ghi].\\daz[$%&_1]\\[+\\^?">;
     constexpr auto case1 = type1::exec("abcdefg#5az&[^");
     constexpr auto case2 = type1::exec("abcdefv#5az&[^");
     constexpr auto case3 = type1::exec("nnnabcdefg#5az&[^nnn");
@@ -393,7 +394,7 @@ TEST(tustrcpptest, RegexExecTest)
     EXPECT_EQ(case6.second.get_end_pos(), 14);
     EXPECT_EQ(case7.second.get_end_pos(), std::string_view::npos);
 
-    using type2 = tustr::regex<"abcdef(ghi[jkl].\\d\\]m){2}\\)nop">;
+    using type2 = regex<"abcdef(ghi[jkl].\\d\\]m){2}\\)nop">;
     // グループ二回繰り返し
     constexpr auto case8 = type2::exec("abcdefghij%1]mghil<9]m)nop");
     constexpr auto case9 = type2::exec("nnnabcdefghij%1]mghil<9]m)nopnnn");
@@ -410,7 +411,7 @@ TEST(tustrcpptest, RegexExecTest)
     EXPECT_EQ(case8.first.get(0), "ghij%1]m"sv);
     EXPECT_EQ(case8.first.get(1), "ghil<9]m"sv);
 
-    using type3 = tustr::regex<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}(aa)\\)nop">;
+    using type3 = regex<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}(aa)\\)nop">;
     constexpr auto case12 = type3::exec("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nop");
 
     EXPECT_EQ(case12.second.get_end_pos(), 43);
@@ -428,7 +429,7 @@ TEST(tustrcpptest, RegexExecTest)
     EXPECT_EQ(case12.first.get(10), "]m"sv);
     EXPECT_EQ(case12.first.get(11), "aa"sv);
 
-    using type4 = tustr::regex<"(?=.{0,4}[A-Z]).{5}">;
+    using type4 = regex<"(?=.{0,4}[A-Z]).{5}">;
     constexpr auto case13 = type4::exec("abcde1234f");
     constexpr auto case14 = type4::exec("aBcde1234f");
     constexpr auto case15 = type4::exec("abcdE1234f");
@@ -439,7 +440,7 @@ TEST(tustrcpptest, RegexExecTest)
     EXPECT_EQ(case15.second.get_begin_pos(), 0);
     EXPECT_EQ(case16.second.get_begin_pos(), 5);
 
-    using type5 = tustr::regex<"abcde|\\d{3}|ab(hij|klmn)">;
+    using type5 = regex<"abcde|\\d{3}|ab(hij|klmn)">;
     constexpr auto case17 = type5::exec("abcde");
     constexpr auto case18 = type5::exec("123");
     constexpr auto case19 = type5::exec("abhij");
@@ -456,7 +457,7 @@ TEST(tustrcpptest, RegexExecTest)
     EXPECT_EQ(case20.second.get_end_pos(), 6);
     EXPECT_EQ(case20.first.get(0), "klmn"sv);
 
-    using type6 = tustr::regex<"ab(bbb|aa)">;
+    using type6 = regex<"ab(bbb|aa)">;
     constexpr auto case21 = type6::exec("abaa");
     constexpr auto case22 = type6::exec("abbbb");
 
@@ -468,9 +469,9 @@ TEST(tustrcpptest, RegexExecTest)
     EXPECT_EQ(case22.first.get(0), "bbb"sv);
 }
 
-TEST(tustrcpptest, RegexMatchTest)
+TEST(TuutilcppStrTest, RegexMatchTest)
 {
-    using type1 = tustr::regex<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}(aa)\\)nop\\2\\6">;
+    using type1 = regex<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}(aa)\\)nop\\2\\6">;
     constexpr auto case1 = type1::search("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]m");
     constexpr auto case2 = type1::search("aabcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]m");
     constexpr auto case3 = type1::search("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]ma");
@@ -488,9 +489,9 @@ TEST(tustrcpptest, RegexMatchTest)
     EXPECT_FALSE(case7);
 }
 
-TEST(tustrcpptest, RegexResultTest)
+TEST(TuutilcppStrTest, RegexResultTest)
 {
-    using type1 = tustr::regex<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}(aa)\\)nop\\2\\6">;
+    using type1 = regex<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}(aa)\\)nop\\2\\6">;
     constexpr auto case1 = type1("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]m");
     constexpr auto case2 = type1("aabcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]m");
     constexpr auto case3 = type1("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]ma");
@@ -515,20 +516,20 @@ TEST(tustrcpptest, RegexResultTest)
     EXPECT_EQ(case1.get_match_string_view(13), ""sv);
     EXPECT_EQ(case1.get_match_string_view(99), ""sv);
 
-    using type2 = tustr::regex<"<.*>">;
+    using type2 = regex<"<.*>">;
     constexpr auto case5 = type2("some <foo> <bar> new </bar> </foo> thing");
     EXPECT_EQ(case5.get_match_string_view(), "<foo> <bar> new </bar> </foo>"sv);
 
-    using type3 = tustr::regex<"<.*?>">;
+    using type3 = regex<"<.*?>">;
     constexpr auto case6 = type3("some <foo> <bar> new </bar> </foo> thing");
     EXPECT_EQ(case6.get_match_string_view(), "<foo>"sv);
     
-    using type4 = tustr::regex<"ab?\\w">;
+    using type4 = regex<"ab?\\w">;
     constexpr auto case7 = type4("abb");
     EXPECT_EQ(case7.get_match_string_view(), "abb"sv);
 
     // 非貪欲の0回マッチ検査
-    using type5 = tustr::regex<"ab??\\w">;
+    using type5 = regex<"ab??\\w">;
     constexpr auto case8 = type5("abb");
     EXPECT_EQ(case8.get_match_string_view(), "ab"sv);
 }

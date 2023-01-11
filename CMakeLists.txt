@@ -12,10 +12,10 @@ set(TUGAMECPP_TESTS
     ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/algorithm_test.cpp
     ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/carry_over_test.cpp
     ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/big_int_test.cpp
-    ${PROJECT_SOURCE_DIR}/tests/tustrcpp/cstr_test.cpp
-    ${PROJECT_SOURCE_DIR}/tests/tustrcpp/regex_test.cpp
-    ${PROJECT_SOURCE_DIR}/tests/column_test.cpp
-    ${PROJECT_SOURCE_DIR}/tests/db_definition_test.cpp
+    ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/cstr_test.cpp
+    ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/regex_test.cpp
+    ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/column_test.cpp
+    ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/db_definition_test.cpp
 )
 source_group(tests FILES ${TUGAMECPP_TESTS})
 

@@ -2,10 +2,10 @@
 /// @file resolve.hpp 
 /// @brief regex.hpp関連(各パターンの文字列がどの機能をもつか解決する)
 ///----------------------------------
-#ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_RESOLVE_HPP
-#define TUSTRCPP_INCLUDE_GUARD_REGEX_RESOLVE_HPP
+#ifndef TUUTILCPP_INCLUDE_GUARD_STR_REGEX_RESOLVE_HPP
+#define TUUTILCPP_INCLUDE_GUARD_STR_REGEX_RESOLVE_HPP
 
-namespace tustr::_regex
+namespace tuutil::str::_regex
 {
     /**
      * @fn
@@ -142,4 +142,4 @@ namespace tustr::_regex
     template <template <cstr, RegexParseable> class F, cstr Pattern> using bind_regex_pattern_t = bind_regex_pattern<F, Pattern>::type;
 }
 
-#endif // TUSTRCPP_INCLUDE_GUARD_REGEX_RESOLVE_HPP
+#endif // TUUTILCPP_INCLUDE_GUARD_STR_REGEX_RESOLVE_HPP

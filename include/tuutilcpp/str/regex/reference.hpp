@@ -2,10 +2,10 @@
 /// @file quantifier.hpp 
 /// @brief regex.hppŠÖ˜A
 ///----------------------------------
-#ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_REFERENCE_HPP
-#define TUSTRCPP_INCLUDE_GUARD_REGEX_REFERENCE_HPP
+#ifndef TUUTILCPP_INCLUDE_GUARD_STR_REGEX_REFERENCE_HPP
+#define TUUTILCPP_INCLUDE_GUARD_STR_REGEX_REFERENCE_HPP
 
-namespace tustr::_regex
+namespace tuutil::str::_regex
 {
     template <cstr Pattern, std::size_t Pos>
     struct reference_parser
@@ -29,4 +29,4 @@ namespace tustr::_regex
     };
 }
 
-#endif // TUSTRCPP_INCLUDE_GUARD_REGEX_REFERENCE_HPP
+#endif // TUUTILCPP_INCLUDE_GUARD_STR_REGEX_REFERENCE_HPP

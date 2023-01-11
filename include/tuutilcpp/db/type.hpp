@@ -2,12 +2,10 @@
 /// @file type.hpp
 /// @brief DBフィールド用の型定義
 ///----------------------------------
-#ifndef TUDBCPP_INCLUDE_GUARD_TYPE_HPP
-#define TUDBCPP_INCLUDE_GUARD_TYPE_HPP
+#ifndef TUUTILCPP_INCLUDE_GUARD_DB_TYPE_HPP
+#define TUUTILCPP_INCLUDE_GUARD_DB_TYPE_HPP
 
-#include <string>
-
-namespace tudb
+namespace tuutil::db
 {
     template <std::size_t N> struct varchar : public std::string{};
     using smallint = std::int16_t;
@@ -37,4 +35,4 @@ namespace tudb
     template <class T> constexpr std::size_t get_maxlength(const T& v) { return get_maxlength_t<T>::size; } 
 }
 
-#endif // TUDBCPP_INCLUDE_GUARD_TYPE_HPP
+#endif // TUUTILCPP_INCLUDE_GUARD_DB_TYPE_HPP

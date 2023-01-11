@@ -13,7 +13,7 @@ struct dummy_metafunction
 template <class... Args>
 struct dummy_non_metafunction {};
 
-TEST(tuutilcpp_mpl_test, MetaCallbackTest)
+TEST(TuutilcppMplTest, MetaCallbackTest)
 {
     constexpr auto case1 = ReturenValueMetaFunction<dummy_metafunction<int, float>>;
     constexpr auto case2 = ReturenValueMetaFunction<int>;
@@ -83,7 +83,7 @@ TEST(tuutilcpp_mpl_test, MetaCallbackTest)
     ASSERT_TRUE(case25);
 }
 
-TEST(tuutilcpp_mpl_test, MapTest)
+TEST(TuutilcppMplTest, MapTest)
 {
     using type_list = dummy_non_metafunction<long long, short, unsigned short, unsigned long long, unsigned long>;
     using expect_type_list = dummy_non_metafunction<const long long, const short, const unsigned short, const unsigned long long, const unsigned long>;
@@ -102,7 +102,7 @@ TEST(tuutilcpp_mpl_test, MapTest)
 template <class T1, class T2> struct get_max_size_type : public std::conditional<(sizeof(T1) > sizeof(T2)), T1, T2> {};
 template <class T1, class T2> struct get_min_size_type : public std::conditional<(sizeof(T1) <= sizeof(T2)), T1, T2> {};
 
-TEST(tuutilcpp_mpl_test, FoldTest)
+TEST(TuutilcppMplTest, FoldTest)
 {
     using type_list = dummy_non_metafunction<long long, short, unsigned short, unsigned long long, unsigned long>;
     using l_max_type = foldl_t<quote<get_max_size_type>, long, type_list>;
@@ -124,7 +124,7 @@ TEST(tuutilcpp_mpl_test, FoldTest)
     EXPECT_TRUE(case4);
 }
 
-TEST(tuutilcpp_mpl_test, PushTest)
+TEST(TuutilcppMplTest, PushTest)
 {
     using type_list = dummy_non_metafunction<int, float>;
 
@@ -147,7 +147,7 @@ TEST(tuutilcpp_mpl_test, PushTest)
     EXPECT_TRUE(case8);
 }
 
-TEST(tuutilcpp_mpl_test, ParameterPackTest)
+TEST(TuutilcppMplTest, ParameterPackTest)
 {
     using type_list = dummy_non_metafunction<double, long long, char, int>;
     constexpr auto case1 = std::is_same_v<reverse_t<type_list>, dummy_non_metafunction<int, char, long long, double>>;
@@ -191,7 +191,7 @@ TEST(tuutilcpp_mpl_test, ParameterPackTest)
     EXPECT_TRUE(case16);
 }
 
-TEST(tuutilcpp_mpl_test, FindIfTest)
+TEST(TuutilcppMplTest, FindIfTest)
 {
     using type_list = dummy_non_metafunction<double, long long, char, int>;
     using find_type_int = find_if_t<bind<quote<std::is_same>, int>, type_list>;
@@ -204,7 +204,7 @@ TEST(tuutilcpp_mpl_test, FindIfTest)
     ASSERT_TRUE(case2);
 }
 
-TEST(tuutilcpp_mpl_test, ArgmentTest)
+TEST(TuutilcppMplTest, ArgmentTest)
 {
     using type_list = dummy_non_metafunction<void, std::string, int, unsigned char, short, std::nullptr_t, long long>;
     constexpr auto case1 = std::is_same_v<
@@ -219,7 +219,7 @@ TEST(tuutilcpp_mpl_test, ArgmentTest)
     ASSERT_TRUE(case1);
 }
 
-TEST(tuutilcpp_mpl_test, ExtractIfTest)
+TEST(TuutilcppMplTest, ExtractIfTest)
 {
     using type_list = dummy_non_metafunction<void, std::string, int, unsigned char, short, std::nullptr_t, long long>;
     using extracted_integral_list = extract_if_t<quote<std::is_integral>, type_list>;
@@ -253,7 +253,7 @@ TEST(tuutilcpp_mpl_test, ExtractIfTest)
     ASSERT_TRUE(case8);
 }
 
-TEST(tuutilcpp_mpl_test, UniqueTest)
+TEST(TuutilcppMplTest, UniqueTest)
 {
     using type_list = dummy_non_metafunction<void, std::string, int, int, void, std::string, int>;
     using expect_type_list = dummy_non_metafunction<void, std::string, int>;
