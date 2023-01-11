@@ -8,6 +8,7 @@
 #include <tudbcpp/constraint.hpp>
 #include <tudbcpp/type.hpp>
 #include <tustrcpp/cstr.hpp>
+#include <tuutilcpp/utility.hpp>
 
 namespace tudb
 {
@@ -20,7 +21,7 @@ namespace tudb
      * @tparam Constraints 列制約を任意数指定する(指定なしもOK)
     */
     template <
-        enumeration auto ColID,
+        tuutil::mpl::Enumeration auto ColID,
         tustr::cstr Name,
         class FieldType,
         ColumnConstraintDefinable... Constraints
@@ -44,7 +45,7 @@ namespace tudb
      * @brief column_definition型かどうかを判定するメタ関数
     */
     template <class T> struct is_column_definition : public std::false_type {};
-    template <enumeration auto ColID, tustr::cstr Name, typename FieldType, ColumnConstraintDefinable... Constraints>
+    template <tuutil::mpl::Enumeration auto ColID, tustr::cstr Name, typename FieldType, ColumnConstraintDefinable... Constraints>
     struct is_column_definition<define_column<ColID, Name, FieldType, Constraints...>> : public std::true_type {};
 
     /**
@@ -76,7 +77,7 @@ namespace tudb
     template <class T>
     concept ColumnListDefinitionable = requires {
         // Tはパラメータパックを持っている
-        requires has_type_parameters_v<T>;
+        requires tuutil::mpl::has_type_parameters_v<T>;
 
         // 同じ定義のカラムが存在してはいけない
         requires copy_types_t<T, is_unique>::value;

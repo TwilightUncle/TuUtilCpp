@@ -11,11 +11,6 @@ namespace tudb
     template <class Head, class... Parameters> struct is_unique;
 
     /**
-     * @brief 列挙型であることを強制するコンセプト(ほんとはscoped_enumを判定したいがc++23から)
-    */
-    template <class T> concept enumeration = std::is_enum_v<T>;
-
-    /**
      * @brief 判定を行うメタ関数であることの制約(bool_constantを継承していれば通過)
     */
     template <typename T>

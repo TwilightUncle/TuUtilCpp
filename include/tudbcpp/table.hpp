@@ -35,7 +35,7 @@ namespace tudb
      * @tparam ConstraintDefinitionList define_column‚É‚æ‚é—ñ’è‹`‚ðŽw’è‚·‚é
     */
     template <
-        enumeration ETableType,
+        tuutil::mpl::Enumeration ETableType,
         tustr::cstr Name,
         ColumnListDefinitionable ColumnDefinitionList,
         ConstraintListDefinable ConstraintDefinitionList = constraint_unspecified

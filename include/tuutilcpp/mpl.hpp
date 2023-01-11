@@ -28,6 +28,7 @@ namespace tuutil::mpl
     template <auto... Values> struct value_list {};
 }
 
+#include <tuutilcpp/mpl/concepts.hpp>
 #include <tuutilcpp/mpl/value_constant.hpp>
 #include <tuutilcpp/mpl/meta_callback.hpp>
 #include <tuutilcpp/mpl/mpl_if.hpp>
