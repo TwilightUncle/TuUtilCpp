@@ -8,7 +8,6 @@
 #include <tudbcpp/constraint.hpp>
 #include <tudbcpp/type.hpp>
 #include <tustrcpp/cstr.hpp>
-#include <tuutilcpp/utility.hpp>
 
 namespace tudb
 {
@@ -35,7 +34,7 @@ namespace tudb
         using field_type = FieldType;
         using constraint_list = std::conditional_t<
             (sizeof...(Constraints) > 0),
-            type_list<to_table_constraint_t<Constraints, ColID>...>,
+            tuutil::mpl::type_list<to_table_constraint_t<Constraints, ColID>...>,
             constraint_unspecified
         >;
     };
@@ -80,12 +79,12 @@ namespace tudb
         requires tuutil::mpl::has_type_parameters_v<T>;
 
         // 同じ定義のカラムが存在してはいけない
-        requires copy_types_t<T, is_unique>::value;
+        requires tuutil::mpl::is_unique_v<T>;
 
         // テンプレート引数が全てカラム定義であること(全てのパラメータがカラム定義であるかをリストとして取得し、論理積で結果を確認)
-        requires copy_types_t<
-            map_types_t<is_column_definition, pass_types<T>>,
-            std::conjunction
+        requires tuutil::mpl::apply_list<
+            tuutil::mpl::quote<std::conjunction>,
+            tuutil::mpl::map_t<tuutil::mpl::quote<is_column_definition>, T>
         >::value;
 
         // nameがかぶってはいけない
@@ -98,13 +97,13 @@ namespace tudb
      * @brief カラムの定義リストから、各カラムに指定された制約情報を抽出する(一つもなければtype_list<ignore_type>が返る)
     */
     template <ColumnListDefinitionable T>
-    struct extract_constraints : public remove_if_by_type<
-        constraint,
-        std::is_same,
-        pass_types<copy_types_t<
-            map_types_t<get_constraint_list, pass_types<T>>,
-            concat_type_list_t
-        >>
+    struct extract_constraints : public tuutil::mpl::relay<
+        T,
+        tuutil::mpl::type_list<
+            tuutil::mpl::bind<tuutil::mpl::quote<tuutil::mpl::map>, tuutil::mpl::quote<get_constraint_list>>,
+            tuutil::mpl::bind<tuutil::mpl::quote<tuutil::mpl::apply_list>, tuutil::mpl::quote<tuutil::mpl::concat_type_list>>,
+            tuutil::mpl::bind<tuutil::mpl::quote<tuutil::mpl::remove_if>, tuutil::mpl::bind<tuutil::mpl::quote<std::is_same>, constraint>>
+        >
     > {};
 
     template <ColumnListDefinitionable T> using extract_constraints_t = extract_constraints<T>::type;

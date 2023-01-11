@@ -215,6 +215,23 @@ namespace tuutil::mpl
 
     template <class List> using get_back_t = get_back<List>::type;
     template <class ValueList> constexpr auto get_back_v = get_back<ValueList>::value;
+
+    /**
+     * @fn
+     * @brief 1つ以上のパラメータパックの内容を結合する
+    */
+    template <class... Lists>
+    requires (sizeof...(Lists) > 0)
+    struct concat_type_list;
+    // 二つのtype_listを結合
+    template <template <class...> class List, class... Types1, class... Types2>
+    struct concat_type_list<List<Types1...>, List<Types2...>> : std::type_identity<List<Types1..., Types2...>> {};
+    // 任意数のtype_listを結合する
+    template <class Head, class... Lists>
+    requires (has_type_parameters_v<Lists> && ...)
+    struct concat_type_list<Head, Lists...> : public foldl<quote<concat_type_list>, Head, type_list<Lists...>> {};
+
+    template <class... Lists> using concat_type_list_t = concat_type_list<Lists...>::type;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_MPL_REVERSE_HPP

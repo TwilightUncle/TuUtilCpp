@@ -168,6 +168,11 @@ TEST(tuutilcpp_mpl_test, ParameterPackTest)
     constexpr auto case14 = get_front_v<val_list>;
     constexpr auto case15 = get_back_v<val_list>;
 
+    using concat_target1 = dummy_non_metafunction<int, double, std::string>;
+    using concat_target2 = dummy_non_metafunction<std::nullptr_t, std::size_t, char>;
+    using concated_list = concat_type_list_t<concat_target1, concat_target2, dummy_non_metafunction<long long>>;
+    constexpr auto case16 = std::is_same_v<concated_list, dummy_non_metafunction<int, double, std::string, std::nullptr_t, std::size_t, char, long long>>;
+
     EXPECT_TRUE(case1);
     EXPECT_TRUE(case2);
     EXPECT_TRUE(case3);
@@ -183,6 +188,7 @@ TEST(tuutilcpp_mpl_test, ParameterPackTest)
     EXPECT_TRUE(case13);
     EXPECT_EQ(case14, double(1));
     EXPECT_EQ(case15, int(1));
+    EXPECT_TRUE(case16);
 }
 
 TEST(tuutilcpp_mpl_test, FindIfTest)
