@@ -2,12 +2,10 @@
 /// @file table.hpp
 /// @brief DBテーブル定義
 ///----------------------------------
-#ifndef TUDBCPP_INCLUDE_GUARD_TABLE_HPP
-#define TUDBCPP_INCLUDE_GUARD_TABLE_HPP
+#ifndef TUUTILCPP_INCLUDE_GUARD_DB_TABLE_HPP
+#define TUUTILCPP_INCLUDE_GUARD_DB_TABLE_HPP
 
-#include <tudbcpp/column.hpp>
-
-namespace tudb
+namespace tuutil::db
 {
     /**
      * @fn
@@ -30,13 +28,13 @@ namespace tudb
      * @fn
      * @brief テーブル定義用メタ関数
      * @tparam ETableType テーブルと列の識別子として定義したスコープ付き列挙型
-     * @tparam Name tuutil::str::cstrで包んで渡した文字列リテラル
+     * @tparam Name str::cstrで包んで渡した文字列リテラル
      * @tparam ColumnDefinitionList define_columnによる列定義を指定する
      * @tparam ConstraintDefinitionList define_columnによる列定義を指定する
     */
     template <
         mpl::Enumeration ETableType,
-        tuutil::str::cstr Name,
+        str::cstr Name,
         ColumnListDefinitionable ColumnDefinitionList,
         ConstraintListDefinable ConstraintDefinitionList = constraint_unspecified
     >
@@ -71,4 +69,4 @@ namespace tudb
     };
 }
 
-#endif // TUDBCPP_INCLUDE_GUARD_TABLE_HPP
+#endif // TUUTILCPP_INCLUDE_GUARD_DB_TABLE_HPP

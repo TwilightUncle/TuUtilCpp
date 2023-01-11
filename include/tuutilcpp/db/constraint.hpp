@@ -2,15 +2,11 @@
 /// @file constraint.hpp
 /// @brief —ñ§–ñ’è‹`
 ///----------------------------------
-#ifndef TUDBCPP_INCLUDE_GUARD_CONSTRAINT_HPP
-#define TUDBCPP_INCLUDE_GUARD_CONSTRAINT_HPP
+#ifndef TUUTILCPP_INCLUDE_GUARD_DB_CONSTRAINT_HPP
+#define TUUTILCPP_INCLUDE_GUARD_DB_CONSTRAINT_HPP
 
-#include <tuutilcpp/mpl.hpp>
-
-namespace tudb
+namespace tuutil::db
 {
-    namespace mpl = tuutil::mpl;
-
     // /**
     //  * @brief ƒJƒ‰ƒ€’è‹`‚Ì§–ñ‚ğ¦‚·’è”
     // */
@@ -97,4 +93,4 @@ namespace tudb
     using constraint_unspecified = mpl::type_list<constraint>;
 }
 
-#endif // TUDBCPP_INCLUDE_GUARD_CONSTRAINT_HPP
+#endif // TUUTILCPP_INCLUDE_GUARD_DB_CONSTRAINT_HPP

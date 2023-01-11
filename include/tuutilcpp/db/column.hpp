@@ -2,26 +2,22 @@
 /// @file column.hpp
 /// @brief DB列定義
 ///----------------------------------
-#ifndef TUDBCPP_INCLUDE_GUARD_COLUMN_HPP
-#define TUDBCPP_INCLUDE_GUARD_COLUMN_HPP
+#ifndef TUUTILCPP_INCLUDE_GUARD_DB_COLUMN_HPP
+#define TUUTILCPP_INCLUDE_GUARD_DB_COLUMN_HPP
 
-#include <tudbcpp/constraint.hpp>
-#include <tudbcpp/type.hpp>
-#include <tuutilcpp/str.hpp>
-
-namespace tudb
+namespace tuutil::db
 {
     /**
      * @fn
      * @brief 列定義用メタ関数(同時に定義内容参照用クラス)
      * @tparam ColID スコープ付き列挙体要素を指定
-     * @tparam Name tuutil::str::cstrで包んだ文字列リテラルを渡す。文字列は1文字以上
+     * @tparam Name str::cstrで包んだ文字列リテラルを渡す。文字列は1文字以上
      * @tparam FieldType 格納するデータ型
      * @tparam Constraints 列制約を任意数指定する(指定なしもOK)
     */
     template <
         mpl::Enumeration auto ColID,
-        tuutil::str::cstr Name,
+        str::cstr Name,
         class FieldType,
         ColumnConstraintDefinable... Constraints
     >
@@ -44,7 +40,7 @@ namespace tudb
      * @brief column_definition型かどうかを判定するメタ関数
     */
     template <class T> struct is_column_definition : public std::false_type {};
-    template <mpl::Enumeration auto ColID, tuutil::str::cstr Name, typename FieldType, ColumnConstraintDefinable... Constraints>
+    template <mpl::Enumeration auto ColID, str::cstr Name, typename FieldType, ColumnConstraintDefinable... Constraints>
     struct is_column_definition<define_column<ColID, Name, FieldType, Constraints...>> : public std::true_type {};
 
     /**
@@ -109,4 +105,4 @@ namespace tudb
     template <ColumnListDefinitionable T> using extract_constraints_t = extract_constraints<T>::type;
 }
 
-#endif // TUDBCPP_INCLUDE_GUARD_COLUMN_HPP
+#endif // TUUTILCPP_INCLUDE_GUARD_DB_COLUMN_HPP
