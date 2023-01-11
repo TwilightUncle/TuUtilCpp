@@ -32,8 +32,7 @@ namespace tuutil::mpl
      * @tparam F 適用するメタ関数
      * @tparam TypeList 型のパラメータパックを持つ型
     */
-    template <MetaCallable Pred, MetaCallable F, class TypeList>
-    struct map_if : public map<bind<quote<apply_if>, Pred, F>, TypeList> {};
+    template <MetaCallable Pred, MetaCallable F, class TypeList> using map_if = map<bind<quote<apply_if>, Pred, F>, TypeList>;
 
     /**
      * @fn

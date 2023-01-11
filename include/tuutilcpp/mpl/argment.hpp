@@ -14,8 +14,7 @@ namespace tuutil::mpl
      * @tparam Arg2 メタ関数の二つ目に指定したい引数
      * @tparam Arg1 メタ関数の一つ目に指定したい引数
     */
-    template <MetaCallable F, class Arg2, class Arg1>
-    struct flip : public apply<F, Arg1, Arg2> {};
+    template <MetaCallable F, class Arg2, class Arg1> using flip = apply<F, Arg1, Arg2>;
 
     /**
      * @fn
@@ -52,7 +51,7 @@ namespace tuutil::mpl
      * @tparam F メタ関数
      * @tparam ArgList 型のパラメータパックを持つ型
     */
-    template <MetaCallable F, class ArgList> struct apply_list {};
+    template <MetaCallable F, class ArgList> struct apply_list;
     template <MetaCallable F, template <class...> class List, class... Args>
     struct apply_list<F, List<Args...>> : public apply<F, Args...> {};
 

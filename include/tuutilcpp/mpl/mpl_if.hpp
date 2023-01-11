@@ -16,7 +16,7 @@ namespace tuutil::mpl
      * @tparam F apply_v<Pred, Arg>‚ª‹U‚Ìê‡•Ô‹p‚³‚ê‚éŒ^
     */
     template <MetaCallable Pred, class Arg, class T, class F>
-    struct mpl_if : public std::conditional<apply_v<Pred, Arg>, T, F> {};
+    using mpl_if = std::conditional<apply_v<Pred, Arg>, T, F>;
 
     /**
      * @fn
@@ -36,7 +36,7 @@ namespace tuutil::mpl
      * @tparam Arg ˆø”
     */
     template <MetaCallable Pred, MetaCallable F, class Arg>
-    struct apply_if : public mpl_if<Pred, Arg, apply_t<F, Arg>, Arg> {};
+    using apply_if = mpl_if<Pred, Arg, apply_t<F, Arg>, Arg>;
 
     /**
      * @fn

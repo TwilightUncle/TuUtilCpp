@@ -211,7 +211,7 @@ namespace tuutil::mpl
      * @brief 最後尾要素を取得する
      * @tparam パラメータパックを持つ型
     */
-    template <class List> struct get_back : public get_front<reverse_t<List>> {};
+    template <class List> using get_back = get_front<reverse_t<List>>;
 
     template <class List> using get_back_t = get_back<List>::type;
     template <class ValueList> constexpr auto get_back_v = get_back<ValueList>::value;

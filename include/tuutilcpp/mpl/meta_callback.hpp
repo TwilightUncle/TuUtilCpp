@@ -16,7 +16,7 @@ namespace tuutil::mpl
      * @fn
      * @brief Œ^T‚ª constexpr ƒƒ“ƒo•Ï”‚ğ‚Á‚Ä‚¢‚é‚©”»’è
     */
-    template <class T> struct has_constexpr_value_member : public std::bool_constant<ReturenValueMetaFunction<T>> {};
+    template <class T> using has_constexpr_value_member = std::bool_constant<ReturenValueMetaFunction<T>>;
 
     /**
      * @fn

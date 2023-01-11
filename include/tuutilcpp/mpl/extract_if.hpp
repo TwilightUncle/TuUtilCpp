@@ -43,9 +43,7 @@ namespace tuutil::mpl
      * @tparam Pred 判定用メタ関数
      * @tparam List パラメータパックを持つ型
     */
-    template <MetaCallable Pred, class List> struct remove_if
-        : public extract_if<bind<quote<flip>, quote<relay>, type_list<Pred, quote<std::negation>>>, List>
-    {};
+    template <MetaCallable Pred, class List> using remove_if = extract_if<bind<quote<flip>, quote<relay>, type_list<Pred, quote<std::negation>>>, List>;
 
     /**
      * @fn

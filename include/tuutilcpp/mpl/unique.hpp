@@ -47,8 +47,7 @@ namespace tuutil::mpl
      * @brief パラメータパックが一意か判定
      * @tparam List パラメータパックをもつ型
     */
-    template <class List>
-    struct is_unique : public std::is_same<List, unique_t<List>> {};
+    template <class List> using is_unique = std::is_same<List, unique_t<List>>;
 
     /**
      * @fn

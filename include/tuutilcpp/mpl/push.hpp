@@ -50,7 +50,7 @@ namespace tuutil::mpl
      * @tparam T ’Ç‰Á‚·‚éŒ^
     */
     template <MetaCallable Pred, class TypeList, class T>
-    struct push_back_if : public std::conditional<apply_v<Pred, T>, push_back_t<TypeList, T>, TypeList> {};
+    using push_back_if = std::conditional<apply_v<Pred, T>, push_back_t<TypeList, T>, TypeList>;
 
     /**
      * @fn
@@ -67,7 +67,7 @@ namespace tuutil::mpl
      * @tparam T ’Ç‰Á‚·‚éŒ^
     */
     template <MetaCallable Pred, class TypeList, class T>
-    struct push_front_if : public std::conditional<apply_v<Pred, T>, push_front_t<TypeList, T>, TypeList> {};
+    using push_front_if = std::conditional<apply_v<Pred, T>, push_front_t<TypeList, T>, TypeList>;
 
     /**
      * @fn
