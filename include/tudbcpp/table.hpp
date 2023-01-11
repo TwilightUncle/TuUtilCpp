@@ -30,13 +30,13 @@ namespace tudb
      * @fn
      * @brief テーブル定義用メタ関数
      * @tparam ETableType テーブルと列の識別子として定義したスコープ付き列挙型
-     * @tparam Name tustr::cstrで包んで渡した文字列リテラル
+     * @tparam Name tuutil::str::cstrで包んで渡した文字列リテラル
      * @tparam ColumnDefinitionList define_columnによる列定義を指定する
      * @tparam ConstraintDefinitionList define_columnによる列定義を指定する
     */
     template <
         mpl::Enumeration ETableType,
-        tustr::cstr Name,
+        tuutil::str::cstr Name,
         ColumnListDefinitionable ColumnDefinitionList,
         ConstraintListDefinable ConstraintDefinitionList = constraint_unspecified
     >
