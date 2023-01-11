@@ -121,6 +121,11 @@ namespace tuutil::mpl
             bind<quote<flip>, quote<unwrap_value_elements>, liftv<List>>
         >
     > {};
+
+    // •Êƒtƒ@ƒCƒ‹‚ÅéŒ¾‚³‚ê‚Ä‚¢‚é‚â‚Â
+
+    template <template <auto...> class List, auto... Parameters>
+    struct reverse<List<Parameters...>> : public behave_as_type_list_arg<quote<reverse>, List<Parameters...>> {};
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_MPL_ARGMENT_HPP

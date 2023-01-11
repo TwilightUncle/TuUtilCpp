@@ -163,6 +163,11 @@ TEST(tuutilcpp_mpl_test, ParameterPackTest)
     constexpr auto case11 = is_same_types_v<tuutil::mpl::value_list<int(1), int(2), int(3)>>;
     constexpr auto case12 = is_same_types_v<tuutil::mpl::value_list<int(1), char(2), int(3)>>;
 
+    using val_list = value_list<double(1), long long(1), char(1), int(1)>;
+    constexpr auto case13 = std::is_same_v<reverse_t<val_list>, value_list<int(1), char(1), long long(1), double(1)>>;
+    constexpr auto case14 = get_front_v<val_list>;
+    constexpr auto case15 = get_back_v<val_list>;
+
     EXPECT_TRUE(case1);
     EXPECT_TRUE(case2);
     EXPECT_TRUE(case3);
@@ -175,6 +180,9 @@ TEST(tuutilcpp_mpl_test, ParameterPackTest)
     EXPECT_EQ(case10, 3);
     EXPECT_TRUE(case11);
     EXPECT_FALSE(case12);
+    EXPECT_TRUE(case13);
+    EXPECT_EQ(case14, double(1));
+    EXPECT_EQ(case15, int(1));
 }
 
 TEST(tuutilcpp_mpl_test, FindIfTest)

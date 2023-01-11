@@ -41,19 +41,19 @@ namespace tuutil::mpl
 
     /**
      * @fn
-     * @brief 型のパラメータパックの並びを反転させる
-     * @tparam TypeList 型のパラメータパックを持つ型
+     * @brief パラメータパックの並びを反転させる
+     * @tparam List 型のパラメータパックを持つ型
     */
-    template <class TypeList> struct reverse;
+    template <class List> struct reverse;
     template <template <class...> class List, class Head, class... Parameters>
-    struct reverse<List<Head, Parameters...>> : public foldl<quote<push_front>, List<Head>, List<Parameters...>> {}; 
+    struct reverse<List<Head, Parameters...>> : public foldl<quote<push_front>, List<Head>, List<Parameters...>> {};
 
     /**
      * @fn
      * @brief 型のパラメータパックの並びを反転させる
      * @tparam TypeList 型のパラメータパックを持つ型
     */
-    template <class TypeList> using reverse_t = reverse<TypeList>::type;
+    template <class List> using reverse_t = reverse<List>::type;
 
     /**
      * @fn
@@ -191,6 +191,30 @@ namespace tuutil::mpl
      * @tparam List パラメータパックを持つ型
     */
     template <class T, class List> constexpr auto contains_v = contains<T, List>::value;
+
+    /**
+     * @fn
+     * @brief 先頭要素を取得する
+     * @tparam パラメータパックを持つ型
+    */
+    template <class List> struct get_front;
+    template <template <class...> class List, class Head, class... Parameters>
+    struct get_front<List<Head, Parameters...>> : public std::type_identity<Head> {};
+    template <template <auto...> class List, auto Head, auto... Parameters>
+    struct get_front<List<Head, Parameters...>> : public value_constant<Head> {};
+
+    template <class List> using get_front_t = get_front<List>::type;
+    template <class ValueList> constexpr auto get_front_v = get_front<ValueList>::value;
+
+    /**
+     * @fn
+     * @brief 最後尾要素を取得する
+     * @tparam パラメータパックを持つ型
+    */
+    template <class List> struct get_back : public get_front<reverse_t<List>> {};
+
+    template <class List> using get_back_t = get_back<List>::type;
+    template <class ValueList> constexpr auto get_back_v = get_back<ValueList>::value;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_MPL_REVERSE_HPP
