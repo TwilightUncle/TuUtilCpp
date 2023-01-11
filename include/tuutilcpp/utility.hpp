@@ -1,6 +1,6 @@
 ///----------------------------------
 /// @file tuutilcpp/utility.hpp
-/// @brief テンプレート引数操作系のヘルパ群
+/// @brief 一旦小さいやつらはここ
 ///----------------------------------
 #ifndef TUUTILCPP_INCLUDE_GUARD_UTILITY_HPP
 #define TUUTILCPP_INCLUDE_GUARD_UTILITY_HPP
@@ -14,8 +14,8 @@
 #include <optional>
 #include <cassert>
 
-#include <tuutilcpp/carry_over.hpp>
-#include <tuutilcpp/big_int.hpp>
-#include <tuutilcpp/algorithm.hpp>
+#include <tuutilcpp/utility/carry_over.hpp>
+#include <tuutilcpp/utility/big_int.hpp>
+#include <tuutilcpp/utility/algorithm.hpp>
 
 #endif // TUUTILCPP_INCLUDE_GUARD_UTILITY_HPP

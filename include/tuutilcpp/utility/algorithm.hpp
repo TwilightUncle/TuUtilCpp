@@ -2,10 +2,10 @@
 /// @file algorithm.hpp 
 /// @brief îƒópÉÅÉ^ä÷êîíËã`
 ///----------------------------------
-#ifndef TUUTILCPP_INCLUDE_GUARD_ALGORITHM_HPP
-#define TUUTILCPP_INCLUDE_GUARD_ALGORITHM_HPP
+#ifndef TUUTILCPP_INCLUDE_GUARD_UTILITY_ALGORITHM_HPP
+#define TUUTILCPP_INCLUDE_GUARD_UTILITY_ALGORITHM_HPP
 
-namespace tudb
+namespace tuutil::utility
 {
     /**
      * @fn
@@ -21,4 +21,4 @@ namespace tudb
     }
 }
 
-#endif // TUUTILCPP_INCLUDE_GUARD_ALGORITHM_HPP
+#endif // TUUTILCPP_INCLUDE_GUARD_UTILITY_ALGORITHM_HPP

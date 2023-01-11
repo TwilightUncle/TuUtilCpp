@@ -2,11 +2,11 @@
 /// @file carry_over.hpp
 /// @brief 二項の引数を受け取る処理に対して繰り上げ処理を適用できるようなコンテナ
 ///----------------------------------
-#ifndef TUUTILCPP_INCLUDE_GUARD_CARRY_OVER_HPP
-#define TUUTILCPP_INCLUDE_GUARD_CARRY_OVER_HPP
+#ifndef TUUTILCPP_INCLUDE_GUARD_UTILITY_CARRY_OVER_HPP
+#define TUUTILCPP_INCLUDE_GUARD_UTILITY_CARRY_OVER_HPP
 
 
-namespace tudb
+namespace tuutil::utility
 {
     /**
      * @brief 二引数を渡して実行した結果、次のフォーマットで結果が返る -> tuple{(T)桁上がりしていない部分, (T)桁上がりした部分, (bool)桁上がりしたかどうか}
@@ -215,4 +215,4 @@ namespace tudb
     }
 }
 
-#endif // TUUTILCPP_INCLUDE_GUARD_CARRY_OVER_HPP
+#endif // TUUTILCPP_INCLUDE_GUARD_UTILITY_CARRY_OVER_HPP

@@ -277,11 +277,11 @@ namespace tuutil::str
      * @brief テンプレート引数で渡した整数値をcstrに変換する。進数を渡すことで、(2,8,16)進数リテラルのような文字列に変換する
     */
     template <auto V, int Hex = 10, bool UsePrefix = false>
-    requires (V >= 0 && Hex >= 2 && (std::integral<decltype(V)> || tudb::is_big_int<decltype(V)>::value))
+    requires (V >= 0 && Hex >= 2 && (std::integral<decltype(V)> || utility::is_big_int<decltype(V)>::value))
     constexpr auto to_string()
     {
         // 10進数として桁数を取得
-        constexpr auto len = tudb::get_digit<V, Hex>();
+        constexpr auto len = utility::get_digit<V, Hex>();
         // 終端文字の長さも配列の要素数に含める
         cstr<len + 1> s{};
         auto val = V;

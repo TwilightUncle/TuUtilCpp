@@ -1,11 +1,13 @@
 #include <gtest/gtest.h>
 #include <tuutilcpp/utility.hpp>
 
+using namespace tuutil::utility;
+
 // 5桁の10進数の想定で考える(コンテナの一要素に入る最大値は9)
 static constexpr char max_num = 10;
 
-using test_class = tudb::carry_over_container<char, 5>;
-using test_class2 = tudb::carry_over_container<int, 5>;
+using test_class = carry_over_container<char, 5>;
+using test_class2 = carry_over_container<int, 5>;
 
 static auto plus(char l, char r)
 {
@@ -21,7 +23,7 @@ constexpr auto mul = [](char l, char r)
 };
 
 template <std::convertible_to<char> T>
-static auto inst_to_string(const tudb::carry_over_container<T, 5>& inst)
+static auto inst_to_string(const carry_over_container<T, 5>& inst)
 {
     char str[6] = {};
     for (int i = 0; i < 5; i++) str[4-i] = (char)(inst[i] + '0');
@@ -68,14 +70,14 @@ TEST(tudbcpptest, CarryOverWithTest)
 
 TEST(tudbcpptest, CarryOverHelperTest)
 {
-    constexpr auto inst1 = tudb::carry_over_container<std::uint32_t, 5>{2u, 1ul << 20 | 1ul << 2, 1ul << 16, 0u, 0u};
-    constexpr auto case1 = tudb::count_using_size(tudb::carry_over_container<std::uint16_t, 3>{0u, 0u, 0u});
-    constexpr auto case2 = tudb::count_using_size(inst1);
-    constexpr auto case3 = tudb::count_using_size(tudb::carry_over_container<std::uint32_t, 5>{0u, 1u, 1u, 0u, 1u});
-    constexpr auto case4 = tudb::convert_diff_size_buffer<std::uint32_t>(tudb::convert_diff_size_buffer<std::uint16_t>(inst1));
+    constexpr auto inst1 = carry_over_container<std::uint32_t, 5>{2u, 1ul << 20 | 1ul << 2, 1ul << 16, 0u, 0u};
+    constexpr auto case1 = count_using_size(carry_over_container<std::uint16_t, 3>{0u, 0u, 0u});
+    constexpr auto case2 = count_using_size(inst1);
+    constexpr auto case3 = count_using_size(carry_over_container<std::uint32_t, 5>{0u, 1u, 1u, 0u, 1u});
+    constexpr auto case4 = convert_diff_size_buffer<std::uint32_t>(convert_diff_size_buffer<std::uint16_t>(inst1));
     // 16 * 10 bitと、左記を内包可能な64 * 3ビットは異なっているため、最終的なバッファの最大ビット数は増える
-    constexpr auto case5 = tudb::convert_diff_size_buffer<std::uint32_t>(tudb::convert_diff_size_buffer<std::uint64_t>(tudb::convert_diff_size_buffer<std::uint16_t>(inst1)));
-    constexpr auto inst2 = tudb::carry_over_container<std::uint32_t, 6>{2u, 1ul << 20 | 1ul << 2, 1ul << 16, 0u, 0u, 0u};
+    constexpr auto case5 = convert_diff_size_buffer<std::uint32_t>(convert_diff_size_buffer<std::uint64_t>(convert_diff_size_buffer<std::uint16_t>(inst1)));
+    constexpr auto inst2 = carry_over_container<std::uint32_t, 6>{2u, 1ul << 20 | 1ul << 2, 1ul << 16, 0u, 0u, 0u};
 
     ASSERT_EQ(case1, 1);
     ASSERT_EQ(case2, 3);

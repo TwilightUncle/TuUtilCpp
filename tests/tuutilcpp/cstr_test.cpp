@@ -78,7 +78,7 @@ TEST(TuutilcppStrTest, CstrIntegralToStringTest)
     constexpr auto case8 = to_string<077777, 8, true>(); 
     constexpr auto case9 = to_string<-0xfffff, 16, true>();
     // constexprではステップ数の上限をコンパイラオプションで上げなければいけない(vc++の場合/constexpr:stepsを指定)
-    constexpr auto case10 = to_string<tudb::big_int<2>{~0ull, 10u}>();
+    constexpr auto case10 = to_string<tuutil::utility::big_int<2>{~0ull, 10u}>();
 
     ASSERT_STREQ(case1.data(), "154352");
     ASSERT_STREQ(case2.data(), "-54362");
