@@ -1,16 +1,14 @@
 ///----------------------------------
-/// @file regex.hpp 
+/// @file str/regex.hpp 
 /// @brief 定数式に置ける正規表現(ユニコード未対応)
 ///----------------------------------
-#ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_HPP
-#define TUSTRCPP_INCLUDE_GUARD_REGEX_HPP
+#ifndef TUUTILCPP_INCLUDE_GUARD_STR_REGEX_HPP
+#define TUUTILCPP_INCLUDE_GUARD_STR_REGEX_HPP
 
 #include <regex>
-#include <tustrcpp/cstr.hpp>
-#include <tustrcpp/regex/result.hpp>
-#include <tuutilcpp/mpl.hpp>
+#include <tuutilcpp/str/regex/result.hpp>
 
-namespace tustr
+namespace tuutil::str
 {
     /**
      * @brief forやwhileで回せるように、関数へ変換する際の型
@@ -76,19 +74,19 @@ namespace tustr
     };
 }
 
-#include <tustrcpp/regex/common.hpp>
-#include <tustrcpp/regex/bracket.hpp>
-#include <tustrcpp/regex/char_class.hpp>
-#include <tustrcpp/regex/quantifier.hpp>
-#include <tustrcpp/regex/char_set.hpp>
-#include <tustrcpp/regex/capture.hpp>
-#include <tustrcpp/regex/general.hpp>
-#include <tustrcpp/regex/reference.hpp>
-#include <tustrcpp/regex/or.hpp>
-#include <tustrcpp/regex/assertion.hpp>
-#include <tustrcpp/regex/perser.hpp>
+#include <tuutilcpp/str/regex/common.hpp>
+#include <tuutilcpp/str/regex/bracket.hpp>
+#include <tuutilcpp/str/regex/char_class.hpp>
+#include <tuutilcpp/str/regex/quantifier.hpp>
+#include <tuutilcpp/str/regex/char_set.hpp>
+#include <tuutilcpp/str/regex/capture.hpp>
+#include <tuutilcpp/str/regex/general.hpp>
+#include <tuutilcpp/str/regex/reference.hpp>
+#include <tuutilcpp/str/regex/or.hpp>
+#include <tuutilcpp/str/regex/assertion.hpp>
+#include <tuutilcpp/str/regex/perser.hpp>
 
-namespace tustr
+namespace tuutil::str
 {
     /**
      * @class
@@ -184,4 +182,4 @@ namespace tustr
     using empty_regex = regex<"">;
 }
 
-#endif // TUSTRCPP_INCLUDE_GUARD_REGEX_HPP
+#endif // TUUTILCPP_INCLUDE_GUARD_STR_REGEX_HPP

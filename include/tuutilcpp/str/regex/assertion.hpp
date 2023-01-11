@@ -2,10 +2,10 @@
 /// @file assertion.hpp 
 /// @brief regex.hppŠÖ˜A
 ///----------------------------------
-#ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_ASSERTION_HPP
-#define TUSTRCPP_INCLUDE_GUARD_REGEX_ASSERTION_HPP
+#ifndef TUUTILCPP_INCLUDE_GUARD_STR_REGEX_ASSERTION_HPP
+#define TUUTILCPP_INCLUDE_GUARD_STR_REGEX_ASSERTION_HPP
 
-namespace tustr::_regex
+namespace tuutil::str::_regex
 {
     /**
      * @fn
@@ -132,4 +132,4 @@ namespace tustr::_regex
     };
 }
 
-#endif // TUSTRCPP_INCLUDE_GUARD_REGEX_ASSERTION_HPP
+#endif // TUUTILCPP_INCLUDE_GUARD_STR_REGEX_ASSERTION_HPP

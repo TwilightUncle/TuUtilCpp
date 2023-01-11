@@ -2,10 +2,10 @@
 /// @file quantifier.hpp 
 /// @brief regex.hppŠÖ˜A
 ///----------------------------------
-#ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_QUANTIFIER_HPP
-#define TUSTRCPP_INCLUDE_GUARD_REGEX_QUANTIFIER_HPP
+#ifndef TUUTILCPP_INCLUDE_GUARD_STR_REGEX_QUANTIFIER_HPP
+#define TUUTILCPP_INCLUDE_GUARD_STR_REGEX_QUANTIFIER_HPP
 
-namespace tustr::_regex
+namespace tuutil::str::_regex
 {
     /**
      * @class
@@ -122,4 +122,4 @@ namespace tustr::_regex
     };
 }
 
-#endif // TUSTRCPP_INCLUDE_GUARD_REGEX_QUANTIFIER_HPP
+#endif // TUUTILCPP_INCLUDE_GUARD_STR_REGEX_QUANTIFIER_HPP

@@ -2,10 +2,10 @@
 /// @file regex/common.hpp 
 /// @brief regex.hpp�̊֘A
 ///----------------------------------
-#ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_COMMON_HPP
-#define TUSTRCPP_INCLUDE_GUARD_REGEX_COMMON_HPP
+#ifndef TUUTILCPP_INCLUDE_GUARD_STR_REGEX_COMMON_HPP
+#define TUUTILCPP_INCLUDE_GUARD_STR_REGEX_COMMON_HPP
 
-namespace tustr
+namespace tuutil::str
 {
     struct regex_char_attribute
     {
@@ -123,4 +123,4 @@ namespace tustr
     }
 }
 
-#endif // TUSTRCPP_INCLUDE_GUARD_REGEX_COMMON_HPP
+#endif // TUUTILCPP_INCLUDE_GUARD_STR_REGEX_COMMON_HPP

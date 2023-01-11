@@ -2,10 +2,10 @@
 /// @file char_set.hpp 
 /// @brief regex.hppŠÖ˜A
 ///----------------------------------
-#ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_CHAR_SET_HPP
-#define TUSTRCPP_INCLUDE_GUARD_REGEX_CHAR_SET_HPP
+#ifndef TUUTILCPP_INCLUDE_GUARD_STR_REGEX_CHAR_SET_HPP
+#define TUUTILCPP_INCLUDE_GUARD_STR_REGEX_CHAR_SET_HPP
 
-namespace tustr::_regex
+namespace tuutil::str::_regex
 {
     /**
      * @class
@@ -102,4 +102,4 @@ namespace tustr::_regex
     };
 }
 
-#endif // TUSTRCPP_INCLUDE_GUARD_REGEX_CHAR_SET_HPP
+#endif // TUUTILCPP_INCLUDE_GUARD_STR_REGEX_CHAR_SET_HPP

@@ -2,10 +2,10 @@
 /// @file regex/result.hpp 
 /// @brief 結果格納用オブジェクト群定義
 ///----------------------------------
-#ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_RESULT_HPP
-#define TUSTRCPP_INCLUDE_GUARD_REGEX_RESULT_HPP
+#ifndef TUUTILCPP_INCLUDE_GUARD_STR_REGEX_RESULT_HPP
+#define TUUTILCPP_INCLUDE_GUARD_STR_REGEX_RESULT_HPP
 
-namespace tustr
+namespace tuutil::str
 {
     /**
      * @class
@@ -99,4 +99,4 @@ namespace tustr
     };
 }
 
-#endif // TUSTRCPP_INCLUDE_GUARD_REGEX_RESULT_HPP
+#endif // TUUTILCPP_INCLUDE_GUARD_STR_REGEX_RESULT_HPP

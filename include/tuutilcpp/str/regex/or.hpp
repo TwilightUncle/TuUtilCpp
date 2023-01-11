@@ -2,10 +2,10 @@
 /// @file regex/general.hpp 
 /// @brief regex.hpp�̊֘A
 ///----------------------------------
-#ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_OR_HPP
-#define TUSTRCPP_INCLUDE_GUARD_REGEX_OR_HPP
+#ifndef TUUTILCPP_INCLUDE_GUARD_STR_REGEX_OR_HPP
+#define TUUTILCPP_INCLUDE_GUARD_STR_REGEX_OR_HPP
 
-namespace tustr::_regex
+namespace tuutil::str::_regex
 {
     /**
      * @fn
@@ -79,4 +79,4 @@ namespace tustr::_regex
     };
 }
 
-#endif // TUSTRCPP_INCLUDE_GUARD_REGEX_OR_HPP
+#endif // TUUTILCPP_INCLUDE_GUARD_STR_REGEX_OR_HPP

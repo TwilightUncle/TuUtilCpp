@@ -2,10 +2,10 @@
 /// @file char_class.hpp 
 /// @brief regex.hppŠÖ˜A
 ///----------------------------------
-#ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_CHAR_CLASS_HPP
-#define TUSTRCPP_INCLUDE_GUARD_REGEX_CHAR_CLASS_HPP
+#ifndef TUUTILCPP_INCLUDE_GUARD_STR_REGEX_CHAR_CLASS_HPP
+#define TUUTILCPP_INCLUDE_GUARD_STR_REGEX_CHAR_CLASS_HPP
 
-namespace tustr::_regex
+namespace tuutil::str::_regex
 {
     struct char_class
     {

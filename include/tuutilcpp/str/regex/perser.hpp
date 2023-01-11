@@ -2,12 +2,12 @@
 /// @file perser.hpp 
 /// @brief regex.hpp関連(パターン解析機能を一つのクラスに集積したもの)
 ///----------------------------------
-#ifndef TUSTRCPP_INCLUDE_GUARD_REGEX_PERSER_HPP
-#define TUSTRCPP_INCLUDE_GUARD_REGEX_PERSER_HPP
+#ifndef TUUTILCPP_INCLUDE_GUARD_STR_REGEX_PERSER_HPP
+#define TUUTILCPP_INCLUDE_GUARD_STR_REGEX_PERSER_HPP
 
-#include <tustrcpp/regex/resolve.hpp>
+#include <tuutilcpp/str/regex/resolve.hpp>
 
-namespace tustr
+namespace tuutil::str
 {
     /**
      * @class
@@ -162,4 +162,4 @@ namespace tustr
     };
 }
 
-#endif // TUSTRCPP_INCLUDE_GUARD_REGEX_PERSER_HPP
+#endif // TUUTILCPP_INCLUDE_GUARD_STR_REGEX_PERSER_HPP
