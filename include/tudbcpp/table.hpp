@@ -19,7 +19,7 @@ namespace tudb
     >
     struct validate_define_table_constraint_arg : public std::bool_constant<
         ConstraintListDefinable<
-            concat_type_list_t<
+            mpl::concat_type_list_t<
                 ConstraintDefinitionList,
                 extract_constraints_t<ColumnDefinitionList>
             >
@@ -35,7 +35,7 @@ namespace tudb
      * @tparam ConstraintDefinitionList define_column‚É‚æ‚é—ñ’è‹`‚ğw’è‚·‚é
     */
     template <
-        enumeration ETableType,
+        mpl::Enumeration ETableType,
         tustr::cstr Name,
         ColumnListDefinitionable ColumnDefinitionList,
         ConstraintListDefinable ConstraintDefinitionList = constraint_unspecified
@@ -44,9 +44,10 @@ namespace tudb
     struct define_table
     {
     private:
+        template <class T1, ColumnDefinable T2> struct is_match_column_id : public std::false_type {};
         template <auto V, ColumnDefinable T>
         requires std::same_as<ETableType, decltype(V)>
-        struct is_match_column_id : public std::bool_constant<V == T::id> {};
+        struct is_match_column_id<mpl::value_constant<V>, T> : public std::bool_constant<V == T::id> {};
 
     public:
         static constexpr auto name = Name;
@@ -56,7 +57,7 @@ namespace tudb
          * @brief V‚É‡’v‚·‚é—ñ’è‹`‚ğæ“¾‚·‚é
         */
         template <ETableType V>
-        using get_column_definition_t = find_if_by_value_t<V, is_match_column_id, pass_types<ColumnDefinitionList>>;
+        using get_column_definition_t = mpl::find_if_t<mpl::bind<mpl::quote<is_match_column_id>, mpl::value_constant<V>>, ColumnDefinitionList>;
 
         /**
          * @fn

@@ -136,7 +136,7 @@ namespace tustr::_regex
     {
         template <RegexParseable T>
         struct apply : public F<Pattern, T> {};
-        using type = tudb::quote<apply>;
+        using type = tuutil::mpl::quote<apply>;
     };
 
     template <template <cstr, RegexParseable> class F, cstr Pattern> using bind_regex_pattern_t = bind_regex_pattern<F, Pattern>::type;

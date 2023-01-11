@@ -8,6 +8,7 @@
 #include <regex>
 #include <tustrcpp/cstr.hpp>
 #include <tustrcpp/regex/result.hpp>
+#include <tuutilcpp/mpl.hpp>
 
 namespace tustr
 {

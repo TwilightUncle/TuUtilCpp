@@ -20,7 +20,7 @@ namespace tudb
      * @tparam Constraints 列制約を任意数指定する(指定なしもOK)
     */
     template <
-        enumeration auto ColID,
+        mpl::Enumeration auto ColID,
         tustr::cstr Name,
         class FieldType,
         ColumnConstraintDefinable... Constraints
@@ -34,7 +34,7 @@ namespace tudb
         using field_type = FieldType;
         using constraint_list = std::conditional_t<
             (sizeof...(Constraints) > 0),
-            type_list<to_table_constraint_t<Constraints, ColID>...>,
+            mpl::type_list<to_table_constraint_t<Constraints, ColID>...>,
             constraint_unspecified
         >;
     };
@@ -44,7 +44,7 @@ namespace tudb
      * @brief column_definition型かどうかを判定するメタ関数
     */
     template <class T> struct is_column_definition : public std::false_type {};
-    template <enumeration auto ColID, tustr::cstr Name, typename FieldType, ColumnConstraintDefinable... Constraints>
+    template <mpl::Enumeration auto ColID, tustr::cstr Name, typename FieldType, ColumnConstraintDefinable... Constraints>
     struct is_column_definition<define_column<ColID, Name, FieldType, Constraints...>> : public std::true_type {};
 
     /**
@@ -76,15 +76,15 @@ namespace tudb
     template <class T>
     concept ColumnListDefinitionable = requires {
         // Tはパラメータパックを持っている
-        requires has_type_parameters_v<T>;
+        requires mpl::has_type_parameters_v<T>;
 
         // 同じ定義のカラムが存在してはいけない
-        requires copy_types_t<T, is_unique>::value;
+        requires mpl::is_unique_v<T>;
 
         // テンプレート引数が全てカラム定義であること(全てのパラメータがカラム定義であるかをリストとして取得し、論理積で結果を確認)
-        requires copy_types_t<
-            map_types_t<is_column_definition, pass_types<T>>,
-            std::conjunction
+        requires mpl::apply_list<
+            mpl::quote<std::conjunction>,
+            mpl::map_t<mpl::quote<is_column_definition>, T>
         >::value;
 
         // nameがかぶってはいけない
@@ -97,13 +97,13 @@ namespace tudb
      * @brief カラムの定義リストから、各カラムに指定された制約情報を抽出する(一つもなければtype_list<ignore_type>が返る)
     */
     template <ColumnListDefinitionable T>
-    struct extract_constraints : public remove_if_by_type<
-        constraint,
-        std::is_same,
-        pass_types<copy_types_t<
-            map_types_t<get_constraint_list, pass_types<T>>,
-            concat_type_list_t
-        >>
+    struct extract_constraints : public mpl::relay<
+        T,
+        mpl::type_list<
+            mpl::bind<mpl::quote<mpl::map>, mpl::quote<get_constraint_list>>,
+            mpl::bind<mpl::quote<mpl::apply_list>, mpl::quote<mpl::concat_type_list>>,
+            mpl::bind<mpl::quote<mpl::remove_if>, mpl::bind<mpl::quote<std::is_same>, constraint>>
+        >
     > {};
 
     template <ColumnListDefinitionable T> using extract_constraints_t = extract_constraints<T>::type;
