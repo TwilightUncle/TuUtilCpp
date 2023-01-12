@@ -7,7 +7,7 @@ C++20以降を対象とした、コンパイル時処理関連の汎用ヘッダ
 |----|----|----|----|
 |[mpl](#mpl)|俺俺メタ関数群。<br>高階メタ関数によるパラメータパックの操作がメイン|`tuutil::mpl`|`#include<tuutilcpp/mpl.hpp>`|
 |[cstr](#cstr--regex)|コンパイル時評価のための固定長文字列クラス|`tuutil::str`|`#include<tuutilcpp/str.hpp>`|
-|[regex](#cstr--regex)|コンパイル時評価のための正規表現クラス。<br>ユニコード、制御文字については未対応。<br>ECMAScriptの正規表現のふるまいを参考に作成|`tuutil::str`|`#include<tuutilcpp/str.hpp>`|
+|[regex](#cstr--regex)|コンパイル時評価のための正規表現クラス。<br>ユニコード、制御文字については未対応。<br>特殊文字等は[ECMAScriptの正規表現](https://developer.mozilla.org/ja/docs/Web/JavaScript/Guide/Regular_Expressions)のふるまいを参考に作成|`tuutil::str`|`#include<tuutilcpp/str.hpp>`|
 <!-- |db|コンパイル時に型検査、SQL生成等を行うO/Rマッパー。<br>全くできていない|`tuutil::db`|`#include<tuutilcpp/db.hpp>`| -->
 
 ※インクルードディレクティブの記載は、`include`ディレクトリをインクルードパスとして追加済みである前提とする。
@@ -83,11 +83,14 @@ template <cstr DateStr>
 struct DateType
 {
     // 日付文字列についてパターンマッチを行い、ついでにキャプチャで年月日をそれぞれ抜き出す
-    static constexpr auto match_result = regex<R"(^(\d{4})([/-])([01]\d)\2(\d{2}))">(DateStr);
+    using date_pattern = regex<R"(^(\d{4})([/-])([01]\d)\2(\d{2}))">;
+    static constexpr auto match_result = date_pattern(DateStr);
     // static constexpr auto match_result = regex<R"(^(\d{4})([/-])([01]\d)\2(\d{2})$)">(DateStr); // なんか行末固定した場合の動きが変...
 
     // パターンマッチに失敗したときコンパイルエラー
     static_assert(match_result.is_match(), "Specified 'DateStr' format is not 'yyyy[/-]mm[/-]dd'.");
+    // キャプチャ等不要でパターンマッチだけしたい場合は以下でOK
+    static_assert(date_pattern::match(DateStr));
 
     static constexpr auto year = to_int<int>(match_result[1]);
     static constexpr auto month = to_int<int>(match_result[3]);
