@@ -3,11 +3,11 @@ C++20以降を対象とした、コンパイル時処理関連の汎用ヘッダ
 
 ## 機能
 
-||概要|名前空間|include|
+|機能名<br>(リンクはソース例)|概要|名前空間|include|
 |----|----|----|----|
-|mpl|俺俺メタ関数群。<br>高階メタ関数によるパラメータパックの操作がメイン|`tuutil::mpl`|`#include<tuutilcpp/mpl.hpp>`|
-|cstr|コンパイル時評価のための固定長文字列クラス|`tuutil::str`|`#include<tuutilcpp/str.hpp>`|
-|regex|コンパイル時評価のための正規表現クラス。<br>ユニコード、制御文字については未対応。<br>ECMAScriptの正規表現のふるまいを参考に作成|`tuutil::str`|`#include<tuutilcpp/str.hpp>`|
+|[mpl](#mpl)|俺俺メタ関数群。<br>高階メタ関数によるパラメータパックの操作がメイン|`tuutil::mpl`|`#include<tuutilcpp/mpl.hpp>`|
+|[cstr](#cstr--regex)|コンパイル時評価のための固定長文字列クラス|`tuutil::str`|`#include<tuutilcpp/str.hpp>`|
+|[regex](#cstr--regex)|コンパイル時評価のための正規表現クラス。<br>ユニコード、制御文字については未対応。<br>ECMAScriptの正規表現のふるまいを参考に作成|`tuutil::str`|`#include<tuutilcpp/str.hpp>`|
 <!-- |db|コンパイル時に型検査、SQL生成等を行うO/Rマッパー。<br>全くできていない|`tuutil::db`|`#include<tuutilcpp/db.hpp>`| -->
 
 ※インクルードディレクティブの記載は、`include`ディレクトリをインクルードパスとして追加済みである前提とする。
@@ -31,6 +31,17 @@ git clone https://github.com/TwilightUncle/TuUtilCpp.git TuUtilCpp
 #include <type_traits>
 #include <tuutilcpp/mpl.hpp>
 using namespace tuutil::mpl;
+
+// テンプレートパラメータを埋めていないメタ関数を型と同じ文脈で利用できるようにする
+using quoted_is_same = quote<std::is_same>;
+static_assert(!std::is_same_v<quoted_is_same, int>);  // 型としてメタ関数のテンプレート引数に指定できる
+
+// テンプレート引数を部分適用することによって、quoted_is_sameからint型か判定するメタ関数を作成する
+using binded_is_int = bind<quoted_is_same, int>;
+
+// quote及び、bindしたメタ関数を実行する
+static_assert(apply_v<quoted_is_same, int, int>); // std::is_same_v<int, int>と同様
+static_assert(apply_v<binded_is_int, int>); // int型の場合のみ真となる
 
 using types = std::tuple<int, double, float, char, int, float>;
 
@@ -71,14 +82,18 @@ using namespace tuutil::str;
 template <cstr DateStr>
 struct DateType
 {
+    // 日付文字列についてパターンマッチを行い、ついでにキャプチャで年月日をそれぞれ抜き出す
     static constexpr auto match_result = regex<R"(^(\d{4})([/-])([01]\d)\2(\d{2}))">(DateStr);
     // static constexpr auto match_result = regex<R"(^(\d{4})([/-])([01]\d)\2(\d{2})$)">(DateStr); // なんか行末固定した場合の動きが変...
+
+    // パターンマッチに失敗したときコンパイルエラー
     static_assert(match_result.is_match(), "Specified 'DateStr' format is not 'yyyy[/-]mm[/-]dd'.");
 
     static constexpr auto year = to_int<int>(match_result[1]);
     static constexpr auto month = to_int<int>(match_result[3]);
     static constexpr auto day = to_int<int>(match_result[4]);
 
+    // 月や日付のとりうる値の範囲から逸脱している時コンパイルエラー
     static_assert(month > 0 && month <= 12, "Possible months are between 1 and 12.");
     static_assert(day > 0 && day <= 31, "Possible dates are between 1 and 31.");
 };
