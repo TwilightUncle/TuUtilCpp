@@ -125,6 +125,12 @@ namespace tuutil::mpl
 
     template <template <auto...> class List, auto... Parameters>
     struct reverse<List<Parameters...>> : public behave_as_type_list_arg<quote<reverse>, List<Parameters...>> {};
+
+    template <template <auto...> class List, auto... Parameters>
+    struct rotatel<List<Parameters...>> : public behave_as_type_list_arg<quote<rotatel>, List<Parameters...>> {};
+
+    template <template <auto...> class List, auto... Parameters>
+    struct rotater<List<Parameters...>> : public behave_as_type_list_arg<quote<rotater>, List<Parameters...>> {};
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_MPL_ARGMENT_HPP
