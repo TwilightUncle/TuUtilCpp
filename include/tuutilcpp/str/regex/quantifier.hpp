@@ -109,6 +109,9 @@ namespace tuutil::str::_regex
     )
     struct add_quantifier<Pattern, T>
     {
+        // 言明は検証位置が変わらず、0回マッチを許容したら書く意味もなさそうなので、数量詞が付与していた場合はエラーとする
+        static_assert(!is_assertion_parser<T>::value, "Do not specify quantifiers in assertions.");
+
         struct type : public T
         {
             using parsed_quantifier = quantifier_perser<Pattern, T::end_pos>;

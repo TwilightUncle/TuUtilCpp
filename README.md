@@ -83,9 +83,8 @@ template <cstr DateStr>
 struct DateType
 {
     // 日付文字列についてパターンマッチを行い、ついでにキャプチャで年月日をそれぞれ抜き出す
-    using date_pattern = regex<R"(^(\d{4})([/-])([01]\d)\2(\d{2}))">;
+    using date_pattern = regex<R"(^(\d{4})([/-])([01]\d)\2(\d{2})$)">;
     static constexpr auto match_result = date_pattern(DateStr);
-    // static constexpr auto match_result = regex<R"(^(\d{4})([/-])([01]\d)\2(\d{2})$)">(DateStr); // なんか行末固定した場合の動きが変...
 
     // パターンマッチに失敗したときコンパイルエラー
     static_assert(match_result.is_match(), "Specified 'DateStr' format is not 'yyyy[/-]mm[/-]dd'.");
