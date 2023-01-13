@@ -130,6 +130,10 @@ namespace tuutil::str::_regex
                 : regex_match_result::make_unmatch();
         }
     };
+
+    template <class T> struct is_assertion_parser : public std::false_type {};
+    template <template <cstr, std::size_t> class Parser, cstr Pattern, std::size_t Pos>
+    struct is_assertion_parser<Parser<Pattern, Pos>> : public std::is_base_of<assertion_parser<Pattern, Pos>, Parser<Pattern, Pos>> {};
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_STR_REGEX_ASSERTION_HPP

@@ -537,4 +537,8 @@ TEST(TuutilcppStrTest, RegexResultTest)
     constexpr auto case9 = type6("2023/01/13");
     EXPECT_TRUE(case9.exists());
     EXPECT_TRUE(case9.is_match());
+
+    // 言明に数量詞をつけたものをコンパイルエラーとする(コメントアウトを消すと以下出力でコンパイルエラー)
+    // static_assert failed: 'Do not specify quantifiers in assertions.'
+    // constexpr auto case10 = regex<"^+">("");
 }
