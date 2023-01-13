@@ -95,7 +95,7 @@ namespace tuutil::str
             auto result = regex_match_result::make_unmatch();
             bool is_lock = is_pos_lock;
 
-            for (auto end_pos = offset, begin_pos = std::string_view::npos; end_pos < subject.size() && cnt < parsed_type::max_count;) {
+            for (auto end_pos = offset, begin_pos = std::string_view::npos; end_pos <= subject.size() && cnt < parsed_type::max_count;) {
                 const auto temp_result = parsed_type::template generated_func<MaxCaptureCount>(
                     subject,
                     end_pos,

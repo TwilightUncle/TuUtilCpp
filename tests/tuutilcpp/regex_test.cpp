@@ -532,4 +532,9 @@ TEST(TuutilcppStrTest, RegexResultTest)
     using type5 = regex<"ab??\\w">;
     constexpr auto case8 = type5("abb");
     EXPECT_EQ(case8.get_match_string_view(), "ab"sv);
+
+    using type6 = regex<R"(^(\d{4})([/-])([01]\d)\2(\d{2})$)">;
+    constexpr auto case9 = type6("2023/01/13");
+    EXPECT_TRUE(case9.exists());
+    EXPECT_TRUE(case9.is_match());
 }
