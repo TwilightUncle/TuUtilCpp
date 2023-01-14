@@ -31,6 +31,7 @@ namespace tuutil::mpl
 #include <tuutilcpp/mpl/concepts.hpp>
 #include <tuutilcpp/mpl/value_constant.hpp>
 #include <tuutilcpp/mpl/meta_callback.hpp>
+#include <tuutilcpp/mpl/get_element.hpp>
 #include <tuutilcpp/mpl/mpl_if.hpp>
 #include <tuutilcpp/mpl/map.hpp>
 #include <tuutilcpp/mpl/fold.hpp>

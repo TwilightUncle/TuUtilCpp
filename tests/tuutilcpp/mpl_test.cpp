@@ -83,6 +83,26 @@ TEST(TuutilcppMplTest, MetaCallbackTest)
     ASSERT_TRUE(case25);
 }
 
+
+TEST(TuutilcppMplTest, GetTest)
+{
+    using type_list = dummy_non_metafunction<long long, short, unsigned short, unsigned long long, unsigned long>;
+    using val_list = value_list<int(1), int(2), char(1), double(1)>;
+
+    constexpr auto case1 = std::is_same_v<get_t<0, type_list>, long long>;
+    constexpr auto case2 = std::is_same_v<get_t<3, type_list>, unsigned long long>;
+    constexpr auto case3 = std::is_same_v<get_t<4, type_list>, unsigned long>;
+    constexpr auto case4 = get_v<0, val_list>;
+    constexpr auto case5 = get_v<2, val_list>;
+    constexpr auto case6 = get_v<3, val_list>;
+
+    EXPECT_TRUE(case1);
+    EXPECT_TRUE(case2);
+    EXPECT_TRUE(case3);
+    EXPECT_EQ(case4, int(1));
+    EXPECT_EQ(case5, double(1));
+}
+
 TEST(TuutilcppMplTest, MapTest)
 {
     using type_list = dummy_non_metafunction<long long, short, unsigned short, unsigned long long, unsigned long>;
