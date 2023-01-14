@@ -302,8 +302,10 @@ TEST(TuutilcppMplTest, CountTest)
     constexpr auto case1 = count_v<dummy_non_metafunction<int, float, void, char>>;
     constexpr auto case2 = count_v<value_list<int(1), int(2), int(3)>>;
     constexpr auto case3 = count_if_v<quote<std::is_integral>, dummy_non_metafunction<int, float, void, char>>;
+    constexpr auto case4 = count_if_v<quote<std::is_unsigned>, dummy_non_metafunction<int, float, void, char>>;
     
     EXPECT_EQ(case1, 4);
     EXPECT_EQ(case2, 3);
     EXPECT_EQ(case3, 2);
+    EXPECT_EQ(case4, 0);
 }

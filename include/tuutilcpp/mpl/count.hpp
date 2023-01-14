@@ -17,6 +17,8 @@ namespace tuutil::mpl
     struct count<List<Parameters...>> : public std::integral_constant<std::size_t, sizeof...(Parameters)> {};
     template <template <auto...> class List, auto... Parameters>
     struct count<List<Parameters...>> : public std::integral_constant<std::size_t, sizeof...(Parameters)> {};
+    template <>
+    struct count<ignore_type> : public std::integral_constant<std::size_t, 0> {};
 
     /**
      * @fn
