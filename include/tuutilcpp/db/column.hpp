@@ -21,7 +21,7 @@ namespace tuutil::db
         class FieldType,
         ColumnConstraintDefinable... Constraints
     >
-    requires (Name.size() > 0)
+    requires (validate_sql_identity<Name>())
     struct define_column
     {
         static constexpr auto name = Name;

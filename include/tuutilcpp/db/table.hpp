@@ -38,7 +38,10 @@ namespace tuutil::db
         ColumnListDefinitionable ColumnDefinitionList,
         ConstraintListDefinable ConstraintDefinitionList = constraint_unspecified
     >
-    requires validate_define_table_constraint_arg<ColumnDefinitionList, ConstraintDefinitionList>::value
+    requires (
+        validate_define_table_constraint_arg<ColumnDefinitionList, ConstraintDefinitionList>::value
+        && validate_sql_identity<Name>()
+    )
     struct define_table
     {
     private:

@@ -32,7 +32,39 @@ namespace tuutil::db
      * @brief 検査対象の値よりvarchar及び、char計の配列のサイズを取得
      * @param v 検査対象の値
     */
-    template <class T> constexpr std::size_t get_maxlength(const T& v) { return get_maxlength_t<T>::size; } 
+    template <class T> constexpr std::size_t get_maxlength(const T& v) { return get_maxlength_t<T>::size; }
+
+    /**
+     * @fn
+     * @brief SQL識別子として正しいフォーマットであるか検証。失敗時コンパイルエラー
+     * @tparam Subject 検査対象
+     * @details ひとまず、先頭が数値以外の半角英数字アンダーバー1 ~ 64文字を識別子として許可
+    */
+    template <str::cstr Subject>
+    consteval bool validate_sql_identity()
+    {
+        static_assert(
+            str::regex<R"(^(?!\d)\w{1,64}$)">::match(Subject),
+            "Invalid SQL identity."
+        );
+        return true;
+    }
+
+    /**
+     * @fn
+     * @brief SQLエイリアス名として正しいフォーマットであるか検証。失敗時コンパイルエラー
+     * @tparam Subject 検査対象
+     * @details ひとまず、先頭が数値以外の半角英数字アンダーバー1 ~ 255文字を識別子として許可
+    */
+    template <str::cstr Subject>
+    consteval bool validate_sql_alias()
+    {
+        static_assert(
+            str::regex<R"(^(?!\d)\w{1,255}$)">::match(Subject),
+            "Invalid SQL alias."
+        );
+        return true;
+    }
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_DB_TYPE_HPP

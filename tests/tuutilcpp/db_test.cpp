@@ -10,6 +10,21 @@ enum class samples2 {
     ID, ID2, NAME, CREATE_AT
 };
 
+TEST(TuutilcppDbTest, TypeTest)
+{
+    db::validate_sql_identity<"_">();
+    db::validate_sql_identity<"abcZYX109_">();
+    db::validate_sql_identity<"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_a">();
+    // 64文字オーバーでコンパイルエラー
+    // db::validate_sql_identity<"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_ab">();
+    // 識別子として許可されない文字が含まれているためコンパイルエラー
+    // db::validate_sql_identity<"abcZYX109_/">();
+    // 数値から始まるためコンパイルエラー
+    // db::validate_sql_identity<"1abcde">();
+    // 空文字のためコンパイルエラー
+    db::validate_sql_identity<"">();
+}
+
 TEST(TuutilcppDbTest, ConstraintTest)
 {
     constexpr auto case1 = db::ColIdListSpecifiable<mpl::value_list<samples::ID, samples::ID2>>;
