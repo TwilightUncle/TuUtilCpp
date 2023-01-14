@@ -100,7 +100,8 @@ TEST(TuutilcppMplTest, GetTest)
     EXPECT_TRUE(case2);
     EXPECT_TRUE(case3);
     EXPECT_EQ(case4, int(1));
-    EXPECT_EQ(case5, double(1));
+    EXPECT_EQ(case5, char(1));
+    EXPECT_EQ(case6, double(1));
 }
 
 TEST(TuutilcppMplTest, MapTest)
