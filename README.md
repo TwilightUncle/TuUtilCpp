@@ -3,7 +3,7 @@ C++20以降を対象とした、コンパイル時処理関連の汎用ヘッダ
 
 ## 機能
 
-|機能名<br>(リンクはソース例)|概要|名前空間|include|
+|機能名<br>(リンクは使用例)|概要|名前空間|include|
 |----|----|----|----|
 |[mpl](#mpl)|メタ関数群。<br>高階メタ関数によるパラメータパックの操作がメイン|`tuutil::mpl`|`#include<tuutilcpp/mpl.hpp>`|
 |[cstr](#cstr--regex)|コンパイル時評価のための固定長文字列クラス|`tuutil::str`|`#include<tuutilcpp/str.hpp>`|
@@ -24,37 +24,38 @@ git clone https://github.com/TwilightUncle/TuUtilCpp.git TuUtilCpp
 # path/to/dir/TuUtilCpp配下にソースが展開される
 ```
 
-## ソース例
+## 使用例
 ### mpl
 ```cpp
 #include <tuple>
 #include <type_traits>
 #include <tuutilcpp/mpl.hpp>
-using namespace tuutil::mpl;
+
+using namespace tuutil;
 
 // テンプレートパラメータを埋めていないメタ関数を型と同じ文脈で利用できるようにする
-using quoted_is_same = quote<std::is_same>;
+using quoted_is_same = mpl::quote<std::is_same>;
 static_assert(!std::is_same_v<quoted_is_same, int>);  // 型としてメタ関数のテンプレート引数に指定できる
 
 // テンプレート引数を部分適用することによって、quoted_is_sameからint型か判定するメタ関数を作成する
-using binded_is_int = bind<quoted_is_same, int>;
+using binded_is_int = mpl::bind<quoted_is_same, int>;
 
 // quote及び、bindしたメタ関数を実行する
-static_assert(apply_v<quoted_is_same, int, int>); // std::is_same_v<int, int>と同様
-static_assert(apply_v<binded_is_int, int>); // int型の場合のみ真となる
+static_assert(mpl::apply_v<quoted_is_same, int, int>); // std::is_same_v<int, int>と同様
+static_assert(mpl::apply_v<binded_is_int, int>); // int型の場合のみ真となる
 
 using types = std::tuple<int, double, float, char, int, float>;
 
 // 整数型を抽出
-using integral_types = extract_if_t<quote<std::is_integral>, types>;
+using integral_types = mpl::extract_if_t<mpl::quote<std::is_integral>, types>;
 static_assert(std::is_same_v<integral_types, std::tuple<int, char, int>>);
 
 // int型を除去
-using not_int_types = remove_if_t<bind<quote<std::is_same>, int>, types>;
+using not_int_types = mpl::remove_if_t<mpl::bind<mpl::quote<std::is_same>, int>, types>;
 static_assert(std::is_same_v<not_int_types, std::tuple<double, float, char, float>>);
 
 // 重複している要素を除去
-using unique_types = unique_t<types>;
+using unique_types = mpl::unique_t<types>;
 static_assert(std::is_same_v<unique_types, std::tuple<int, double, float, char>>);
 
 // 一部メタ関数は非型テンプレートパラメータパックを持つ型の要素操作にも対応している
@@ -62,12 +63,12 @@ template <auto... VParameters> struct val_list {};
 using values = val_list<int(1), double(1), int(2), int(1), char(1), double(1), float(1)>;
 
 // valuesに対して要素の並びの反転、要素の左回転、重複している要素(値と型どちらも一致しているもの)の削除を順に行う
-using result_values = relay_t<
+using result_values = mpl::relay_t<
     values,
-    type_list<
-        quote<reverse>,
-        quote<rotatel>,
-        quote<unique>
+    mpl::type_list<
+        mpl::quote<mpl::reverse>,
+        mpl::quote<mpl::rotatel>,
+        mpl::quote<mpl::unique>
     >
 >;
 static_assert(std::is_same_v<result_values, val_list<double(1), char(1), int(1), int(2), float(1)>>);
@@ -76,14 +77,14 @@ static_assert(std::is_same_v<result_values, val_list<double(1), char(1), int(1),
 ```cpp
 #include <iostream>
 #include <tuutilcpp/str.hpp>
-using namespace tuutil::str;
+using namespace tuutil;
 
 // 非型テンプレート引数として日付文字列を受け取り、形式が不正な場合にコンパイルエラーを起こす
-template <cstr DateStr>
+template <str::cstr DateStr>
 struct DateType
 {
     // 日付文字列についてパターンマッチを行い、ついでにキャプチャで年月日をそれぞれ抜き出す
-    using date_pattern = regex<R"(^(\d{4})([/-])([01]\d)\2(\d{2})$)">;
+    using date_pattern = str::regex<R"(^(\d{4})([/-])([01]\d)\2(\d{2})$)">;
     static constexpr auto match_result = date_pattern(DateStr);
 
     // パターンマッチに失敗したときコンパイルエラー
@@ -91,9 +92,9 @@ struct DateType
     // キャプチャ等不要でパターンマッチだけしたい場合は以下でOK
     static_assert(date_pattern::match(DateStr));
 
-    static constexpr auto year = to_int<int>(match_result[1]);
-    static constexpr auto month = to_int<int>(match_result[3]);
-    static constexpr auto day = to_int<int>(match_result[4]);
+    static constexpr auto year = str::to_int<int>(match_result[1]);
+    static constexpr auto month = str::to_int<int>(match_result[3]);
+    static constexpr auto day = str::to_int<int>(match_result[4]);
 
     // 月や日付のとりうる値の範囲から逸脱している時コンパイルエラー
     static_assert(month > 0 && month <= 12, "Possible months are between 1 and 12.");
