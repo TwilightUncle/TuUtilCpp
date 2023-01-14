@@ -47,6 +47,14 @@ namespace tuutil::mpl
 
     /**
      * @fn
+     * @brief メタ関数リストへArgを食わせ、結果を逐次実行する
+     * @tparam Arg 初期値
+     * @tparam MetaFuncList メタ関数リスト
+    */
+    template <class Arg, class MetaFuncList> constexpr auto relay_v = relay<Arg, MetaFuncList>::value;
+
+    /**
+     * @fn
      * @brief リストとして渡された型リストを引数として関数に適用する
      * @tparam F メタ関数
      * @tparam ArgList 型のパラメータパックを持つ型
@@ -62,6 +70,14 @@ namespace tuutil::mpl
      * @tparam ArgList 型のパラメータパックを持つ型
     */
     template <MetaCallable F, class ArgList> using apply_list_t = apply_list<F, ArgList>::type;
+
+    /**
+     * @fn
+     * @brief リストとして渡された型リストを引数として関数に適用する
+     * @tparam F メタ関数
+     * @tparam ArgList 型のパラメータパックを持つ型
+    */
+    template <MetaCallable F, class ArgList> constexpr auto apply_list_v = apply_list<F, ArgList>::value;
 
     /**
      * @fn
