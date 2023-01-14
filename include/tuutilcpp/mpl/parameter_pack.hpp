@@ -157,24 +157,6 @@ namespace tuutil::mpl
 
     /**
      * @fn
-     * @brief パラメータパックの数を数える
-     * @tparam T 型パラメータパックを持つ型
-    */
-    template <class T> struct count;
-    template <template <class...> class List, class... Parameters>
-    struct count<List<Parameters...>> : public std::integral_constant<std::size_t, sizeof...(Parameters)> {};
-    template <template <auto...> class List, auto... Parameters>
-    struct count<List<Parameters...>> : public std::integral_constant<std::size_t, sizeof...(Parameters)> {};
-
-    /**
-     * @fn
-     * @brief パラメータパックの数を数える
-     * @tparam T 型パラメータパックを持つ型
-    */
-    template <class T> constexpr auto count_v = count<T>::value;
-
-    /**
-     * @fn
      * @brief パラメータパックの型が全て同じとき真
      * @tparam T 検査対象の型パラメータパックを持つ型
     */

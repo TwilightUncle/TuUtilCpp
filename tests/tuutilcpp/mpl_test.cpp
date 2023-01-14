@@ -175,12 +175,10 @@ TEST(TuutilcppMplTest, ParameterPackTest)
     constexpr auto case2 = std::is_same_v<rotatel_t<type_list>, dummy_non_metafunction<long long, char, int, double>>;
     constexpr auto case3 = std::is_same_v<rotater_t<type_list>, dummy_non_metafunction<int, double, long long, char>>;
     constexpr auto case4 = std::is_same_v<copy_t<type_list, lift<tuutil::mpl::type_list>>, tuutil::mpl::type_list<double, long long, char, int>>;
-    constexpr auto case5 = count_v<type_list>;
     constexpr auto case6 = is_same_types_v<dummy_non_metafunction<int, int, int>>;
     constexpr auto case7 = is_same_types_v<dummy_non_metafunction<int, int, char>>;
     constexpr auto case8 = contains_v<int, dummy_non_metafunction<char, long long, int, void>>;
     constexpr auto case9 = contains_v<int, dummy_non_metafunction<char, long long, void>>;
-    constexpr auto case10 = count_v<tuutil::mpl::value_list<int(1), int(2), int(3)>>;
     constexpr auto case11 = is_same_types_v<tuutil::mpl::value_list<int(1), int(2), int(3)>>;
     constexpr auto case12 = is_same_types_v<tuutil::mpl::value_list<int(1), char(2), int(3)>>;
 
@@ -202,12 +200,10 @@ TEST(TuutilcppMplTest, ParameterPackTest)
     EXPECT_TRUE(case2);
     EXPECT_TRUE(case3);
     EXPECT_TRUE(case4);
-    EXPECT_EQ(case5, 4);
     EXPECT_TRUE(case6);
     EXPECT_FALSE(case7);
     EXPECT_TRUE(case8);
     EXPECT_FALSE(case9);
-    EXPECT_EQ(case10, 3);
     EXPECT_TRUE(case11);
     EXPECT_FALSE(case12);
     EXPECT_TRUE(case13);
@@ -299,4 +295,15 @@ TEST(TuutilcppMplTest, UniqueTest)
     ASSERT_TRUE(case4);
     ASSERT_TRUE(case5);
     ASSERT_FALSE(case6);
+}
+
+TEST(TuutilcppMplTest, CountTest)
+{
+    constexpr auto case1 = count_v<dummy_non_metafunction<int, float, void, char>>;
+    constexpr auto case2 = count_v<value_list<int(1), int(2), int(3)>>;
+    constexpr auto case3 = count_if_v<quote<std::is_integral>, dummy_non_metafunction<int, float, void, char>>;
+    
+    EXPECT_EQ(case1, 4);
+    EXPECT_EQ(case2, 3);
+    EXPECT_EQ(case3, 2);
 }
