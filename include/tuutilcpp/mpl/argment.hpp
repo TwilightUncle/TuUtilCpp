@@ -131,6 +131,15 @@ namespace tuutil::mpl
 
     template <template <auto...> class List, auto... Parameters>
     struct rotater<List<Parameters...>> : public behave_as_type_list_arg<quote<rotater>, List<Parameters...>> {};
+
+    template <class Head, class... Lists>
+    requires (has_value_parameters_v<Head> && (has_value_parameters_v<Lists> && ...))
+    struct concat_list<Head, Lists...> : public relay<
+        concat_list_t<wrap_value_elements_t<Head, lift<type_list>>, wrap_value_elements_t<Lists, lift<type_list>>...>,
+        type_list<
+            bind<quote<flip>, quote<unwrap_value_elements>, get_empty_list_t<Head>>
+        >
+    > {};
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_MPL_ARGMENT_HPP
