@@ -14,8 +14,7 @@ set(TUUTILCPP_TESTS
     ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/big_int_test.cpp
     ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/cstr_test.cpp
     ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/regex_test.cpp
-    ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/column_test.cpp
-    ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/db_definition_test.cpp
+    ${PROJECT_SOURCE_DIR}/tests/tuutilcpp/db_test.cpp
 )
 source_group(tests FILES ${TUUTILCPP_TESTS})
 

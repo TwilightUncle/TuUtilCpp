@@ -17,7 +17,7 @@ namespace tuutil::db
     >
     struct validate_define_table_constraint_arg : public std::bool_constant<
         ConstraintListDefinable<
-            mpl::concat_type_list_t<
+            mpl::concat_list_t<
                 ConstraintDefinitionList,
                 extract_constraints_t<ColumnDefinitionList>
             >

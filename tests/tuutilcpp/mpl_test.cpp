@@ -100,7 +100,8 @@ TEST(TuutilcppMplTest, GetTest)
     EXPECT_TRUE(case2);
     EXPECT_TRUE(case3);
     EXPECT_EQ(case4, int(1));
-    EXPECT_EQ(case5, double(1));
+    EXPECT_EQ(case5, char(1));
+    EXPECT_EQ(case6, double(1));
 }
 
 TEST(TuutilcppMplTest, MapTest)
@@ -174,12 +175,10 @@ TEST(TuutilcppMplTest, ParameterPackTest)
     constexpr auto case2 = std::is_same_v<rotatel_t<type_list>, dummy_non_metafunction<long long, char, int, double>>;
     constexpr auto case3 = std::is_same_v<rotater_t<type_list>, dummy_non_metafunction<int, double, long long, char>>;
     constexpr auto case4 = std::is_same_v<copy_t<type_list, lift<tuutil::mpl::type_list>>, tuutil::mpl::type_list<double, long long, char, int>>;
-    constexpr auto case5 = count_v<type_list>;
     constexpr auto case6 = is_same_types_v<dummy_non_metafunction<int, int, int>>;
     constexpr auto case7 = is_same_types_v<dummy_non_metafunction<int, int, char>>;
     constexpr auto case8 = contains_v<int, dummy_non_metafunction<char, long long, int, void>>;
     constexpr auto case9 = contains_v<int, dummy_non_metafunction<char, long long, void>>;
-    constexpr auto case10 = count_v<tuutil::mpl::value_list<int(1), int(2), int(3)>>;
     constexpr auto case11 = is_same_types_v<tuutil::mpl::value_list<int(1), int(2), int(3)>>;
     constexpr auto case12 = is_same_types_v<tuutil::mpl::value_list<int(1), char(2), int(3)>>;
 
@@ -190,25 +189,28 @@ TEST(TuutilcppMplTest, ParameterPackTest)
 
     using concat_target1 = dummy_non_metafunction<int, double, std::string>;
     using concat_target2 = dummy_non_metafunction<std::nullptr_t, std::size_t, char>;
-    using concated_list = concat_type_list_t<concat_target1, concat_target2, dummy_non_metafunction<long long>>;
+    using concated_list = concat_list_t<concat_target1, concat_target2, dummy_non_metafunction<long long>>;
     constexpr auto case16 = std::is_same_v<concated_list, dummy_non_metafunction<int, double, std::string, std::nullptr_t, std::size_t, char, long long>>;
+    using concat_target3 = value_list<nullptr, float(1)>;
+    using concat_target4 = value_list<short(1)>;
+    using concated_list2 = concat_list_t<val_list, concat_target3, concat_target4>;
+    constexpr auto case17 = std::is_same_v<concated_list2, value_list<double(1), long long(1), char(1), int(1), nullptr, float(1), short(1)>>;
 
     EXPECT_TRUE(case1);
     EXPECT_TRUE(case2);
     EXPECT_TRUE(case3);
     EXPECT_TRUE(case4);
-    EXPECT_EQ(case5, 4);
     EXPECT_TRUE(case6);
     EXPECT_FALSE(case7);
     EXPECT_TRUE(case8);
     EXPECT_FALSE(case9);
-    EXPECT_EQ(case10, 3);
     EXPECT_TRUE(case11);
     EXPECT_FALSE(case12);
     EXPECT_TRUE(case13);
     EXPECT_EQ(case14, double(1));
     EXPECT_EQ(case15, int(1));
     EXPECT_TRUE(case16);
+    EXPECT_TRUE(case17);
 }
 
 TEST(TuutilcppMplTest, FindIfTest)
@@ -293,4 +295,17 @@ TEST(TuutilcppMplTest, UniqueTest)
     ASSERT_TRUE(case4);
     ASSERT_TRUE(case5);
     ASSERT_FALSE(case6);
+}
+
+TEST(TuutilcppMplTest, CountTest)
+{
+    constexpr auto case1 = count_v<dummy_non_metafunction<int, float, void, char>>;
+    constexpr auto case2 = count_v<value_list<int(1), int(2), int(3)>>;
+    constexpr auto case3 = count_if_v<quote<std::is_integral>, dummy_non_metafunction<int, float, void, char>>;
+    constexpr auto case4 = count_if_v<quote<std::is_unsigned>, dummy_non_metafunction<int, float, void, char>>;
+    
+    EXPECT_EQ(case1, 4);
+    EXPECT_EQ(case2, 3);
+    EXPECT_EQ(case3, 2);
+    EXPECT_EQ(case4, 0);
 }

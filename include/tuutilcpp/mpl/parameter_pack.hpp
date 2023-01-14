@@ -34,6 +34,24 @@ namespace tuutil::mpl
 
     /**
      * @fn
+     * @brief パラメータパックを持つ型のガワの部分を取得する
+     * @return lift or liftvで包まれたテンプレート型
+    */
+    template <class T> struct get_empty_list;
+    template <template <class...> class List, class... Parameters>
+    struct get_empty_list<List<Parameters...>> : public std::type_identity<lift<List>> {};
+    template <template <auto...> class List, auto... Parameters>
+    struct get_empty_list<List<Parameters...>> : public std::type_identity<liftv<List>> {};
+
+    /**
+     * @fn
+     * @brief パラメータパックを持つ型のガワの部分を取得する
+     * @return lift or liftvで包まれたテンプレート型
+    */
+    template <class T> using get_empty_list_t = get_empty_list<T>::type;
+
+    /**
+     * @fn
      * @brief liftで包まれたテンプレートクラスにパラメータパックを適用する
     */
     template <template <class...> class List, class... Parameters>
@@ -139,24 +157,6 @@ namespace tuutil::mpl
 
     /**
      * @fn
-     * @brief パラメータパックの数を数える
-     * @tparam T 型パラメータパックを持つ型
-    */
-    template <class T> struct count;
-    template <template <class...> class List, class... Parameters>
-    struct count<List<Parameters...>> : public std::integral_constant<std::size_t, sizeof...(Parameters)> {};
-    template <template <auto...> class List, auto... Parameters>
-    struct count<List<Parameters...>> : public std::integral_constant<std::size_t, sizeof...(Parameters)> {};
-
-    /**
-     * @fn
-     * @brief パラメータパックの数を数える
-     * @tparam T 型パラメータパックを持つ型
-    */
-    template <class T> constexpr auto count_v = count<T>::value;
-
-    /**
-     * @fn
      * @brief パラメータパックの型が全て同じとき真
      * @tparam T 検査対象の型パラメータパックを持つ型
     */
@@ -222,16 +222,16 @@ namespace tuutil::mpl
     */
     template <class... Lists>
     requires (sizeof...(Lists) > 0)
-    struct concat_type_list;
+    struct concat_list;
     // 二つのtype_listを結合
     template <template <class...> class List, class... Types1, class... Types2>
-    struct concat_type_list<List<Types1...>, List<Types2...>> : std::type_identity<List<Types1..., Types2...>> {};
+    struct concat_list<List<Types1...>, List<Types2...>> : std::type_identity<List<Types1..., Types2...>> {};
     // 任意数のtype_listを結合する
     template <class Head, class... Lists>
     requires (has_type_parameters_v<Lists> && ...)
-    struct concat_type_list<Head, Lists...> : public foldl<quote<concat_type_list>, Head, type_list<Lists...>> {};
+    struct concat_list<Head, Lists...> : public foldl<quote<concat_list>, Head, type_list<Lists...>> {};
 
-    template <class... Lists> using concat_type_list_t = concat_type_list<Lists...>::type;
+    template <class... Lists> using concat_list_t = concat_list<Lists...>::type;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_MPL_REVERSE_HPP

@@ -41,5 +41,6 @@ namespace tuutil::mpl
 #include <tuutilcpp/mpl/find_if.hpp>
 #include <tuutilcpp/mpl/extract_if.hpp>
 #include <tuutilcpp/mpl/unique.hpp>
+#include <tuutilcpp/mpl/count.hpp>
 
 #endif // TUUTILCPP_INCLUDE_GUARD_MPL_META_HPP
