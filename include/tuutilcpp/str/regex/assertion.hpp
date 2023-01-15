@@ -75,6 +75,31 @@ namespace tuutil::str::_regex
 
         /**
          * @fn
+         * @brief 言明部分の正規表現マッチを行い、結果を返す
+        */
+        static constexpr auto get_assertion_match_result(std::string_view subject, std::size_t offset)
+        {
+            using assertion_matcher = regex<inner_match_pattern, regex_parser>;
+            return assertion_matcher::exec(subject, offset, true).second;
+        }
+
+        /**
+         * @fn
+         * @brief offsetの位置より前方に対して、言明とマッチする位置が存在するか判定
+        */
+        static constexpr bool exists_match_behind(std::string_view subject, std::size_t offset)
+        {
+            std::size_t result_pos = offset + 1;
+            for (
+                std::size_t i = offset;
+                i > 0 && result_pos != offset;
+                result_pos = get_assertion_match_result(subject, --i).get_end_pos()
+            );
+            return result_pos == offset;
+        }
+
+        /**
+         * @fn
          * @brief 解析結果生成された処理
         */
         template <std::size_t N>
@@ -87,42 +112,27 @@ namespace tuutil::str::_regex
                 : regex_match_result::make_unmatch();
             if ((check_flag & BEGIN) && offset == 0) return regex_match_result{0, 0};
             
-            {
-                const auto get_range = [s](std::size_t ofs) {
-                    using assertion_matcher = regex<inner_match_pattern, regex_parser>;
-                    return assertion_matcher::exec(s, ofs, true).second;
-                };
-                const auto check_behind = [&get_range](std::size_t ofs) {
-                    std::size_t result_pos = ofs + 1;
-                    for (
-                        std::size_t i = ofs;
-                        i > 0 && result_pos != ofs;
-                        result_pos = get_range(--i).get_end_pos()
-                    );
-                    return result_pos == ofs;
-                };
+            // 先頭・最後尾以外の言明の判定
+            for (; offset <= s.size(); offset++) {
+                bool match = false;
+                bool behind_match = false;
+                bool ahead_match = false;
+                if constexpr (check_flag & LOOK_BEHIND) 
+                    match = behind_match = exists_match_behind(s, offset);
+                if constexpr (check_flag & LOOK_AHEAD)
+                    match = ahead_match = (get_assertion_match_result(s, offset).get_begin_pos() != std::string_view::npos);
 
-                for (; offset <= s.size(); offset++) {
-                    bool match = false;
-                    bool behind_match = false;
-                    bool ahead_match = false;
-                    if constexpr (check_flag & LOOK_BEHIND) 
-                        match = behind_match = check_behind(offset);
-                    if constexpr (check_flag & LOOK_AHEAD)
-                        match = ahead_match = (get_range(offset).get_begin_pos() != std::string_view::npos);
-
-                    if constexpr (check_flag & IN_WORD) {
-                        if (behind_match && ahead_match) return regex_match_result{offset, 0};
-                    }
-                    else if constexpr (check_flag & WORD_BOUNDARY) {
-                        if (behind_match != ahead_match) return regex_match_result{offset, 0};
-                    }
-                    else if (bool(check_flag & NEGATIVE) != match) return regex_match_result{offset, 0};
-
-                    if (is_pos_lock) break;
-                    // 文字サイズと位置が等しい場合、位置をインクリメントさせない
-                    if (offset == s.size()) break;
+                if constexpr (check_flag & IN_WORD) {
+                    if (behind_match && ahead_match) return regex_match_result{offset, 0};
                 }
+                else if constexpr (check_flag & WORD_BOUNDARY) {
+                    if (behind_match != ahead_match) return regex_match_result{offset, 0};
+                }
+                else if (bool(check_flag & NEGATIVE) != match) return regex_match_result{offset, 0};
+
+                if (is_pos_lock) break;
+                // 文字サイズと位置が等しい場合、位置をインクリメントさせない
+                if (offset == s.size()) break;
             }
 
             return (check_flag & END) && offset == s.size()
