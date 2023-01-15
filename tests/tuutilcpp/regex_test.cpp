@@ -479,6 +479,8 @@ TEST(TuutilcppStrTest, RegexMatchTest)
     constexpr auto case5 = type1::match("aabcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]m");
     constexpr auto case6 = type1::match("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]ma");
     constexpr auto case7 = type1::search("abcdefghij@ghij$ghij%1]mghij/ghij|2]mc)nopghij@]ma");
+    constexpr auto case8 = type1::search("");
+    constexpr auto case9 = type1::match("");
 
     EXPECT_TRUE(case1);
     EXPECT_TRUE(case2);
@@ -487,6 +489,8 @@ TEST(TuutilcppStrTest, RegexMatchTest)
     EXPECT_FALSE(case5);
     EXPECT_FALSE(case6);
     EXPECT_FALSE(case7);
+    EXPECT_FALSE(case8);
+    EXPECT_FALSE(case9);
 }
 
 TEST(TuutilcppStrTest, RegexResultTest)
