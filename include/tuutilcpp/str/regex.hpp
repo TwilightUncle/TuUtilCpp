@@ -147,7 +147,7 @@ namespace tuutil::str
          * @fn
          * @brief 検査対象の文字列全体がパターンマッチしているとき真
         */
-        constexpr bool is_match() const noexcept { return match_range.match_length() == test_target.size(); }
+        constexpr bool is_match() const noexcept { return this->exists() && match_range.match_length() == test_target.size(); }
 
         constexpr bool empty() const noexcept { return !this->exists(); }
         constexpr std::size_t size() const noexcept { return this->exists() ? this->capture_list.size() + 1 : 0; }
