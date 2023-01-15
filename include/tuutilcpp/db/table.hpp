@@ -12,7 +12,7 @@ namespace tuutil::db
      * @brief テンプレート引数検証用のメタ関数
     */
     template <
-        ColumnListDefinitionable ColumnDefinitionList,
+        ColumnListDefinable ColumnDefinitionList,
         ConstraintListDefinable ConstraintDefinitionList
     >
     struct validate_define_table_constraint_arg : public std::bool_constant<
@@ -35,10 +35,13 @@ namespace tuutil::db
     template <
         mpl::Enumeration ETableType,
         str::cstr Name,
-        ColumnListDefinitionable ColumnDefinitionList,
+        ColumnListDefinable ColumnDefinitionList,
         ConstraintListDefinable ConstraintDefinitionList = constraint_unspecified
     >
-    requires validate_define_table_constraint_arg<ColumnDefinitionList, ConstraintDefinitionList>::value
+    requires (
+        validate_define_table_constraint_arg<ColumnDefinitionList, ConstraintDefinitionList>::value
+        && validate_sql_identity<Name>()
+    )
     struct define_table
     {
     private:

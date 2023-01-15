@@ -10,6 +10,21 @@ enum class samples2 {
     ID, ID2, NAME, CREATE_AT
 };
 
+TEST(TuutilcppDbTest, TypeTest)
+{
+    db::validate_sql_identity<"_">();
+    db::validate_sql_identity<"abcZYX109_">();
+    db::validate_sql_identity<"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_a">();
+    // 64文字オーバーでコンパイルエラー
+    // db::validate_sql_identity<"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_ab">();
+    // 識別子として許可されない文字が含まれているためコンパイルエラー
+    // db::validate_sql_identity<"abcZYX109_/">();
+    // 数値から始まるためコンパイルエラー
+    // db::validate_sql_identity<"1abcde">();
+    // 空文字のためコンパイルエラー
+    // db::validate_sql_identity<"">();
+}
+
 TEST(TuutilcppDbTest, ConstraintTest)
 {
     constexpr auto case1 = db::ColIdListSpecifiable<mpl::value_list<samples::ID, samples::ID2>>;
@@ -114,12 +129,15 @@ TEST(TuutilcppDbTest, DbColumnTest)
     >; // 複数制約を指定されたカラム
     constexpr auto case8 = std::is_same_v<db::get_constraint_list_t<column_na>, db::constraint_unspecified>; // 制約未指定のカラム
     // カラム定義リストであること
-    constexpr auto case9 = db::ColumnListDefinitionable<int>; // そもそもパラメータパックを持っていない型NG
-    constexpr auto case10 = db::ColumnListDefinitionable<column_definition_list>; // OK
-    constexpr auto case11 = db::ColumnListDefinitionable<mpl::type_list<column_id, column_na, int>>; // リスト内にdefine_column以外を含むNG
-    constexpr auto case12 = db::ColumnListDefinitionable<mpl::type_list<column_id, column_na, column_na>>; // リスト内の型が一意ではないNG
+    constexpr auto case9 = db::ColumnListDefinable<int>; // そもそもパラメータパックを持っていない型NG
+    constexpr auto case10 = db::ColumnListDefinable<column_definition_list>; // OK
+    constexpr auto case11 = db::ColumnListDefinable<mpl::type_list<column_id, column_na, int>>; // リスト内にdefine_column以外を含むNG
+    constexpr auto case12 = db::ColumnListDefinable<mpl::type_list<column_id, column_na, column_na>>; // リスト内の型が一意ではないNG
+    constexpr auto case13 = db::ColumnListDefinable<mpl::type_list<column_id, db::define_column<samples::ID, "bad_id", db::integer>>>; // ColIDが重複しているのでNG
+    constexpr auto case14 = db::ColumnListDefinable<mpl::type_list<column_id, db::define_column<samples2::ID2, "id2", db::integer, db::pk>>>; // 異なる型のColIDが指定されたカラム定義が含まれるのでNG
+    constexpr auto case15 = db::ColumnListDefinable<mpl::type_list<column_id, db::define_column<samples::ID2, "id", db::integer>>>; // カラム名に重複ありNG
     // extract_constraintsテスト
-    constexpr auto case13 = std::is_same_v<
+    constexpr auto case16 = std::is_same_v<
         db::extract_constraints_t<column_definition_list>,
         mpl::type_list<
             db::primary_key<samples::ID>,
@@ -127,7 +145,7 @@ TEST(TuutilcppDbTest, DbColumnTest)
             db::foreign_key<mpl::value_list<samples::ID2>, mpl::value_list<samples2::ID>>
         >
     >;
-    constexpr auto case14 = std::is_same_v<
+    constexpr auto case17 = std::is_same_v<
         db::extract_constraints_t<mpl::type_list<column_na, column_ce>>,
         mpl::ignore_type
     >;
@@ -144,8 +162,11 @@ TEST(TuutilcppDbTest, DbColumnTest)
     EXPECT_TRUE(case10);
     EXPECT_FALSE(case11);
     EXPECT_FALSE(case12);
-    EXPECT_TRUE(case13);
-    EXPECT_TRUE(case14);
+    EXPECT_FALSE(case13);
+    EXPECT_FALSE(case14);
+    EXPECT_FALSE(case15);
+    EXPECT_TRUE(case16);
+    EXPECT_TRUE(case17);
 }
 
 TEST(TuutilcppDbTest, DbDefinitionTest)
