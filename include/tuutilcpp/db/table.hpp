@@ -35,6 +35,10 @@ namespace tuutil::db
     {
         using id_type = ETableType;
         static constexpr auto name = Name;
+        using constraint_list = mpl::concat_list_t<
+            ConstraintDefinitionList,
+            extract_constraints_t<ColumnDefinitionList>
+        >;
     };
 
     // テーブル定義からカラム定義を取得する場合の特殊化

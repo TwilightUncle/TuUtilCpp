@@ -150,11 +150,9 @@ namespace tuutil::mpl
 
     template <class Head, class... Lists>
     requires (has_value_parameters_v<Head> && (has_value_parameters_v<Lists> && ...))
-    struct concat_list<Head, Lists...> : public relay<
-        concat_list_t<wrap_value_elements_t<Head, lift<type_list>>, wrap_value_elements_t<Lists, lift<type_list>>...>,
-        type_list<
-            bind<quote<flip>, quote<unwrap_value_elements>, get_empty_list_t<Head>>
-        >
+    struct concat_list<Head, Lists...> : public apply<
+        bind<quote<flip>, quote<unwrap_value_elements>, get_empty_list_t<Head>>,
+        concat_list_t<wrap_value_elements_t<Head, lift<type_list>>, wrap_value_elements_t<Lists, lift<type_list>>...>
     > {};
 }
 

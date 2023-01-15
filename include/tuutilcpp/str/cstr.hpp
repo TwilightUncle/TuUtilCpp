@@ -260,14 +260,14 @@ namespace tuutil::str
 
     /**
      * @fn
-     * @brief 演算子オーバーロード(一致。不一致は導出されるので不要。細かい仕様はc++20の一貫比較で確認すること)
+     * @brief 演算子オーバーロード
     */
     template <std::size_t N1, std::size_t N2>
     constexpr bool operator==(const cstr<N1>& s1, const cstr<N2>& s2) { return s1.view() == s2.view(); }
 
     /**
      * @fn
-     * @brief 演算子オーバーロード(宇宙船。細かい仕様はc++20の一貫比較で確認すること)
+     * @brief 演算子オーバーロード
     */
     template <std::size_t N1, std::size_t N2>
     constexpr std::strong_ordering operator<=>(const cstr<N1>& s1, const cstr<N2>& s2) { return s1.view() <=> s2.view(); }
@@ -314,6 +314,7 @@ namespace tuutil::str
     {
         T val{};
         for (const auto c: s) {
+            if (c < '0' || c > '9') break;
             val *= 10;
             val += (c - '0');
         }
