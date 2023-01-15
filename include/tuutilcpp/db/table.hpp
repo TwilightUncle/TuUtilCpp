@@ -9,23 +9,6 @@ namespace tuutil::db
 {
     /**
      * @fn
-     * @brief テンプレート引数検証用のメタ関数
-    */
-    template <
-        ColumnListDefinable ColumnDefinitionList,
-        ConstraintListDefinable ConstraintDefinitionList
-    >
-    struct validate_define_table_constraint_arg : public std::bool_constant<
-        ConstraintListDefinable<
-            mpl::concat_list_t<
-                ConstraintDefinitionList,
-                extract_constraints_t<ColumnDefinitionList>
-            >
-        >
-    > {};
-
-    /**
-     * @fn
      * @brief テーブル定義用メタ関数
      * @tparam ETableType テーブルと列の識別子として定義したスコープ付き列挙型
      * @tparam Name str::cstrで包んで渡した文字列リテラル
@@ -39,37 +22,29 @@ namespace tuutil::db
         ConstraintListDefinable ConstraintDefinitionList = constraint_unspecified
     >
     requires (
-        validate_define_table_constraint_arg<ColumnDefinitionList, ConstraintDefinitionList>::value
+        ConstraintListDefinable<
+            mpl::concat_list_t<
+                ConstraintDefinitionList,
+                extract_constraints_t<ColumnDefinitionList>
+            >
+        >
         && validate_sql_identity<Name>()
     )
     struct define_table
     {
-    private:
-        template <class T1, ColumnDefinable T2> struct is_match_column_id : public std::false_type {};
-        template <auto V, ColumnDefinable T>
-        requires std::same_as<ETableType, decltype(V)>
-        struct is_match_column_id<mpl::value_constant<V>, T> : public std::bool_constant<V == T::id> {};
-
-    public:
         static constexpr auto name = Name;
-
-        /**
-         * @fn
-         * @brief Vに合致する列定義を取得する
-        */
-        template <ETableType V>
-        using get_column_definition_t = mpl::find_if_t<mpl::bind<mpl::quote<is_match_column_id>, mpl::value_constant<V>>, ColumnDefinitionList>;
-
-        /**
-         * @fn
-         * @brief Vに合致する列情報を取得する
-        */
-        template <ETableType V>
-        static constexpr auto get_column_info()
-        {
-            return get_column_definition_t<V>{};
-        }
     };
+
+    // テーブル定義からカラム定義を取得する場合の特殊化
+    template <
+        mpl::Enumeration auto ColID,
+        mpl::Enumeration ETableType,
+        str::cstr Name,
+        ColumnListDefinable ColumnDefinitionList,
+        ConstraintListDefinable ConstraintDefinitionList
+    >
+    struct get_column_definition<ColID, define_table<ETableType, Name, ColumnDefinitionList, ConstraintDefinitionList>>
+        : public get_column_definition<ColID, ColumnDefinitionList> {};
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_DB_TABLE_HPP
