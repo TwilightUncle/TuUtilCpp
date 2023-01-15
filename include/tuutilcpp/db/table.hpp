@@ -100,6 +100,36 @@ namespace tuutil::db
         && mpl::apply_list_v<mpl::quote<std::conjunction>, mpl::map_t<mpl::quote<is_table_definition>, T>>  // Tが持つパラメータパックは全てdefine_tableであること
         && mpl::is_unique_v<mpl::map_t<mpl::quote<get_table_id>, T>>                                        // Tが持つパラメータパック要素のメンバidは全て異なる型であること
         && mpl::is_unique_v<mpl::map_t<mpl::quote<get_table_name>, T>>;                                     // Tが持つパラメータパック要素のメンバnameは全て異なる値であること
+
+    /**
+     * @fn
+     * @brief 指定したETableTypeに合致するテーブル定義をテーブル定義リストから取得する
+     * @tparam ETableType 定義に該当する列挙型
+     * @tparam T テーブル定義リストかDB schema定義
+    */
+    template <mpl::Enumeration ETableType, class T> struct get_table_def;
+
+    // 直接テーブル定義リストを指定した場合
+    template <mpl::Enumeration ETableType, TableListDefinable List>
+    struct get_table_def<ETableType, List> : public mpl::find_if<
+        mpl::bind<
+            mpl::quote<mpl::flip>,
+            mpl::quote<mpl::relay>,
+            mpl::type_list<
+                mpl::quote<get_table_id>,
+                mpl::bind<mpl::quote<std::is_same>, ETableType>
+            >
+        >,
+        List
+    > {};
+
+    /**
+     * @fn
+     * @brief 指定したETableTypeに合致するテーブル定義をテーブル定義リストから取得する
+     * @tparam ETableType 定義に該当する列挙型
+     * @tparam T テーブル定義リストかDB schema定義
+    */
+    template <mpl::Enumeration ETableType, class T> using get_table_def_t = get_table_def<ETableType, T>::type;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_DB_TABLE_HPP

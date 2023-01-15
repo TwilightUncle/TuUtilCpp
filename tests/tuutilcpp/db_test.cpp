@@ -250,4 +250,10 @@ TEST(TuutilcppDbTest, DbDefinitionTest)
     >;
     constexpr auto case8 = db::TableListDefinable<mpl::type_list<samples_def, samples2_same_name_def>>;
     EXPECT_FALSE(case8);    // samples_def‚ÆName‚ÉŽw’è‚µ‚½•¶Žš—ñ‚ª‚©‚Ô‚Á‚Ä‚¢‚é‚½‚ßNG
+
+    constexpr auto case9 = std::is_same_v<db::get_table_def_t<samples, mpl::type_list<samples_def, samples2_def>>, samples_def>;
+    constexpr auto case10 = std::is_same_v<db::get_table_def_t<samples2, mpl::type_list<samples_def, samples2_def>>, samples2_def>;
+
+    EXPECT_TRUE(case9);
+    EXPECT_TRUE(case10);
 }
