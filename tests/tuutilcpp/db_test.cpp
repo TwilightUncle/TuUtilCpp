@@ -149,6 +149,11 @@ TEST(TuutilcppDbTest, DbColumnTest)
         db::extract_constraints_t<mpl::type_list<column_na, column_ce>>,
         mpl::ignore_type
     >;
+    // 定義リストから特定の定義を取得する
+    constexpr auto case18 = std::is_same_v<db::get_column_def<samples::ID, column_definition_list>, column_id>;
+    constexpr auto case19 = std::is_same_v<db::get_column_def<samples::ID2, column_definition_list>, column_id2>;
+    constexpr auto case20 = std::is_same_v<db::get_column_def<samples::CREATE_AT, column_definition_list>, column_ce>;
+    constexpr auto case21 = std::is_same_v<db::get_column_def<samples2::ID, column_definition_list>, mpl::ignore_type>;
 
     EXPECT_TRUE(case1);
     EXPECT_TRUE(case2);
@@ -167,6 +172,10 @@ TEST(TuutilcppDbTest, DbColumnTest)
     EXPECT_FALSE(case15);
     EXPECT_TRUE(case16);
     EXPECT_TRUE(case17);
+    EXPECT_TRUE(case18);
+    EXPECT_TRUE(case19);
+    EXPECT_TRUE(case20);
+    EXPECT_TRUE(case21);
 }
 
 TEST(TuutilcppDbTest, DbDefinitionTest)
@@ -176,12 +185,69 @@ TEST(TuutilcppDbTest, DbDefinitionTest)
         "samples",
         mpl::type_list<
             db::define_column<samples::ID, "id", db::integer, db::pk>,
-            db::define_column<samples::NAME, "name", db::varchar<256>, db::fk<samples2::NAME>>,
+            db::define_column<samples::ID2, "id2", db::integer, db::fk<samples2::ID>>,
+            db::define_column<samples::NAME, "name", db::varchar<256>>,
             db::define_column<samples::CREATE_AT, "create_at", db::integer>
         >
     >;
 
-    EXPECT_STREQ(samples_def::get_column_info<samples::ID>().name.data(), "id");
-    EXPECT_STREQ(samples_def::get_column_info<samples::NAME>().name.data(), "name");
-    EXPECT_STREQ(samples_def::get_column_info<samples::CREATE_AT>().name.data(), "create_at");
+    // テーブルで指定したsample2と、カラムに指定した列挙体の型samplesが異なっているためコンパイルエラーを起こす
+    // using error_samples_def = db::define_table<
+    //     samples2,
+    //     "samples",
+    //     mpl::type_list<
+    //         db::define_column<samples::ID, "id", db::integer, db::pk>,
+    //         db::define_column<samples::NAME, "name", db::varchar<256>, db::fk<samples2::NAME>>
+    //     >
+    // >;
+
+    constexpr auto case1 = db::get_column_def<samples::ID, samples_def>::name.data();
+    constexpr auto case2 = db::get_column_def<samples::NAME, samples_def>::name.data();
+    constexpr auto case3 = db::get_column_def<samples::CREATE_AT, samples_def>::name.data();
+
+    EXPECT_STREQ(case1, "id");
+    EXPECT_STREQ(case2, "name");
+    EXPECT_STREQ(case3, "create_at");
+
+    using samples2_def = db::define_table<
+        samples2,
+        "samples2",
+        mpl::type_list<
+            db::define_column<samples2::ID, "id", db::integer, db::pk>,
+            db::define_column<samples2::NAME, "name", db::varchar<256>>,
+            db::define_column<samples2::CREATE_AT, "create_at", db::integer>
+        >
+    >;
+    constexpr auto case4 = db::TableListDefinable<mpl::type_list<samples_def, samples2_def>>;
+    EXPECT_TRUE(case4);
+    
+    constexpr auto case5 = db::TableListDefinable<mpl::type_list<samples_def, samples_def>>;
+    EXPECT_FALSE(case5);    // リスト内に重複している型があってはいけない
+
+    constexpr auto case6 = db::TableListDefinable<mpl::type_list<samples_def, int>>;
+    EXPECT_FALSE(case6); // リストにテーブル定義ではないものが含まれているためNG
+
+    using samples2_same_id_def = db::define_table<
+        samples,
+        "samples2",
+        mpl::type_list<
+            db::define_column<samples::ID, "id", db::integer, db::pk>,
+            db::define_column<samples::NAME, "name", db::varchar<256>>,
+            db::define_column<samples::CREATE_AT, "create_at", db::integer>
+        >
+    >;
+    constexpr auto case7 = db::TableListDefinable<mpl::type_list<samples_def, samples2_same_id_def>>;
+    EXPECT_FALSE(case7);    // samples_defとETableTypeへ指定した型がかぶっている
+
+    using samples2_same_name_def = db::define_table<
+        samples2,
+        "samples",
+        mpl::type_list<
+            db::define_column<samples2::ID, "id", db::integer, db::pk>,
+            db::define_column<samples2::NAME, "name", db::varchar<256>>,
+            db::define_column<samples2::CREATE_AT, "create_at", db::integer>
+        >
+    >;
+    constexpr auto case8 = db::TableListDefinable<mpl::type_list<samples_def, samples2_same_name_def>>;
+    EXPECT_FALSE(case8);    // samples_defとNameに指定した文字列がかぶっているためNG
 }

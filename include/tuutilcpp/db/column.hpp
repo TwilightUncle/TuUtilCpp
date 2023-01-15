@@ -66,7 +66,7 @@ namespace tuutil::db
      * @fn
      * @brief カラム定義からカラムIDを示す列挙体の値を取得
     */
-    template <class T> constexpr auto get_column_id_v = get_column_id<T>::value;
+    template <class T> constexpr auto get_column_id_v = get_column_id_t<T>::value;
 
     /**
      * @fn
@@ -121,7 +121,40 @@ namespace tuutil::db
         >
     > {};
 
+    /**
+     * @fn
+     * @brief カラムの定義リストから、各カラムに指定された制約情報を抽出する(一つもなければtype_list<ignore_type>が返る)
+    */
     template <ColumnListDefinable T> using extract_constraints_t = extract_constraints<T>::type;
+
+    /**
+     * @fn
+     * @brief 指定したColIDに合致するテーブル定義をテーブル定義リストから取得する
+     * @tparam ColID 定義に該当する列挙体
+     * @tparam T カラム定義リスト
+    */
+    template <mpl::Enumeration auto ColID, class T> struct get_column_definition;
+
+    // 直接定義リストをしていした場合の特殊化
+    template <mpl::Enumeration auto ColID, ColumnListDefinable T>
+    struct get_column_definition<ColID, T> : public mpl::find_if<
+        mpl::bind<
+            mpl::quote<mpl::flip>,
+            mpl::quote<mpl::relay>,
+            mpl::type_list<
+                mpl::quote<get_column_id>,
+                mpl::bind<mpl::quote<std::is_same>, mpl::value_constant<ColID>>
+            >
+        >,
+        T
+    > {};
+
+    /**
+     * @fn
+     * @brief 指定したColIDに合致するテーブル定義をテーブル定義リストから取得する
+    */
+    template <mpl::Enumeration auto ColID, class T>
+    using get_column_def = get_column_definition<ColID, T>::type;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_DB_COLUMN_HPP
