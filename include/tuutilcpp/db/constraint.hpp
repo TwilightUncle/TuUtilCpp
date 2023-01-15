@@ -23,10 +23,10 @@ namespace tuutil::db
      * @brief カラムIDリストとして正しい形式か検査
     */
     template <class ColIdList>
-    concept ColIdListSpecifiable = mpl::has_value_parameters_v<ColIdList>
-        && mpl::is_same_types_v<ColIdList>
-        && mpl::is_unique_v<ColIdList>
-        && mpl::Enumeration<mpl::get_front_t<ColIdList>>;
+    concept ColIdListSpecifiable = mpl::has_value_parameters_v<ColIdList>   // ColIdListは非型テンプレートパラメータパックを持つこと
+        && mpl::is_same_types_v<ColIdList>                                  // ColIdListのパラメータパック要素の型は全て同じであること
+        && mpl::is_unique_v<ColIdList>                                      // ColIdListのパラメータパックの値に重複があってはいけない
+        && mpl::Enumeration<mpl::get_front_t<ColIdList>>;                   // ColIdListの型は列挙体でなければいけない
 
     /**
      * @class
@@ -62,9 +62,9 @@ namespace tuutil::db
     */
     template <class... ColIdLists>
     concept ForeignKeyArgsSpecifiable = (sizeof...(ColIdLists) == 2)
-        && (ColIdListSpecifiable<ColIdLists> && ...)
-        && mpl::is_unique_v<mpl::concat_list_t<ColIdLists...>> // 二つのIDリストに一致するIDが含まれていてはならない
-        && (mpl::count_v<ColIdLists> == ...);
+        && (ColIdListSpecifiable<ColIdLists> && ...)            // ColIdListsはそれぞれでColIdListSpecifiableの制約を満たさなければ伊根内
+        && mpl::is_unique_v<mpl::concat_list_t<ColIdLists...>>  // 二つのIDリストに一致するIDが含まれていてはならない
+        && (mpl::count_v<ColIdLists> == ...);                   // 二つのIDリストが持つパラメータパックの数は等しくなければいけない
 
     /**
      * @class
@@ -119,10 +119,10 @@ namespace tuutil::db
      * @brief テーブルへの制約リストであること
     */
     template <class T>
-    concept ConstraintListDefinable = mpl::has_type_parameters_v<T>
-        && mpl::is_unique_v<T>
-        && mpl::apply_list_v<mpl::quote<std::conjunction>, mpl::map_t<mpl::quote<is_constraint_definition>, T>>
-        && mpl::count_if_v<mpl::quote<is_primary_key>, T> < 2; // 複数の主キーが一つのテーブルに存在してはいけない
+    concept ConstraintListDefinable = mpl::has_type_parameters_v<T>                                             // Tは型のパラメータパックを持つこと
+        && mpl::is_unique_v<T>                                                                                  // Tの持つパラメータパックに重複はあってはならない
+        && mpl::apply_list_v<mpl::quote<std::conjunction>, mpl::map_t<mpl::quote<is_constraint_definition>, T>> // Tの持つパラメータパック要素は全てconstraint_definitionでなければならない
+        && mpl::count_if_v<mpl::quote<is_primary_key>, T> < 2;                                                  // 複数の主キーが一つのテーブルに存在してはいけない
 
     /**
      * @fn
