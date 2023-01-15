@@ -150,10 +150,10 @@ TEST(TuutilcppDbTest, DbColumnTest)
         mpl::ignore_type
     >;
     // 定義リストから特定の定義を取得する
-    constexpr auto case18 = std::is_same_v<db::get_column_def<samples::ID, column_definition_list>, column_id>;
-    constexpr auto case19 = std::is_same_v<db::get_column_def<samples::ID2, column_definition_list>, column_id2>;
-    constexpr auto case20 = std::is_same_v<db::get_column_def<samples::CREATE_AT, column_definition_list>, column_ce>;
-    constexpr auto case21 = std::is_same_v<db::get_column_def<samples2::ID, column_definition_list>, mpl::ignore_type>;
+    constexpr auto case18 = std::is_same_v<db::get_column_def_t<samples::ID, column_definition_list>, column_id>;
+    constexpr auto case19 = std::is_same_v<db::get_column_def_t<samples::ID2, column_definition_list>, column_id2>;
+    constexpr auto case20 = std::is_same_v<db::get_column_def_t<samples::CREATE_AT, column_definition_list>, column_ce>;
+    constexpr auto case21 = std::is_same_v<db::get_column_def_t<samples2::ID, column_definition_list>, mpl::ignore_type>;
 
     EXPECT_TRUE(case1);
     EXPECT_TRUE(case2);
@@ -201,9 +201,9 @@ TEST(TuutilcppDbTest, DbDefinitionTest)
     //     >
     // >;
 
-    constexpr auto case1 = db::get_column_def<samples::ID, samples_def>::name.data();
-    constexpr auto case2 = db::get_column_def<samples::NAME, samples_def>::name.data();
-    constexpr auto case3 = db::get_column_def<samples::CREATE_AT, samples_def>::name.data();
+    constexpr auto case1 = db::get_column_def_t<samples::ID, samples_def>::name.data();
+    constexpr auto case2 = db::get_column_def_t<samples::NAME, samples_def>::name.data();
+    constexpr auto case3 = db::get_column_def_t<samples::CREATE_AT, samples_def>::name.data();
 
     EXPECT_STREQ(case1, "id");
     EXPECT_STREQ(case2, "name");

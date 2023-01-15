@@ -133,11 +133,11 @@ namespace tuutil::db
      * @tparam ColID 定義に該当する列挙体
      * @tparam T カラム定義リスト
     */
-    template <mpl::Enumeration auto ColID, class T> struct get_column_definition;
+    template <mpl::Enumeration auto ColID, class T> struct get_column_def;
 
     // 直接定義リストをしていした場合の特殊化
     template <mpl::Enumeration auto ColID, ColumnListDefinable T>
-    struct get_column_definition<ColID, T> : public mpl::find_if<
+    struct get_column_def<ColID, T> : public mpl::find_if<
         mpl::bind<
             mpl::quote<mpl::flip>,
             mpl::quote<mpl::relay>,
@@ -154,7 +154,7 @@ namespace tuutil::db
      * @brief 指定したColIDに合致するテーブル定義をテーブル定義リストから取得する
     */
     template <mpl::Enumeration auto ColID, class T>
-    using get_column_def = get_column_definition<ColID, T>::type;
+    using get_column_def_t = get_column_def<ColID, T>::type;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_DB_COLUMN_HPP

@@ -45,8 +45,8 @@ namespace tuutil::db
         ColumnListDefinable ColumnDefinitionList,
         ConstraintListDefinable ConstraintDefinitionList
     >
-    struct get_column_definition<ColID, define_table<ETableType, Name, ColumnDefinitionList, ConstraintDefinitionList>>
-        : public get_column_definition<ColID, ColumnDefinitionList> {};
+    struct get_column_def<ColID, define_table<ETableType, Name, ColumnDefinitionList, ConstraintDefinitionList>>
+        : public get_column_def<ColID, ColumnDefinitionList> {};
 
     /**
      * @fn
