@@ -28,10 +28,12 @@ namespace tuutil::db
                 extract_constraints_t<ColumnDefinitionList>
             >
         >
+        && std::is_same_v<typename mpl::get_front_t<ColumnDefinitionList>::id_type, ETableType>
         && validate_sql_identity<Name>()
     )
     struct define_table
     {
+        using id_type = ETableType;
         static constexpr auto name = Name;
     };
 

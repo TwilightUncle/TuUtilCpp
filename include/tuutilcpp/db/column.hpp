@@ -66,7 +66,7 @@ namespace tuutil::db
      * @fn
      * @brief カラム定義からカラムIDを示す列挙体の値を取得
     */
-    template <class T> constexpr auto get_column_id_v = get_column_id<T>::value;
+    template <class T> constexpr auto get_column_id_v = get_column_id_t<T>::value;
 
     /**
      * @fn

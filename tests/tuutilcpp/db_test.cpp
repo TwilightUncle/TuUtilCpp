@@ -190,6 +190,16 @@ TEST(TuutilcppDbTest, DbDefinitionTest)
         >
     >;
 
+    // テーブルで指定したsample2と、カラムに指定した列挙体の型が異なっているためコンパイルエラー
+    // using error_samples_def = db::define_table<
+    //     samples2,
+    //     "samples",
+    //     mpl::type_list<
+    //         db::define_column<samples::ID, "id", db::integer, db::pk>,
+    //         db::define_column<samples::NAME, "name", db::varchar<256>, db::fk<samples2::NAME>>
+    //     >
+    // >;
+
     constexpr auto case1 = db::get_column_def<samples::ID, samples_def>::name.data();
     constexpr auto case2 = db::get_column_def<samples::NAME, samples_def>::name.data();
     constexpr auto case3 = db::get_column_def<samples::CREATE_AT, samples_def>::name.data();
