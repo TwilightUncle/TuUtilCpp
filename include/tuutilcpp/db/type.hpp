@@ -7,32 +7,49 @@
 
 namespace tuutil::db
 {
-    template <std::size_t N> struct varchar : public std::string{};
+    /**
+     * @class
+     * @brief sqlの可変長文字列型
+    */
+    template <std::size_t N>
+    requires (N < 256)
+    struct varchar : public std::string {};
+
+    template <class T> struct is_varchar : public std::false_type {};
+    template <std::size_t N> struct is_varchar<varchar<N>> : public std::true_type {};
+    template <class T> constexpr auto is_varchar_v = is_varchar<T>::value;
+
+    /**
+     * @class
+     * @brief sqlの固定長文字列型
+    */
+    template <std::size_t N>
+    requires (N < 256)
+    struct character : public str::cstr<N + 1> {};
+
+    template <class T> struct is_character : public std::false_type {};
+    template <std::size_t N> struct is_character<character<N>> : public std::true_type {};
+    template <class T> constexpr auto is_character_v = is_character<T>::value;
+
+    /**
+     * @fn
+     * @brief sql文字列型のサイズを取得する
+    */
+    template <class T> struct get_sql_string_size;
+    template <template <std::size_t> class Str, std::size_t N>
+    struct get_sql_string_size<Str<N>> : public std::integral_constant<std::size_t, N> {};
+    template <class T> constexpr auto get_sql_string_size_v = get_sql_string_size<T>::value;
+
+    // 整数型のエイリアス
+    using bit = bool;
+    using tinyint = std::int8_t;
     using smallint = std::int16_t;
     using integer = std::int32_t;
     using bigint = std::int64_t;
-
-    // char(N)は組み込みそのままのため、ここでの定義は行わない
-
-    /// varchar(max)の場合に使用
-    /// (e.g. varchar<varchar_max>
-    constexpr std::size_t varchar_max = std::string{}.max_size();
-
-    /**
-     * @fn
-     * @brief 検査対象の型よりvarchar及び、char系配列のサイズを取得
-     * @param T 検査対象の型
-    */
-    template <class T> struct get_maxlength_t;
-    template <std::size_t N> struct get_maxlength_t<varchar<N>> { static constexpr auto size = N; };
-    template <std::size_t N, typename T> struct get_maxlength_t<T[N]> { static constexpr auto size = N; };
-
-    /**
-     * @fn
-     * @brief 検査対象の値よりvarchar及び、char計の配列のサイズを取得
-     * @param v 検査対象の値
-    */
-    template <class T> constexpr std::size_t get_maxlength(const T& v) { return get_maxlength_t<T>::size; }
+    using unsigned_tinyint = std::uint8_t;
+    using unsigned_smallint = std::uint16_t;
+    using unsigned_integer = std::uint32_t;
+    using unsigned_bigint = std::uint64_t;
 
     /**
      * @fn

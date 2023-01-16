@@ -12,6 +12,16 @@ enum class samples2 {
 
 TEST(TuutilcppDbTest, TypeTest)
 {
+    // constexpr auto case1 = db::get_type_name_string<db::bit>();
+    // constexpr auto case2 = db::get_type_name_string<db::unsigned_bigint>();
+    // constexpr auto case3 = db::get_type_name_string<db::varchar<0>>();
+    // constexpr auto case4 = db::get_type_name_string<db::character<255>>();
+
+    // EXPECT_STREQ(case1.data(), "bit");
+    // EXPECT_STREQ(case2.data(), "bigint unsigned");
+    // EXPECT_STREQ(case3.data(), "varchar(0)");
+    // EXPECT_STREQ(case4.data(), "char(255)");
+
     db::validate_sql_identity<"_">();
     db::validate_sql_identity<"abcZYX109_">();
     db::validate_sql_identity<"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_a">();
@@ -108,7 +118,7 @@ TEST(TuutilcppDbTest, DbColumnTest)
 {
     using column_id = db::define_column<samples::ID, "id", db::integer, db::pk>;
     using column_id2 = db::define_column<samples::ID2, "id2", db::integer, db::pk, db::fk<samples2::ID>>;
-    using column_na = db::define_column<samples::NAME, "name", db::varchar<256>>;
+    using column_na = db::define_column<samples::NAME, "name", db::varchar<255>>;
     using column_ce = db::define_column<samples::CREATE_AT, "create_at", db::integer>;
     using column_definition_list = mpl::type_list<column_id, column_id2, column_na, column_ce>;
 
@@ -186,7 +196,7 @@ TEST(TuutilcppDbTest, DbDefinitionTest)
         mpl::type_list<
             db::define_column<samples::ID, "id", db::integer, db::pk>,
             db::define_column<samples::ID2, "id2", db::integer, db::fk<samples2::ID>>,
-            db::define_column<samples::NAME, "name", db::varchar<256>>,
+            db::define_column<samples::NAME, "name", db::varchar<255>>,
             db::define_column<samples::CREATE_AT, "create_at", db::integer>
         >
     >;
@@ -214,7 +224,7 @@ TEST(TuutilcppDbTest, DbDefinitionTest)
         "samples2",
         mpl::type_list<
             db::define_column<samples2::ID, "id", db::integer, db::pk>,
-            db::define_column<samples2::NAME, "name", db::varchar<256>>,
+            db::define_column<samples2::NAME, "name", db::varchar<255>>,
             db::define_column<samples2::CREATE_AT, "create_at", db::integer>
         >
     >;
@@ -232,7 +242,7 @@ TEST(TuutilcppDbTest, DbDefinitionTest)
         "samples2",
         mpl::type_list<
             db::define_column<samples::ID, "id", db::integer, db::pk>,
-            db::define_column<samples::NAME, "name", db::varchar<256>>,
+            db::define_column<samples::NAME, "name", db::varchar<255>>,
             db::define_column<samples::CREATE_AT, "create_at", db::integer>
         >
     >;
@@ -244,7 +254,7 @@ TEST(TuutilcppDbTest, DbDefinitionTest)
         "samples",
         mpl::type_list<
             db::define_column<samples2::ID, "id", db::integer, db::pk>,
-            db::define_column<samples2::NAME, "name", db::varchar<256>>,
+            db::define_column<samples2::NAME, "name", db::varchar<255>>,
             db::define_column<samples2::CREATE_AT, "create_at", db::integer>
         >
     >;
