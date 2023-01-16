@@ -29,6 +29,7 @@ namespace tuutil::db
             >
         >
         && std::is_same_v<typename mpl::get_front_t<ColumnDefinitionList>::id_type, ETableType>
+        && !mpl::exists_if_v<mpl::quote<is_auto_increment>, ConstraintDefinitionList>               // 直接auto_incrementを指定してはいけない
         && validate_sql_identity<Name>()
     )
     struct define_table
@@ -84,7 +85,7 @@ namespace tuutil::db
      * @brief テーブル定義からテーブルを識別する列挙型を取得する
     */
     template <TableDefinable T>
-    struct get_table_id : public std::type_identity<typename T::id_type> {};
+    struct get_table_id<T> : public std::type_identity<typename T::id_type> {};
     
     /**
      * @fn

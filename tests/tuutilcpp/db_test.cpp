@@ -100,27 +100,45 @@ TEST(TuutilcppDbTest, ConstraintTest)
             db::foreign_key<mpl::value_list<samples::ID, samples::ID2>, mpl::value_list<samples2::ID, samples2::ID2>>
         >
     >;
+    constexpr auto case18 = db::ConstraintListDefinable<
+        mpl::type_list<
+            db::auto_increment<samples::ID>,
+            db::auto_increment<samples::ID2>, // 複数のauto_incrementがあってはいけない
+            db::foreign_key<mpl::value_list<samples::ID, samples::ID2>, mpl::value_list<samples2::ID, samples2::ID2>>
+        >
+    >;
+    constexpr auto case19 = db::ConstraintListDefinable<
+        mpl::type_list<
+            db::auto_increment<samples::ID>,    // 制約で指定しているColIDの型が統一されていないためNG
+            db::primary_key<samples2::ID, samples2::ID2>
+        >
+    >;
 
     EXPECT_TRUE(case13);
     EXPECT_TRUE(case14);
     EXPECT_FALSE(case15);
     EXPECT_FALSE(case16);
     EXPECT_FALSE(case17);
+    EXPECT_FALSE(case18);
+    EXPECT_FALSE(case19);
 
-    constexpr auto case18 = std::is_same_v<db::to_table_constraint_t<db::pk, samples::ID>, db::primary_key<samples::ID>>;
-    constexpr auto case19 = std::is_same_v<db::to_table_constraint_t<db::fk<samples2::ID>, samples::ID>, db::foreign_key<mpl::value_list<samples::ID>, mpl::value_list<samples2::ID>>>;
+    constexpr auto case20 = std::is_same_v<db::to_table_constraint_t<db::pk, samples::ID>, db::primary_key<samples::ID>>;
+    constexpr auto case21 = std::is_same_v<db::to_table_constraint_t<db::fk<samples2::ID>, samples::ID>, db::foreign_key<mpl::value_list<samples::ID>, mpl::value_list<samples2::ID>>>;
 
-    EXPECT_TRUE(case18);
-    EXPECT_TRUE(case19);
+    EXPECT_TRUE(case20);
+    EXPECT_TRUE(case21);
 }
 
 TEST(TuutilcppDbTest, DbColumnTest)
 {
-    using column_id = db::define_column<samples::ID, "id", db::integer, db::pk>;
+    using column_id = db::define_column<samples::ID, "id", db::integer, db::pk, db::ai, db::not_null>;
     using column_id2 = db::define_column<samples::ID2, "id2", db::integer, db::pk, db::fk<samples2::ID>>;
     using column_na = db::define_column<samples::NAME, "name", db::varchar<255>>;
     using column_ce = db::define_column<samples::CREATE_AT, "create_at", db::integer>;
     using column_definition_list = mpl::type_list<column_id, column_id2, column_na, column_ce>;
+
+    // 整数以外にaiを指定しているのでコンパイルエラー
+    // using bad_column_id = db::define_column<samples::ID, "id", db::varchar<255>, db::pk, db::ai>;
 
     // カラムであることの制約のテスト(is_column_definitionも兼ねる)
     constexpr auto case1 = db::ColumnDefinable<column_id>;
@@ -129,7 +147,10 @@ TEST(TuutilcppDbTest, DbColumnTest)
     constexpr auto case4 = db::ColumnDefinable<std::string>;
     // get_constraint_listのテスト
     constexpr auto case5 = std::is_same_v<db::get_constraint_list_t<int>, db::constraint_unspecified>; // define_column以外
-    constexpr auto case6 = std::is_same_v<db::get_constraint_list_t<column_id>, mpl::type_list<db::primary_key<samples::ID>>>; // 制約を指定されたカラム
+    constexpr auto case6 = std::is_same_v<
+        db::get_constraint_list_t<column_id>,
+        mpl::type_list<db::primary_key<samples::ID>, db::auto_increment<samples::ID>, db::table_constraint>
+    >; // 制約を指定されたカラム
     constexpr auto case7 = std::is_same_v<
         db::get_constraint_list_t<column_id2>,
         mpl::type_list<
@@ -151,6 +172,7 @@ TEST(TuutilcppDbTest, DbColumnTest)
         db::extract_constraints_t<column_definition_list>,
         mpl::type_list<
             db::primary_key<samples::ID>,
+            db::auto_increment<samples::ID>,
             db::primary_key<samples::ID2>,
             db::foreign_key<mpl::value_list<samples::ID2>, mpl::value_list<samples2::ID>>
         >
@@ -188,7 +210,7 @@ TEST(TuutilcppDbTest, DbColumnTest)
     EXPECT_TRUE(case21);
 }
 
-TEST(TuutilcppDbTest, DbDefinitionTest)
+TEST(TuutilcppDbTest, DbTableTest)
 {
     using samples_def = db::define_table<
         samples,
@@ -198,6 +220,9 @@ TEST(TuutilcppDbTest, DbDefinitionTest)
             db::define_column<samples::ID2, "id2", db::integer, db::fk<samples2::ID>>,
             db::define_column<samples::NAME, "name", db::varchar<255>>,
             db::define_column<samples::CREATE_AT, "create_at", db::integer>
+        >,
+        mpl::type_list<
+            db::unique<samples::ID2, samples::NAME>
         >
     >;
 
@@ -207,7 +232,20 @@ TEST(TuutilcppDbTest, DbDefinitionTest)
     //     "samples",
     //     mpl::type_list<
     //         db::define_column<samples::ID, "id", db::integer, db::pk>,
-    //         db::define_column<samples::NAME, "name", db::varchar<256>, db::fk<samples2::NAME>>
+    //         db::define_column<samples::NAME, "name", db::varchar<255>, db::fk<samples2::NAME>>
+    //     >
+    // >;
+
+    // テーブル制約として直接auto_incrimentを指定してはならない
+    // using error_samples_def2 = db::define_table<
+    //     samples,
+    //     "samples",
+    //     mpl::type_list<
+    //         db::define_column<samples::ID, "id", db::integer, db::pk>,
+    //         db::define_column<samples::NAME, "name", db::varchar<255>, db::fk<samples2::NAME>>
+    //     >,
+    //     mpl::type_list<
+    //         db::auto_increment<samples::ID>
     //     >
     // >;
 

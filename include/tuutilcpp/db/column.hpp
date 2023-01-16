@@ -21,13 +21,23 @@ namespace tuutil::db
         class FieldType,
         ColumnConstraintDefinable... Constraints
     >
-    requires (validate_sql_identity<Name>())
+    requires (
+        (std::is_integral_v<FieldType> || !mpl::exists_v<ai, mpl::type_list<Constraints...>>) // auto incrimentについての制約(設定されている場合、フィールド型は整数でなければならない)
+        && validate_sql_identity<Name>()
+    )
     struct define_column
     {
+        // テーブル情報
         static constexpr auto name = Name;
         static constexpr auto id = ColID;
         using id_type = decltype(ColID);
         using field_type = FieldType;
+
+        // 制約のフラグ
+        static constexpr auto is_auto_incriment = mpl::exists_v<ai, mpl::type_list<Constraints...>>;
+        static constexpr auto is_not_null = mpl::exists_v<not_null, mpl::type_list<Constraints...>>;
+        
+        // テーブルとしても参照が必要な制約リスト
         using constraint_list = std::conditional_t<
             (sizeof...(Constraints) > 0),
             mpl::type_list<to_table_constraint_t<Constraints, ColID>...>,

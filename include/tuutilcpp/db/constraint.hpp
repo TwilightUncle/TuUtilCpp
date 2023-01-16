@@ -35,7 +35,10 @@ namespace tuutil::db
     */
     template <mpl::Enumeration auto... ColIds>
     requires (ColIdListSpecifiable<mpl::value_list<ColIds...>>)
-    struct primary_key : public table_constraint {};
+    struct primary_key : public table_constraint
+    {
+        using id_type = mpl::get_front_t<mpl::value_list<ColIds...>>;
+    };
 
     /**
      * @fn
@@ -74,7 +77,10 @@ namespace tuutil::db
     */
     template <class ColIdList, class RefColIdList>
     requires ForeignKeyArgsSpecifiable<ColIdList, RefColIdList>
-    struct foreign_key : public table_constraint {};
+    struct foreign_key : public table_constraint
+    {
+        using id_type = mpl::get_front_t<ColIdList>;
+    };
 
     /**
      * @fn
@@ -98,6 +104,61 @@ namespace tuutil::db
     template <mpl::Enumeration auto RefColId> struct fk : public column_constraint {};
 
     /**
+     * @class
+     * @brief テーブルに一意性制約を指定する
+     * @tparam ColIds 一意性を持たせたい列の組
+    */
+    template <mpl::Enumeration auto... ColIds>
+    requires (ColIdListSpecifiable<mpl::value_list<ColIds...>>)
+    struct unique : public table_constraint
+    {
+        using id_type = mpl::get_front_t<mpl::value_list<ColIds...>>;
+    };
+
+    /**
+     * @fn
+     * @brief 一意性制約か判定
+    */
+    template <class T> struct is_unique : public std::false_type {};
+    template <mpl::Enumeration auto... ColIds> struct is_unique<unique<ColIds...>> : public std::true_type {};
+
+    /**
+     * @class
+     * @brief カラムに一意性制約を指定する
+    */
+    struct uni : public column_constraint {};
+
+    /**
+     * @class
+     * @brief 自動採番。集計目的のため、これを直接テーブルに指定してはいけない
+    */
+    template <mpl::Enumeration auto ColId>
+    struct auto_increment : public table_constraint
+    {
+        using id_type = decltype(ColId);
+    };
+
+    /**
+     * @class
+     * @brief カラムに自動採番を設定する
+    */
+    struct ai : public column_constraint {};
+
+    /**
+     * @fn
+     * @brief 自動採番か判定
+    */
+    template <class T> struct is_auto_increment : public std::false_type {};
+    template <mpl::Enumeration auto ColId>
+    struct is_auto_increment<auto_increment<ColId>> : public std::true_type {};
+
+    /**
+     * @class
+     * @brief NOT NULL制約
+    */
+    struct not_null : public column_constraint {};
+
+    /**
      * @brief カラムへ指定可能な制約のコンセプト
     */
     template <class T>
@@ -116,21 +177,37 @@ namespace tuutil::db
     concept ConstraintDefinable = is_constraint_definition<T>::value;
 
     /**
+     * @fn
+     * @brief テーブルの識別子型を取得する
+    */
+    template <class T> struct get_table_id;
+    template <ConstraintDefinable T>
+    struct get_table_id<T> : public std::type_identity<typename T::id_type> {};
+
+    /**
      * @brief テーブルへの制約リストであること
     */
     template <class T>
     concept ConstraintListDefinable = mpl::has_type_parameters_v<T>                                             // Tは型のパラメータパックを持つこと
         && mpl::is_unique_v<T>                                                                                  // Tの持つパラメータパックに重複はあってはならない
         && mpl::apply_list_v<mpl::quote<std::conjunction>, mpl::map_t<mpl::quote<is_constraint_definition>, T>> // Tの持つパラメータパック要素は全てconstraint_definitionでなければならない
-        && mpl::count_if_v<mpl::quote<is_primary_key>, T> < 2;                                                  // 複数の主キーが一つのテーブルに存在してはいけない
+        && mpl::is_same_types_v<
+            mpl::map_t<
+                mpl::quote<get_table_id>,
+                mpl::remove_if_t<mpl::bind<mpl::quote<std::is_same>, table_constraint>, T>
+            >>                                                                                                  // Tが持つパラメータパック要素のメンバid_typeは全て同じ型であること(基底型を除く)
+        && mpl::count_if_v<mpl::quote<is_primary_key>, T> < 2                                                   // 複数の主キーが一つのテーブルに存在してはいけない
+        && mpl::count_if_v<mpl::quote<is_auto_increment>, T> < 2;                                               // 複数の自動採番列が一つのテーブルに存在してはいけない
 
     /**
      * @fn
      * @brief カラム定義用から通常のテーブル定義用に制約を変換する
      * @tparam Constraint カラムに指定している制約
      * @tparam ColId Constraintを指定している対象のカラムID
+     * @details カラムのみで特にテーブルに指定するものではない場合、デフォルトでtable_constraintを返す
     */
-    template <ColumnConstraintDefinable Constraint, mpl::Enumeration auto ColId> struct to_table_constraint;
+    template <ColumnConstraintDefinable Constraint, mpl::Enumeration auto ColId>
+    struct to_table_constraint : public std::type_identity<table_constraint> {};
 
     // 各制約に対する特殊化
     template <mpl::Enumeration auto ColId>
@@ -138,6 +215,10 @@ namespace tuutil::db
     template <mpl::Enumeration auto ColId, mpl::Enumeration auto ColId2>
     struct to_table_constraint<fk<ColId2>, ColId>
         : public std::type_identity<foreign_key<mpl::value_list<ColId>, mpl::value_list<ColId2>>> {};
+    template <mpl::Enumeration auto ColId>
+    struct to_table_constraint<uni, ColId> : public std::type_identity<unique<ColId>> {};
+    template <mpl::Enumeration auto ColId>
+    struct to_table_constraint<ai, ColId> : public std::type_identity<auto_increment<ColId>> {};
 
     /**
      * @fn
