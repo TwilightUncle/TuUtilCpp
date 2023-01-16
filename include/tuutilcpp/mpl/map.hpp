@@ -16,6 +16,8 @@ namespace tuutil::mpl
     template <MetaCallable F, class TypeList> struct map;
     template <MetaCallable F, template <class...> class List, class... Parameters>
     struct map<F, List<Parameters...>> : public std::type_identity<List<apply_t<F, Parameters>...>> {};
+    template <MetaCallable F>
+    struct map<F, ignore_type> : public std::type_identity<ignore_type> {};
 
     /**
      * @fn
