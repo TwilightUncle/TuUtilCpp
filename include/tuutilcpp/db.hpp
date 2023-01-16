@@ -12,5 +12,7 @@
 #include <tuutilcpp/db/constraint.hpp>
 #include <tuutilcpp/db/column.hpp>
 #include <tuutilcpp/db/table.hpp>
+#include <tuutilcpp/db/schema.hpp>
+#include <tuutilcpp/db/query/sqlite.hpp>
 
 #endif // TUUTILCPP_INCLUDE_GUARD_DB_HPP

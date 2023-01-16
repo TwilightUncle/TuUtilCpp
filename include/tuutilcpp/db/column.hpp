@@ -34,8 +34,8 @@ namespace tuutil::db
         using field_type = FieldType;
 
         // 制約のフラグ
-        static constexpr auto is_auto_incriment = mpl::exists_v<ai, mpl::type_list<Constraints...>>;
-        static constexpr auto is_not_null = mpl::exists_v<not_null, mpl::type_list<Constraints...>>;
+        static constexpr auto auto_incriment = mpl::exists_v<ai, mpl::type_list<Constraints...>>;
+        static constexpr auto not_null = mpl::exists_v<db::not_null, mpl::type_list<Constraints...>>;
         
         // テーブルとしても参照が必要な制約リスト
         using constraint_list = std::conditional_t<

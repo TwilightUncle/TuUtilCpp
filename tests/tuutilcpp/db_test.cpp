@@ -12,16 +12,6 @@ enum class samples2 {
 
 TEST(TuutilcppDbTest, TypeTest)
 {
-    // constexpr auto case1 = db::get_type_name_string<db::bit>();
-    // constexpr auto case2 = db::get_type_name_string<db::unsigned_bigint>();
-    // constexpr auto case3 = db::get_type_name_string<db::varchar<0>>();
-    // constexpr auto case4 = db::get_type_name_string<db::character<255>>();
-
-    // EXPECT_STREQ(case1.data(), "bit");
-    // EXPECT_STREQ(case2.data(), "bigint unsigned");
-    // EXPECT_STREQ(case3.data(), "varchar(0)");
-    // EXPECT_STREQ(case4.data(), "char(255)");
-
     db::validate_sql_identity<"_">();
     db::validate_sql_identity<"abcZYX109_">();
     db::validate_sql_identity<"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_a">();
@@ -304,4 +294,26 @@ TEST(TuutilcppDbTest, DbTableTest)
 
     EXPECT_TRUE(case9);
     EXPECT_TRUE(case10);
+}
+
+TEST(TuutilcppDbTest, SqliteQueryTest)
+{
+    using sqlite_query = db::query::sqlite;
+    constexpr auto case1 = sqlite_query::get_type_name_string<db::bit>();
+    constexpr auto case2 = sqlite_query::get_type_name_string<db::unsigned_bigint>();
+    constexpr auto case3 = sqlite_query::get_type_name_string<db::varchar<0>>();
+    constexpr auto case4 = sqlite_query::get_type_name_string<db::character<255>>();
+
+    EXPECT_STREQ(case1.data(), "bit");
+    EXPECT_STREQ(case2.data(), "bigint unsigned");
+    EXPECT_STREQ(case3.data(), "varchar(0)");
+    EXPECT_STREQ(case4.data(), "char(255)");
+
+    using column_id = db::define_column<samples::ID, "id", db::integer, db::pk, db::ai, db::not_null>;
+    using column_na = db::define_column<samples::NAME, "name", db::varchar<255>>;
+    constexpr auto case5 = sqlite_query::get_column_define_string<column_id>();
+    constexpr auto case6 = sqlite_query::get_column_define_string<column_na>();
+
+    EXPECT_STREQ(case5.data(), "\"id\" int autoincrement not null ");
+    EXPECT_STREQ(case6.data(), "\"name\" varchar(255) ");
 }
