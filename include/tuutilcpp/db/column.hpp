@@ -117,7 +117,7 @@ namespace tuutil::db
         mpl::type_list<
             mpl::bind<mpl::quote<mpl::map>, mpl::quote<get_constraint_list>>,
             mpl::bind<mpl::quote<mpl::apply_list>, mpl::quote<mpl::concat_list>>,
-            mpl::bind<mpl::quote<mpl::remove_if>, mpl::bind<mpl::quote<std::is_same>, constraint>>
+            mpl::bind<mpl::quote<mpl::remove_if>, mpl::bind<mpl::quote<std::is_same>, table_constraint>>
         >
     > {};
 

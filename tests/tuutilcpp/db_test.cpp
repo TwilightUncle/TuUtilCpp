@@ -61,7 +61,7 @@ TEST(TuutilcppDbTest, ConstraintTest)
 
     constexpr auto case13 = db::ConstraintListDefinable<
         mpl::type_list<
-            db::constraint,
+            db::table_constraint,
             db::primary_key<samples::ID, samples::ID2>,
             db::foreign_key<mpl::value_list<samples::ID, samples::ID2>, mpl::value_list<samples2::ID, samples2::ID2>>
         >

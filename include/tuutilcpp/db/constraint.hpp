@@ -11,13 +11,13 @@ namespace tuutil::db
      * @class
      * @brief テーブルの制約として指定可能な型の基底。ただし、直接これを指定しても無視される
     */
-    struct constraint {};
+    struct table_constraint {};
 
     /**
      * @class
      * @brief カラムの制約として指定可能な型の基底。ただし、直接、これを指定しても無視される
     */
-    struct constraint_c {};
+    struct column_constraint {};
 
     /**
      * @brief カラムIDリストとして正しい形式か検査
@@ -35,7 +35,7 @@ namespace tuutil::db
     */
     template <mpl::Enumeration auto... ColIds>
     requires (ColIdListSpecifiable<mpl::value_list<ColIds...>>)
-    struct primary_key : public constraint {};
+    struct primary_key : public table_constraint {};
 
     /**
      * @fn
@@ -55,7 +55,7 @@ namespace tuutil::db
      * @class
      * @brief カラムに主キー制約を指定する
     */
-    struct pk : public constraint_c {};
+    struct pk : public column_constraint {};
 
     /**
      * @brief 外部キー制約の正しい引数か検査
@@ -74,7 +74,7 @@ namespace tuutil::db
     */
     template <class ColIdList, class RefColIdList>
     requires ForeignKeyArgsSpecifiable<ColIdList, RefColIdList>
-    struct foreign_key : public constraint {};
+    struct foreign_key : public table_constraint {};
 
     /**
      * @fn
@@ -95,19 +95,19 @@ namespace tuutil::db
      * @brief カラムに外部キー制約を指定する
      * @tparam RefColId 参照先のカラムID
     */
-    template <mpl::Enumeration auto RefColId> struct fk : public constraint_c {};
+    template <mpl::Enumeration auto RefColId> struct fk : public column_constraint {};
 
     /**
      * @brief カラムへ指定可能な制約のコンセプト
     */
     template <class T>
-    concept ColumnConstraintDefinable = std::is_base_of_v<constraint_c, T> && !std::is_same_v<constraint_c, T>;
+    concept ColumnConstraintDefinable = std::is_base_of_v<column_constraint, T> && !std::is_same_v<column_constraint, T>;
 
     /**
      * @fn
      * @brief テーブルの制約か判定
     */
-    template <class T> using is_constraint_definition = std::is_base_of<constraint, T>;
+    template <class T> using is_constraint_definition = std::is_base_of<table_constraint, T>;
 
     /**
      * @brief テーブルの制約であること
@@ -151,7 +151,7 @@ namespace tuutil::db
     /**
      * テーブルとして制約を未指定であること
     */
-    using constraint_unspecified = mpl::type_list<constraint>;
+    using constraint_unspecified = mpl::type_list<table_constraint>;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_DB_CONSTRAINT_HPP
