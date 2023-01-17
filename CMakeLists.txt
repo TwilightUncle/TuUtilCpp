@@ -19,6 +19,9 @@ set(TUUTILCPP_TESTS
 source_group(tests FILES ${TUUTILCPP_TESTS})
 
 if (TUUTILCPP_BUILD_TESTS)
+    #sqliteを探す
+    find_package(unofficial-sqlite3 CONFIG REQUIRED)
+
     # GoogleTestをダウンロード
     include(FetchContent)
         FetchContent_Declare(
@@ -43,7 +46,7 @@ if (TUUTILCPP_BUILD_TESTS)
     # big_intの定数式評価ステップ数がデフォルトでは足りない(vc++ではそうであった)
     target_compile_options(TuUtilCppTest PRIVATE $<$<CXX_COMPILER_ID:MSVC>: /constexpr:steps1500000>)
     target_include_directories(TuUtilCppTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
-    target_link_libraries(TuUtilCppTest PRIVATE gtest_main)
+    target_link_libraries(TuUtilCppTest PRIVATE gtest_main unofficial::sqlite3::sqlite3)
     target_compile_features(TuUtilCppTest PRIVATE cxx_std_20)
     add_test(NAME TuUtilCppTest COMMAND TuUtilCppTest)
 
