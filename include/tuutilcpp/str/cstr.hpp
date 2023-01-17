@@ -258,19 +258,26 @@ namespace tuutil::str
         return res;
     }
 
-    /**
-     * @fn
-     * @brief 演算子オーバーロード
-    */
     template <std::size_t N1, std::size_t N2>
     constexpr bool operator==(const cstr<N1>& s1, const cstr<N2>& s2) { return s1.view() == s2.view(); }
 
-    /**
-     * @fn
-     * @brief 演算子オーバーロード
-    */
     template <std::size_t N1, std::size_t N2>
     constexpr std::strong_ordering operator<=>(const cstr<N1>& s1, const cstr<N2>& s2) { return s1.view() <=> s2.view(); }
+
+    template <std::size_t N1, std::size_t N2>
+    constexpr auto operator+(const cstr<N1>& s1, const cstr<N2>& s2) { return concat(s1, s2); }
+
+    template <std::size_t N1, std::size_t N2>
+    constexpr auto operator+(const char (&s1)[N1], const cstr<N2>& s2) { return cstr<N1>{s1} + s2; }
+
+    template <std::size_t N1, std::size_t N2>
+    constexpr auto operator+(const cstr<N1>& s1, const char (&s2)[N2]) { return s1 + cstr<N2>{s2}; }
+
+    template <std::size_t N>
+    constexpr auto operator+(const char c, const cstr<N>& s) { return char_to_cstr(c) + s; }
+
+    template <std::size_t N>
+    constexpr auto operator+(const cstr<N>& s, const char c) { return s + char_to_cstr(c); }
 
     /**
      * @fn
@@ -294,16 +301,16 @@ namespace tuutil::str
 
         // 進数リテラルの接頭子を付与
         if constexpr (UsePrefix) {
-            if constexpr (Hex == 2) return concat(cstr{"0b"}, s);
-            else if constexpr (Hex == 8) return concat(cstr{"0"}, s);
-            else if constexpr (Hex == 16) return concat(cstr{"0x"}, s);
+            if constexpr (Hex == 2) return "0b" + s;
+            else if constexpr (Hex == 8) return "0" + s;
+            else if constexpr (Hex == 16) return "0x" + s;
             else return s;
         }
         else return s;
     }
     // 負数の場合
     template <std::integral auto V, std::size_t Hex = 10, bool UsePrefix = false>
-    constexpr auto to_string() { return concat(cstr{"-"}, to_string<-V, Hex, UsePrefix>()); }
+    constexpr auto to_string() { return "-" + to_string<-V, Hex, UsePrefix>(); }
 
     /**
      * @fn

@@ -19,16 +19,16 @@ namespace tuutil::str::_regex
         static constexpr auto others            = cstr{"-!\"#$%&'()=^~|`@{}+;*:,<.>/?\b\\"};
         static constexpr auto bk_others         = cstr{"b0[]\\"};
 
-        static constexpr auto true_words        = concat(digits, words);
-        static constexpr auto true_space        = concat(space, strends);
-        static constexpr auto bk_true_space     = concat(bk_space, bk_strends);
-        static constexpr auto dot               = concat(digits, words, space, others);
-        static constexpr auto bk_dot            = concat(bk_space, bk_others);
-        static constexpr auto anti_digits       = concat(words, space, strends, others);
-        static constexpr auto bk_anti_digits    = concat(bk_space, bk_strends, bk_others);
-        static constexpr auto anti_words        = concat(space, strends, others);
-        static constexpr auto bk_anti_words     = concat(bk_space, bk_others, bk_others);
-        static constexpr auto anti_space        = concat(digits, words, others);
+        static constexpr auto true_words        = digits + words;
+        static constexpr auto true_space        = space + strends;
+        static constexpr auto bk_true_space     = bk_space + bk_strends;
+        static constexpr auto dot               = digits + words + space + others;
+        static constexpr auto bk_dot            = bk_space + bk_others;
+        static constexpr auto anti_digits       = words + space + strends + others;
+        static constexpr auto bk_anti_digits    = bk_space + bk_strends + bk_others;
+        static constexpr auto anti_words        = space + strends + others;
+        static constexpr auto bk_anti_words     = bk_space + bk_others + bk_others;
+        static constexpr auto anti_space        = digits + words + others;
 
     public:
         // “Áê•¶š‚ÉŠY“–‚·‚é•¶šW‡‚ğæ“¾‚·‚é

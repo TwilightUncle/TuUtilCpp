@@ -26,9 +26,9 @@ namespace tuutil::db::query
             else if constexpr (std::is_same_v<T, unsigned_integer>)     return str::cstr{"int unsigned"};
             else if constexpr (std::is_same_v<T, unsigned_bigint>)      return str::cstr{"bigint unsigned"};
             else if constexpr (is_varchar_v<T>)
-                return str::concat(str::cstr{"varchar("}, str::to_string<get_sql_string_size_v<T>>(), str::cstr{")"});
+                return "varchar(" + str::to_string<get_sql_string_size_v<T>>() + ')';
             else if constexpr (is_character_v<T>)
-                return str::concat(str::cstr{"char("}, str::to_string<get_sql_string_size_v<T>>(), str::cstr{")"});
+                return "char(" + str::to_string<get_sql_string_size_v<T>>() + ')';
             else return str::cstr{""};
         }
 
@@ -53,12 +53,10 @@ namespace tuutil::db::query
         template <ColumnDefinable ColumnDefinition>
         static constexpr auto get_column_define_string()
         {
-            return str::concat(
-                str::cstr{"\""}, ColumnDefinition::name, str::cstr{"\" "},
-                get_type_name_string<typename ColumnDefinition::field_type>(), str::cstr{" "},
-                get_auto_increment_string<ColumnDefinition::auto_incriment>(),
-                get_not_null_string<ColumnDefinition::not_null>()
-            );
+            return '"' + ColumnDefinition::name + "\" "
+                + get_type_name_string<typename ColumnDefinition::field_type>() + ' '
+                + get_auto_increment_string<ColumnDefinition::auto_incriment>()
+                + get_not_null_string<ColumnDefinition::not_null>();
         }
 
     };

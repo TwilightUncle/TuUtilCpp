@@ -64,6 +64,16 @@ TEST(TuutilcppStrTest, CstrOperatorTest)
     ASSERT_TRUE(case3);
     ASSERT_TRUE(case4);
     ASSERT_FALSE(case5);
+
+    constexpr auto case6 = cstr{"abc"} + cstr{"def"};
+    constexpr auto case7 = case6 + cstr{"ghi"} + cstr{"jkl"};
+    constexpr auto case8 = "abc" + cstr{"def"} + "ghi";
+    constexpr auto case9 = 'a' + cstr{"bcd"} + 'e';
+
+    ASSERT_STREQ(case6.data(), "abcdef");
+    ASSERT_STREQ(case7.data(), "abcdefghijkl");
+    ASSERT_STREQ(case8.data(), "abcdefghi");
+    ASSERT_STREQ(case9.data(), "abcde");
 }
 
 TEST(TuutilcppStrTest, CstrIntegralToStringTest)
