@@ -133,7 +133,8 @@ int main()
 ```
 
 ## テストのビルドコマンド
-CMakeをインストールし、パスを通しておくこと。  
+CMakeをインストールし、パスを通しておくこと。 
+また、vcpkgもインストール済みであること。  
 MSVC以外のコンパイラを利用する場合、CMakeLists.txtの修正が必要かも。
 ```sh
 # 各自のソース展開先ディレクトリへ移動
@@ -144,7 +145,7 @@ mkdir build
 cd build
 
 # プロジェクトファイルの作成(初回のみ)
-cmake -DTUUTILCPP_BUILD_TESTS=ON ..
+cmake -DTUUTILCPP_BUILD_TESTS=ON -DCMAKE_TOOLCHAIN_FILE=path\to\vcpkg\scripts\buildsystems\vcpkg.cmake ..
 
 # テストソースをビルド
 cmake --build .
