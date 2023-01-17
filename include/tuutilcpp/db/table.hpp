@@ -36,6 +36,7 @@ namespace tuutil::db
     {
         using id_type = ETableType;
         static constexpr auto name = Name;
+        using column_list = ColumnDefinitionList;
         using constraint_list = mpl::concat_list_t<
             ConstraintDefinitionList,
             extract_constraints_t<ColumnDefinitionList>
