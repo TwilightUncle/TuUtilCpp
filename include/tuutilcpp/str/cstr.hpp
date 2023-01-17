@@ -300,6 +300,24 @@ namespace tuutil::str
 
     /**
      * @fn
+     * @brief パラメータパックの固定長文字列を、区切り文字列を挟んで一つの文字へと結合する
+     * @tparam Separator 区切り文字列
+     * @tparam List 固定長文字列のパラメータパックを持つ型
+    */
+    template <cstr Separator, class List> struct cstrs_join;
+    template <cstr Separator, template <cstr...> class List, cstr... Strs>
+    struct cstrs_join<Separator, List<Strs...>> : public mpl::value_constant<join(Separator, Strs...)> {};
+
+    /**
+     * @fn
+     * @brief パラメータパックの固定長文字列を、区切り文字列を挟んで一つの文字へと結合する
+     * @tparam Separator 区切り文字列
+     * @tparam Strs 固定長文字列のパラメータパック
+    */
+    template <cstr Separator, class List> constexpr auto cstrs_join_v = cstrs_join<Separator, List>::value;
+
+    /**
+     * @fn
      * @brief テンプレート引数で渡した整数値をcstrに変換する。進数を渡すことで、(2,8,16)進数リテラルのような文字列に変換する
     */
     template <auto V, int Hex = 10, bool UsePrefix = false>
