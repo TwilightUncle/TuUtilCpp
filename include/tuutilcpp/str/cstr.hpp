@@ -281,6 +281,25 @@ namespace tuutil::str
 
     /**
      * @fn
+     * @brief パラメータパックの固定長文字列を、区切り文字列を挟んで一つの文字へと結合する
+     * @param separator 区切り文字列
+     * @param head パラメータパックの先頭文字列(特にstr特別する必要はない)
+     * @param strs 固定長文字列のパラメータパック
+    */
+    template <std::size_t SepN, std::size_t HeadN, std::size_t... Sizes>
+    constexpr auto join(const cstr<SepN>& separator, const cstr<HeadN>& head, const cstr<Sizes>&... strs)
+    {
+        return head + ((separator + strs) + ...);
+    }
+
+    template <std::size_t SepN, std::size_t... Sizes>
+    constexpr auto join(const char (&separator)[SepN], const cstr<Sizes>&... strs) { return join(cstr<SepN>{separator}, strs...); }
+
+    template <std::size_t... Sizes>
+    constexpr auto join(const char c, const cstr<Sizes>&... strs) { return join(char_to_cstr(c), strs...); }
+
+    /**
+     * @fn
      * @brief テンプレート引数で渡した整数値をcstrに変換する。進数を渡すことで、(2,8,16)進数リテラルのような文字列に変換する
     */
     template <auto V, int Hex = 10, bool UsePrefix = false>

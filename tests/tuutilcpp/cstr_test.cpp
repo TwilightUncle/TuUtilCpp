@@ -76,6 +76,17 @@ TEST(TuutilcppStrTest, CstrOperatorTest)
     ASSERT_STREQ(case9.data(), "abcde");
 }
 
+TEST(TuutilcppStrTest, CstrJoinTest)
+{
+    constexpr auto case1 = join(cstr{",-"}, cstr{"abc"}, cstr{"def"}, cstr{"ghi"});
+    constexpr auto case2 = join(",-", cstr{"abc"}, cstr{"def"}, cstr{"ghi"});
+    constexpr auto case3 = join(',', cstr{"abc"}, cstr{"def"}, cstr{"ghi"});
+
+    ASSERT_STREQ(case1.data(), "abc,-def,-ghi");
+    ASSERT_STREQ(case2.data(), "abc,-def,-ghi");
+    ASSERT_STREQ(case3.data(), "abc,def,ghi");
+}
+
 TEST(TuutilcppStrTest, CstrIntegralToStringTest)
 {
     constexpr auto case1 = to_string<(unsigned int)154352>();
