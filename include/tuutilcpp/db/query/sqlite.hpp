@@ -1,6 +1,6 @@
 ///----------------------------------
-/// @file type.hpp
-/// @brief DBフィールド用の型定義
+/// @file db/query/sqlite.hpp
+/// @brief sqliteクエリ生成
 ///----------------------------------
 #ifndef TUUTILCPP_INCLUDE_GUARD_DB_QUERY_SQLITE_HPP
 #define TUUTILCPP_INCLUDE_GUARD_DB_QUERY_SQLITE_HPP
@@ -104,6 +104,30 @@ namespace tuutil::db::query
         >> {};
         template <TableDefinable TableDefinition>
         static constexpr auto make_create_table_string_t_v = make_create_table_string<TableDefinition>::type::value;
+
+        /**
+         * @fn
+         * @brief DBテーブルのdrop文を作成する
+         * @tparam TableDefinition テーブル定義クラス
+        */
+        template <TableDefinable TableDefinition>
+        struct make_drop_table_string
+            : public std::type_identity<mpl::value_constant<"drop table \"" + TableDefinition::name + '"'>>
+        {};
+        template <TableDefinable TableDefinition>
+        static constexpr auto make_drop_table_string_t_v = make_drop_table_string<TableDefinition>::type::value;
+
+        /**
+         * @fn
+         * @brief DBテーブルの存在確認
+         * @tparam TableDefinition テーブル定義クラス
+        */
+        template <TableDefinable TableDefinition>
+        struct make_exists_table_string : public std::type_identity<mpl::value_constant<
+            "select count(*) from sqlite_master where TYPE='table' AND name='" + TableDefinition::name + "'"
+        >> {};
+        template <TableDefinable TableDefinition>
+        static constexpr auto make_exists_table_string_t_v = make_exists_table_string<TableDefinition>::type::value;
     };
 }
 

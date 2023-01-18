@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <tuutilcpp/db.hpp>
+#include <tuutilcpp/db/sqlite.hpp>
 
 using namespace tuutil;
 
@@ -323,5 +324,27 @@ TEST(TuutilcppDbTest, SqliteQueryTest)
         mpl::type_list<column_id, column_na>
     >;
     constexpr auto case7 = sqlite_query::make_create_table_string_t_v<table1>;
+    constexpr auto case8 = sqlite_query::make_drop_table_string_t_v<table1>;
+    constexpr auto case9 = sqlite_query::make_exists_table_string_t_v<table1>;
     EXPECT_STREQ(case7.data(), R"(create table "samples"("id" int autoincrement not null, "name" varchar(255)))");
+    EXPECT_STREQ(case8.data(), R"(drop table "samples")");
+    EXPECT_STREQ(case9.data(), R"(select count(*) from sqlite_master where TYPE='table' AND name='samples')");
+}
+
+TEST(TuutilcppDbTest, SqliteExecuteTest)
+{
+    // using column_id = db::define_column<samples::ID, "id", db::integer, db::pk, db::ai, db::not_null>;
+    using column_id = db::define_column<samples::ID, "id", db::integer, db::pk, db::not_null>;
+    using column_na = db::define_column<samples::NAME, "name", db::varchar<255>>;
+    using table1 = db::define_table<
+        samples,
+        "samples",
+        mpl::type_list<column_id, column_na>
+    >;
+
+    db::sqlite<"test.db", mpl::type_list<table1>> test_db;
+    EXPECT_TRUE(test_db.exists_table<samples>());
+    if (!test_db.exists_table<samples>()) {
+        test_db.create_table_all();
+    }
 }
