@@ -90,7 +90,7 @@ namespace tuutil::str::_regex
         static constexpr auto value = Pattern.substr<begin_pos + 1, end_pos - begin_pos - 2>();
 
         // ŠJnA•Â‚¶Š‡ŒÊ‚àŠÜ‚ß‚½•¶š—ñ
-        static constexpr auto value_with_bracket = concat(char_to_cstr(bracket_info::begin), value, char_to_cstr(bracket_info::end));
+        static constexpr auto value_with_bracket = bracket_info::begin + value + bracket_info::end;
     };
 }
 

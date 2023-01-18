@@ -21,13 +21,23 @@ namespace tuutil::db
         class FieldType,
         ColumnConstraintDefinable... Constraints
     >
-    requires (validate_sql_identity<Name>())
+    requires (
+        (std::is_integral_v<FieldType> || !mpl::exists_v<ai, mpl::type_list<Constraints...>>) // auto incrimentについての制約(設定されている場合、フィールド型は整数でなければならない)
+        && validate_sql_identity<Name>()
+    )
     struct define_column
     {
+        // テーブル情報
         static constexpr auto name = Name;
         static constexpr auto id = ColID;
         using id_type = decltype(ColID);
         using field_type = FieldType;
+
+        // 制約のフラグ
+        static constexpr auto auto_incriment = mpl::exists_v<ai, mpl::type_list<Constraints...>>;
+        static constexpr auto not_null = mpl::exists_v<db::not_null, mpl::type_list<Constraints...>>;
+        
+        // テーブルとしても参照が必要な制約リスト
         using constraint_list = std::conditional_t<
             (sizeof...(Constraints) > 0),
             mpl::type_list<to_table_constraint_t<Constraints, ColID>...>,
@@ -117,7 +127,7 @@ namespace tuutil::db
         mpl::type_list<
             mpl::bind<mpl::quote<mpl::map>, mpl::quote<get_constraint_list>>,
             mpl::bind<mpl::quote<mpl::apply_list>, mpl::quote<mpl::concat_list>>,
-            mpl::bind<mpl::quote<mpl::remove_if>, mpl::bind<mpl::quote<std::is_same>, constraint>>
+            mpl::bind<mpl::quote<mpl::remove_if>, mpl::bind<mpl::quote<std::is_same>, table_constraint>>
         >
     > {};
 
@@ -133,11 +143,11 @@ namespace tuutil::db
      * @tparam ColID 定義に該当する列挙体
      * @tparam T カラム定義リスト
     */
-    template <mpl::Enumeration auto ColID, class T> struct get_column_definition;
+    template <mpl::Enumeration auto ColID, class T> struct get_column_def;
 
     // 直接定義リストをしていした場合の特殊化
     template <mpl::Enumeration auto ColID, ColumnListDefinable T>
-    struct get_column_definition<ColID, T> : public mpl::find_if<
+    struct get_column_def<ColID, T> : public mpl::find_if<
         mpl::bind<
             mpl::quote<mpl::flip>,
             mpl::quote<mpl::relay>,
@@ -154,7 +164,7 @@ namespace tuutil::db
      * @brief 指定したColIDに合致するテーブル定義をテーブル定義リストから取得する
     */
     template <mpl::Enumeration auto ColID, class T>
-    using get_column_def = get_column_definition<ColID, T>::type;
+    using get_column_def_t = get_column_def<ColID, T>::type;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_DB_COLUMN_HPP

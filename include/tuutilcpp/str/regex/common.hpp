@@ -44,20 +44,18 @@ namespace tuutil::str
         // 単体で出てきてはいけないもの
         static constexpr auto deny_chars            = cstr{"})]"};
         // 上記全てを含む
-        static constexpr auto special_chars = concat(
-            quantifier_chars,
-            anchor_chars,
-            bk_anchor_chars,
-            class_chars,
-            bk_class_chars,
-            capture_chars,
-            or_match_chars,
-            char_set,
-            char_set_inner,
-            bk_char_set_inner,
-            bk_reference_chars,
-            deny_chars
-        );
+        static constexpr auto special_chars = quantifier_chars
+            + anchor_chars
+            + bk_anchor_chars
+            + class_chars
+            + bk_class_chars
+            + capture_chars
+            + or_match_chars
+            + char_set
+            + char_set_inner
+            + bk_char_set_inner
+            + bk_reference_chars
+            + deny_chars;
 
         // 属性リスト
         static constexpr auto attributes = []() {

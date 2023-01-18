@@ -38,6 +38,38 @@ namespace tuutil::mpl
      * @tparam TypeList 型のパラメータパックを持つ型
     */
     template <MetaCallable Pred, class TypeList> using find_if_t = find_if<Pred, TypeList>::type;
+
+    /**
+     * @fn
+     * @brief 指定条件の型が存在しているか判定
+     * @tparam Pred 判定用メタ関数
+     * @tparam TypeList 型のパラメータパックを持つ型
+    */
+    template <MetaCallable Pred, class TypeList> using exists_if = std::negation<std::is_same<find_if_t<Pred, TypeList>, ignore_type>>;
+    
+    /**
+     * @fn
+     * @brief 指定条件の型が存在しているか判定
+     * @tparam Pred 判定用メタ関数
+     * @tparam TypeList 型のパラメータパックを持つ型
+    */
+    template <MetaCallable Pred, class TypeList> constexpr auto exists_if_v = exists_if<Pred, TypeList>::value;
+
+    /**
+     * @fn
+     * @brief 指定の型が存在しているか判定
+     * @tparam Pred 判定用メタ関数
+     * @tparam TypeList 型のパラメータパックを持つ型
+    */
+    template <class T, class TypeList> using exists = exists_if<bind<quote<std::is_same>, T>, TypeList>;
+    
+    /**
+     * @fn
+     * @brief 指定の型が存在しているか判定
+     * @tparam Pred 判定用メタ関数
+     * @tparam TypeList 型のパラメータパックを持つ型
+    */
+    template <class T, class TypeList> constexpr auto exists_v = exists<T, TypeList>::value;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_MPL_FIND_IF_HPP

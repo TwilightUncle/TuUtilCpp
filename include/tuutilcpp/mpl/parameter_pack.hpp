@@ -166,6 +166,7 @@ namespace tuutil::mpl
     // 非型テンプレートパラメータの型部分のみの比較(具体的な値については関知しない)
     template <template <auto...> class List, auto... Parameters>
     struct is_same_types<List<Parameters...>> : public is_same_types<type_list<decltype(Parameters)...>> {};
+    template <> struct is_same_types<ignore_type> : public std::true_type {};
 
     /**
      * @fn

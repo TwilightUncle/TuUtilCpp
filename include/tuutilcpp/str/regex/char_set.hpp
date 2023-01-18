@@ -34,20 +34,20 @@ namespace tuutil::str::_regex
         static constexpr auto make_regex_char_list()
         {
             if constexpr (N >= size) return cstr{""};
-            else return concat(char_range.substr<N, 1>(), make_regex_char_list<N + 1>());
+            else return char_range.substr<N, 1>() + make_regex_char_list<N + 1>();
         }
         template <int N>
         requires (char_range[N] == '-')
         static constexpr auto make_regex_char_list()
         {
             if constexpr (begin_index == N || size - 1 == N)
-                return concat(cstr{"-"}, make_regex_char_list<N + 1>());
+                return '-' + make_regex_char_list<N + 1>();
             else {
                 constexpr char begin_char = (std::min)(char_range[N - 1], char_range[N + 1]) + 1;
                 constexpr char end_char = (std::max)(char_range[N - 1], char_range[N + 1]);
                 cstr<2 + end_char - begin_char> str{};
                 for (char c = 0; c < str.max_size; c++) str[c] = c + begin_char;
-                return concat(str, make_regex_char_list<N + 2>());
+                return str + make_regex_char_list<N + 2>();
             }
         }
         template <int N>
@@ -56,8 +56,8 @@ namespace tuutil::str::_regex
         {
             // •¶š”ÍˆÍ‚ÌŠ‡ŒÊ“à‚Å‚Íu.v‚Í“Áê•¶š‚Å‚Í‚È‚¢
             if constexpr (char_range[N + 1] != '.')
-                return concat(char_class::get_const_char_set<char_range[N + 1]>(), make_regex_char_list<N + 2>());
-            else return concat(cstr{"."}, make_regex_char_list<N + 2>());
+                return char_class::get_const_char_set<char_range[N + 1]>() + make_regex_char_list<N + 2>();
+            else return '.' + make_regex_char_list<N + 2>();
         }
 
         /**
@@ -69,7 +69,7 @@ namespace tuutil::str::_regex
         {
             if constexpr (N >= size) return cstr{""};
             else if constexpr (char_range[N] == '\\' && char_range[N + 1] != '.')
-                return concat(char_class::get_const_bk_char_set<char_range[N + 1]>(), make_regex_bk_char_list<N + 2>());
+                return char_class::get_const_bk_char_set<char_range[N + 1]>() + make_regex_bk_char_list<N + 2>();
             else return make_regex_bk_char_list<N + 1>();
         }
 

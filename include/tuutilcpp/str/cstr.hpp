@@ -258,19 +258,63 @@ namespace tuutil::str
         return res;
     }
 
-    /**
-     * @fn
-     * @brief 演算子オーバーロード(一致。不一致は導出されるので不要。細かい仕様はc++20の一貫比較で確認すること)
-    */
     template <std::size_t N1, std::size_t N2>
     constexpr bool operator==(const cstr<N1>& s1, const cstr<N2>& s2) { return s1.view() == s2.view(); }
 
-    /**
-     * @fn
-     * @brief 演算子オーバーロード(宇宙船。細かい仕様はc++20の一貫比較で確認すること)
-    */
     template <std::size_t N1, std::size_t N2>
     constexpr std::strong_ordering operator<=>(const cstr<N1>& s1, const cstr<N2>& s2) { return s1.view() <=> s2.view(); }
+
+    template <std::size_t N1, std::size_t N2>
+    constexpr auto operator+(const cstr<N1>& s1, const cstr<N2>& s2) { return concat(s1, s2); }
+
+    template <std::size_t N1, std::size_t N2>
+    constexpr auto operator+(const char (&s1)[N1], const cstr<N2>& s2) { return cstr<N1>{s1} + s2; }
+
+    template <std::size_t N1, std::size_t N2>
+    constexpr auto operator+(const cstr<N1>& s1, const char (&s2)[N2]) { return s1 + cstr<N2>{s2}; }
+
+    template <std::size_t N>
+    constexpr auto operator+(const char c, const cstr<N>& s) { return char_to_cstr(c) + s; }
+
+    template <std::size_t N>
+    constexpr auto operator+(const cstr<N>& s, const char c) { return s + char_to_cstr(c); }
+
+    /**
+     * @fn
+     * @brief パラメータパックの固定長文字列を、区切り文字列を挟んで一つの文字へと結合する
+     * @param separator 区切り文字列
+     * @param head パラメータパックの先頭文字列(特にstr特別する必要はない)
+     * @param strs 固定長文字列のパラメータパック
+    */
+    template <std::size_t SepN, std::size_t HeadN, std::size_t... Sizes>
+    constexpr auto join(const cstr<SepN>& separator, const cstr<HeadN>& head, const cstr<Sizes>&... strs)
+    {
+        return head + ((separator + strs) + ...);
+    }
+
+    template <std::size_t SepN, std::size_t... Sizes>
+    constexpr auto join(const char (&separator)[SepN], const cstr<Sizes>&... strs) { return join(cstr<SepN>{separator}, strs...); }
+
+    template <std::size_t... Sizes>
+    constexpr auto join(const char c, const cstr<Sizes>&... strs) { return join(char_to_cstr(c), strs...); }
+
+    /**
+     * @fn
+     * @brief パラメータパックの固定長文字列を、区切り文字列を挟んで一つの文字へと結合する
+     * @tparam Separator 区切り文字列
+     * @tparam List 固定長文字列のパラメータパックを持つ型
+    */
+    template <cstr Separator, class List> struct cstrs_join;
+    template <cstr Separator, template <cstr...> class List, cstr... Strs>
+    struct cstrs_join<Separator, List<Strs...>> : public mpl::value_constant<join(Separator, Strs...)> {};
+
+    /**
+     * @fn
+     * @brief パラメータパックの固定長文字列を、区切り文字列を挟んで一つの文字へと結合する
+     * @tparam Separator 区切り文字列
+     * @tparam Strs 固定長文字列のパラメータパック
+    */
+    template <cstr Separator, class List> constexpr auto cstrs_join_v = cstrs_join<Separator, List>::value;
 
     /**
      * @fn
@@ -294,16 +338,16 @@ namespace tuutil::str
 
         // 進数リテラルの接頭子を付与
         if constexpr (UsePrefix) {
-            if constexpr (Hex == 2) return concat(cstr{"0b"}, s);
-            else if constexpr (Hex == 8) return concat(cstr{"0"}, s);
-            else if constexpr (Hex == 16) return concat(cstr{"0x"}, s);
+            if constexpr (Hex == 2) return "0b" + s;
+            else if constexpr (Hex == 8) return "0" + s;
+            else if constexpr (Hex == 16) return "0x" + s;
             else return s;
         }
         else return s;
     }
     // 負数の場合
     template <std::integral auto V, std::size_t Hex = 10, bool UsePrefix = false>
-    constexpr auto to_string() { return concat(cstr{"-"}, to_string<-V, Hex, UsePrefix>()); }
+    constexpr auto to_string() { return "-" + to_string<-V, Hex, UsePrefix>(); }
 
     /**
      * @fn
@@ -314,6 +358,7 @@ namespace tuutil::str
     {
         T val{};
         for (const auto c: s) {
+            if (c < '0' || c > '9') break;
             val *= 10;
             val += (c - '0');
         }
