@@ -10,12 +10,6 @@
 
 namespace tuutil::str
 {
-    /**
-     * @brief forやwhileで回せるように、関数へ変換する際の型
-    */
-    template <std::size_t N>
-    using regex_generated_function_ptr_type = regex_match_result(*)(std::string_view, std::size_t, bool, regex_capture_store<N>&);
-
     template <class T>
     concept RegexParseable = requires {
         { T::begin_pos } -> std::convertible_to<std::size_t>;
@@ -102,11 +96,10 @@ namespace tuutil::str
 
         using parser = Parser<Pattern, 0>;
         using capture_store_type = regex_capture_store<parser::max_capture_count>;
-        using function_ptr_type = regex_generated_function_ptr_type<parser::max_capture_count>;
 
         static constexpr auto exec(std::string_view s, std::size_t offset = 0, bool is_pos_lock = false)
         {
-            auto cs = regex_capture_store<parser::max_capture_count>{};
+            auto cs = capture_store_type{};
             auto re = parser::exec<parser::max_capture_count>(s, offset, is_pos_lock, cs);
             return std::pair{cs, re};
         }
@@ -115,13 +108,13 @@ namespace tuutil::str
         // 結果キャプチャリストを格納
         const capture_store_type capture_list;
         // 結果のマッチ範囲を格納
-        const regex_match_result match_range;
+        const regex_match_result match_result;
         // テスト対象
         const std::string_view test_target;
 
         constexpr regex(std::string_view test_target, const std::pair<capture_store_type, regex_match_result>& run_result)
             : capture_list(run_result.first)
-            , match_range(run_result.second)
+            , match_result(run_result.second)
             , test_target(test_target)
         {}
 
@@ -141,13 +134,13 @@ namespace tuutil::str
          * @fn
          * @brief 検査対象文字列にパターンマッチしている部分が存在したら真
         */
-        constexpr bool exists() const noexcept { return bool(match_range); }
+        constexpr bool exists() const noexcept { return bool(match_result); }
 
         /**
          * @fn
          * @brief 検査対象の文字列全体がパターンマッチしているとき真
         */
-        constexpr bool is_match() const noexcept { return this->exists() && match_range.match_length() == test_target.size(); }
+        constexpr bool is_match() const noexcept { return this->exists() && match_result.match_length() == test_target.size(); }
 
         constexpr bool empty() const noexcept { return !this->exists(); }
         constexpr std::size_t size() const noexcept { return this->exists() ? this->capture_list.size() + 1 : 0; }
@@ -160,7 +153,7 @@ namespace tuutil::str
         constexpr std::string_view get_match_string_view(std::size_t index = 0) const
         {
             if (!this->exists() || this->capture_list.size() < index) return std::string_view{};
-            if (!index) return test_target.substr(match_range.get_begin_pos(), match_range.match_length());
+            if (!index) return test_target.substr(match_result.get_begin_pos(), match_result.match_length());
             return this->capture_list.get(index - 1);
         }
 

@@ -54,11 +54,9 @@ namespace tuutil::str
             "Invalied template argment [Pattern, Pos]. Must not specified of '}', ')', ']'."
         );
 
-        using parsed_type = tuutil::mpl::relay_t<
-            _regex::resolve_parser<Pattern, Pos>,
-            tuutil::mpl::type_list<
-                _regex::bind_regex_pattern_t<_regex::add_quantifier, Pattern>
-            >
+        using parsed_type = tuutil::mpl::apply_t<
+            _regex::bind_regex_pattern_t<_regex::add_quantifier, Pattern>,
+            _regex::resolve_parser<Pattern, Pos>
         >;
 
         // ˆÈ~‚ÌˆÊ’u‚Ì‰ğÍ
