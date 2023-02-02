@@ -440,7 +440,7 @@ TEST(TuutilcppStrTest, RegexExecTest)
     EXPECT_EQ(case8.first.get(0), "ghij%1]m"sv);
     EXPECT_EQ(case8.first.get(1), "ghil<9]m"sv);
 
-    using type3 = regex<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}(aa)\\)nop">;
+    using type3 = regex<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}(?<aa>aa)\\)nop">;
     constexpr auto case12 = type3::exec("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nop");
 
     EXPECT_EQ(case12.second.get_end_pos(), 43);
@@ -457,6 +457,7 @@ TEST(TuutilcppStrTest, RegexExecTest)
     EXPECT_EQ(case12.first.get(9), "2]m"sv);
     EXPECT_EQ(case12.first.get(10), "]m"sv);
     EXPECT_EQ(case12.first.get(11), "aa"sv);
+    EXPECT_EQ(case12.first.get("aa"), "aa"sv);
 
     using type4 = regex<"(?=.{0,4}[A-Z]).{5}">;
     constexpr auto case13 = type4::exec("abcde1234f");
