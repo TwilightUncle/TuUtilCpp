@@ -4,6 +4,35 @@
 using namespace std::string_view_literals;
 using namespace tuutil::str;
 
+TEST(TuutilcppStrTest, RegexCaptureStoreTest)
+{
+    auto capture_store1 = regex_capture_store<3>{};
+    capture_store1.push_back("abc");
+    capture_store1.push_back("0123456", "numbers");
+    capture_store1.push_back("@#$%&", "marks");
+
+    auto capture_store2 = regex_capture_store<5>{};
+    capture_store2.push_back(capture_store1);
+
+    EXPECT_THROW(capture_store1.push_back("abc"), std::out_of_range);
+    EXPECT_NO_THROW(capture_store2.push_back("abc"));
+
+    // インデックスによるキャプチャ内容取得のテスト
+    EXPECT_EQ(capture_store1.get(0), capture_store2.get(0));
+    EXPECT_EQ(capture_store1.get(1), capture_store2.get(1));
+    EXPECT_EQ(capture_store1.get(2), capture_store2.get(2));
+    EXPECT_THROW(capture_store1.get(3), std::out_of_range);
+    EXPECT_EQ(capture_store2.get(3), "abc"sv);
+    EXPECT_THROW(capture_store2.get(4), std::out_of_range);
+
+    // 名前指定によるキャプチャ内容取得のテスト
+    EXPECT_EQ(capture_store1.get("numbers"), "0123456"sv);
+    EXPECT_EQ(capture_store1.get("numbers"), capture_store2.get("numbers"));
+    EXPECT_EQ(capture_store1.get("marks"), capture_store2.get("marks"));
+    EXPECT_THROW(capture_store1.get("not_exists"), std::out_of_range);
+    EXPECT_THROW(capture_store2.get("not_exists"), std::out_of_range);
+}
+
 /**
  * @fn
  * @brief 許可リストまたは拒否リストとして指定したchar_listを参照し、targetが有効か検証する。バックスラッシュを含む場合、二つで一文字と認識する

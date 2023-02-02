@@ -17,6 +17,9 @@ namespace tuutil::str
     private:
         std::array<std::string_view, N> buf{};
         std::size_t end_pos{};
+
+        // 名前付きキャプチャの名前を入れておく
+        std::array<std::string_view, N> name_mapping{};
     
     public:
         constexpr regex_capture_store() noexcept {}
@@ -24,10 +27,13 @@ namespace tuutil::str
         /**
          * @fn
          * @brief キャプチャ結果を格納
+         * @param sv キャプチャした内容
+         * @param capture_name 名前付きキャプチャの場合指定する
         */
-        constexpr void push_back(std::string_view sv)
+        constexpr void push_back(std::string_view sv, std::string_view capture_name = {})
         {
             if (this->end_pos >= N) throw std::out_of_range(std::string("orver max size. max value is ") + std::to_string(N));
+            this->name_mapping[this->end_pos] = capture_name;
             this->buf[this->end_pos++] = sv;
         }
 
@@ -35,7 +41,7 @@ namespace tuutil::str
         constexpr void push_back(const regex_capture_store<M>& cs)
         {
             for (auto i = std::size_t{}; this->end_pos < N && i < cs.size(); i++)
-                this->push_back(cs.get(i));
+                this->push_back(cs.get(i), cs.get_name(i));
         }
 
         /**
@@ -51,6 +57,34 @@ namespace tuutil::str
                     + std::to_string(this->end_pos) + ", specify index: " + std::to_string(index)
                 );
             return this->buf[index];
+        }
+
+        /**
+         * @fn
+         * @brief 指定インデックスのキャプチャ名を取得。名前がない場合は空文字が返る
+        */
+        constexpr auto get_name(std::size_t index) const
+        {
+            // 値が未格納の領域へのアクセスは禁止する
+            if (index >= this->end_pos)
+                throw std::out_of_range(
+                    std::string("index exceeds maximum allowed value. size: ")
+                    + std::to_string(this->end_pos) + ", specify index: " + std::to_string(index)
+                );
+            return this->name_mapping[index];
+        }
+
+        /**
+         * @fn
+         * @brief キャプチャ名からキャプチャ内容を取得
+        */
+        constexpr auto get(std::string_view name) const
+        {
+            for (std::size_t i = 0; i < this->end_pos; i++)
+                if (!this->name_mapping[i].empty() && name == this->name_mapping[i])
+                    return this->buf[i];
+            throw std::out_of_range(std::string("Not found capture name: ") + std::string{name.begin(), name.end()});
+            return std::string_view{};
         }
 
         constexpr auto front() const noexcept
