@@ -63,7 +63,7 @@ namespace tuutil::str::_regex
         {
             const auto [cap, re] = inner_regex::exec(s, offset, is_pos_lock);
             if (re) {
-                if (is_capture) cs.push_back(s.substr(offset, re.match_length()));
+                if (is_capture) cs.push_back(s.substr(offset, re.match_length()), name.view());
                 cs.push_back(cap);
             } 
             return re;
