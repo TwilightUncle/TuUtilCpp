@@ -40,7 +40,7 @@ namespace tuutil::str
         static constexpr auto char_set_inner        = cstr{"^-"};
         static constexpr auto bk_char_set_inner     = cstr{"b"};
         // キャプチャグループ参照
-        static constexpr auto bk_reference_chars    = cstr{"123456789"};
+        static constexpr auto bk_reference_chars    = cstr{"123456789k"};
         // 単体で出てきてはいけないもの
         static constexpr auto deny_chars            = cstr{"})]"};
         // 上記全てを含む

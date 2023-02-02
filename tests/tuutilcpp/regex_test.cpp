@@ -258,11 +258,14 @@ TEST(TuutilcppStrTest, RegexReferenceTest)
 {
     using type1 = _regex::reference_parser<"\\1", 1>;
     using type2 = _regex::reference_parser<"\\345", 1>;
+    using type3 = _regex::reference_parser<"\\k<name>", 1>;
 
     EXPECT_EQ(type1::end_pos, 2);
     EXPECT_EQ(type1::reference_index, 0);
     EXPECT_EQ(type2::end_pos, 4);
     EXPECT_EQ(type2::reference_index, 344);
+    EXPECT_EQ(type3::end_pos, 8);
+    EXPECT_STREQ(type3::reference_name.data(), "name");
 }
 
 TEST(TuutilcppStrTest, RegexAddQuantifierTest)
@@ -440,7 +443,7 @@ TEST(TuutilcppStrTest, RegexExecTest)
     EXPECT_EQ(case8.first.get(0), "ghij%1]m"sv);
     EXPECT_EQ(case8.first.get(1), "ghil<9]m"sv);
 
-    using type3 = regex<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}(?<aa>aa)\\)nop">;
+    using type3 = regex<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}(?<name>aa)\\)nop">;
     constexpr auto case12 = type3::exec("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nop");
 
     EXPECT_EQ(case12.second.get_end_pos(), 43);
@@ -457,7 +460,7 @@ TEST(TuutilcppStrTest, RegexExecTest)
     EXPECT_EQ(case12.first.get(9), "2]m"sv);
     EXPECT_EQ(case12.first.get(10), "]m"sv);
     EXPECT_EQ(case12.first.get(11), "aa"sv);
-    EXPECT_EQ(case12.first.get("aa"), "aa"sv);
+    EXPECT_EQ(case12.first.get("name"), "aa"sv);
 
     using type4 = regex<"(?=.{0,4}[A-Z]).{5}">;
     constexpr auto case13 = type4::exec("abcde1234f");
@@ -501,7 +504,7 @@ TEST(TuutilcppStrTest, RegexExecTest)
 
 TEST(TuutilcppStrTest, RegexMatchTest)
 {
-    using type1 = regex<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}(aa)\\)nop\\2\\6">;
+    using type1 = regex<"abcdef((ghi[jkl].){2,4}(\\d(\\]m))){2}(?<name>aa)\\)nop\\2\\6\\k<name>?">;
     constexpr auto case1 = type1::search("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]m");
     constexpr auto case2 = type1::search("aabcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]m");
     constexpr auto case3 = type1::search("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]ma");
@@ -511,6 +514,7 @@ TEST(TuutilcppStrTest, RegexMatchTest)
     constexpr auto case7 = type1::search("abcdefghij@ghij$ghij%1]mghij/ghij|2]mc)nopghij@]ma");
     constexpr auto case8 = type1::search("");
     constexpr auto case9 = type1::match("");
+    constexpr auto case10 = type1::match("abcdefghij@ghij$ghij%1]mghij/ghij|2]maa)nopghij@]maa");
 
     EXPECT_TRUE(case1);
     EXPECT_TRUE(case2);
@@ -521,6 +525,7 @@ TEST(TuutilcppStrTest, RegexMatchTest)
     EXPECT_FALSE(case7);
     EXPECT_FALSE(case8);
     EXPECT_FALSE(case9);
+    EXPECT_TRUE(case10);
 }
 
 TEST(TuutilcppStrTest, RegexResultTest)
