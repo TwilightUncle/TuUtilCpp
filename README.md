@@ -84,7 +84,7 @@ template <str::cstr DateStr>
 struct DateType
 {
     // 日付文字列についてパターンマッチを行い、ついでにキャプチャで年月日をそれぞれ抜き出す
-    using date_pattern = str::regex<R"(^(\d{4})([/-])([01]\d)\2(\d{2})$)">;
+    using date_pattern = str::regex<R"(^(\d{4})(?<delimiter>[/-])([01]\d)\k<delimiter>(\d{2})$)">;
     static constexpr auto match_result = date_pattern(DateStr);
 
     // パターンマッチに失敗したときコンパイルエラー
