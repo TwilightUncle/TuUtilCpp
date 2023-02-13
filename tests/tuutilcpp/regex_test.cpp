@@ -580,4 +580,8 @@ TEST(TuutilcppStrTest, RegexResultTest)
     // 言明に数量詞をつけたものをコンパイルエラーとする(コメントアウトを消すと以下出力でコンパイルエラー)
     // static_assert failed: 'Do not specify quantifiers in assertions.'
     // constexpr auto case10 = regex<"^+">("");
+
+    // 実行時アクセス違反とならないことのテスト
+    auto case10 = regex<"abcde">(std::string("abcdefg"));
+    EXPECT_EQ(case10.get_match_string_view(), "abcde"sv);
 }

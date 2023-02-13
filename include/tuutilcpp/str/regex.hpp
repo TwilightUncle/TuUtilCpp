@@ -110,13 +110,22 @@ namespace tuutil::str
         // 結果のマッチ範囲を格納
         const regex_match_result match_result;
         // テスト対象
-        const std::string_view test_target;
+        std::string_view test_target;
+        // テスト対象文字列のオリジナル(実行時のみ使用)
+        std::optional<std::string> test_target_origin;
+
 
         constexpr regex(std::string_view test_target, const std::pair<capture_store_type, regex_match_result>& run_result)
             : capture_list(run_result.first)
             , match_result(run_result.second)
             , test_target(test_target)
-        {}
+        {
+            // 実行時のみ、string_viewの参照によるアクセスエラー対策のため、std::stringにテスト対象をコピーする
+            if (!std::is_constant_evaluated()) {
+                this->test_target_origin = std::string(test_target.begin(), test_target.end());
+                this->test_target = std::string_view(this->test_target_origin.value());
+            }
+        }
 
     public:
         /**
