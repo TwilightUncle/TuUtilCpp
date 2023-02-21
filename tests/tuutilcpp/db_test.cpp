@@ -342,9 +342,17 @@ TEST(TuutilcppDbTest, SqliteExecuteTest)
         mpl::type_list<column_id, column_na>
     >;
 
-    db::sqlite<"test.db", mpl::type_list<table1>> test_db;
-    EXPECT_TRUE(test_db.exists_table<samples>());
-    if (!test_db.exists_table<samples>()) {
+    using test_db_type = db::sqlite<"test.db", mpl::type_list<table1>>;
+
+    // DB生成とかcreateテーブル周りのテスト
+    EXPECT_FALSE(test_db_type::exists_db());
+    {
+        db::sqlite<"test.db", mpl::type_list<table1>> test_db;
+        ASSERT_TRUE(test_db_type::exists_db());
+        ASSERT_FALSE(test_db.exists_table<samples>());
         test_db.create_table_all();
+        EXPECT_TRUE(test_db.exists_table<samples>());
     }
+    test_db_type::drop_db();
+    EXPECT_FALSE(test_db_type::exists_db());
 }

@@ -5,6 +5,8 @@
 #ifndef TUUTILCPP_INCLUDE_GUARD_DB_SQLITE_HPP
 #define TUUTILCPP_INCLUDE_GUARD_DB_SQLITE_HPP
 
+#include <fstream>
+#include <filesystem>
 #include <tuutilcpp/str.hpp>
 #include <tuutilcpp/db.hpp>
 #include <tuutilcpp/db/connection/sqlite.hpp>
@@ -25,11 +27,23 @@ namespace tuutil::db
 
         /**
          * @fn
+         * @brief テンプレート引数で指定されたDBファイルが存在委するか判定
+        */
+        static bool exists_db() { return std::ifstream(std::string(DbName)).is_open(); }
+
+        /**
+         * @fn
+         * @brief データベースを削除する
+        */
+        static void drop_db() { std::filesystem::remove(std::string(DbName)); }
+
+        /**
+         * @fn
          * @brief TableDefinitionに含まれる全てのcreate文を発行する
         */
-        void create_table_all() const
+        void create_table_all()
         {
-            for (auto s : create_querys_v) this->con.exec<nullptr>(std::string{s}, nullptr, nullptr);
+            for (auto s : create_querys_v) this->con.exec(std::string(s));
         }
 
         /**
@@ -42,22 +56,16 @@ namespace tuutil::db
         {
             using table_definition_type = get_table_def_t<ETableType ,TableDefinitionList>;
             static_assert(!std::is_same_v<table_definition_type, mpl::ignore_type>, "Not found database table definition.");
-            return bool(this->count(std::string(query::sqlite::make_exists_table_string_t_v<table_definition_type>)));
+            return this->con.tableExists(table_definition_type::name);
         }
 
         /**
          * @fn
          * @brief countのクエリを発行
         */
-        int count(const std::string& query) const
+        int count(const std::string& query)
         {
-            constexpr auto callback = [](void* out, int, char** result, char**) {
-                auto cnt = (int*)out;
-                *cnt = std::atoi(*result);
-            };
-            int cnt = 0;
-            this->con.exec<callback>(query, (void*)&cnt, nullptr);
-            return cnt;
+            return this->con.count(query);
         }
 
     private:
