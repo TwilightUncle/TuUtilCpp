@@ -34,6 +34,7 @@ namespace tuutil::db
         /**
          * @fn
          * @brief データベースを削除する
+         * TODO: 有効な接続が存在するか確認し、あったら例外を投げるようにすること
         */
         static void drop_db() { std::filesystem::remove(std::string(DbName)); }
 
@@ -81,7 +82,6 @@ namespace tuutil::db
         struct expansion_querys<List<TableDefinitions...>>
         {
             static constexpr auto create_querys = std::array{ query::sqlite::make_create_table_string_t_v<TableDefinitions>.view()... };
-            static constexpr auto exists_querys = std::array{ query::sqlite::make_exists_table_string_t_v<TableDefinitions>.view()... };
         };
         static constexpr auto create_querys_v = expansion_querys<TableDefinitionList>::create_querys;
     };

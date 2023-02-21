@@ -325,10 +325,8 @@ TEST(TuutilcppDbTest, SqliteQueryTest)
     >;
     constexpr auto case7 = sqlite_query::make_create_table_string_t_v<table1>;
     constexpr auto case8 = sqlite_query::make_drop_table_string_t_v<table1>;
-    constexpr auto case9 = sqlite_query::make_exists_table_string_t_v<table1>;
     EXPECT_STREQ(case7.data(), R"(create table "samples"("id" int autoincrement not null, "name" varchar(255)))");
     EXPECT_STREQ(case8.data(), R"(drop table "samples")");
-    EXPECT_STREQ(case9.data(), R"(select count(*) from sqlite_master where TYPE='table' AND name='samples')");
 }
 
 TEST(TuutilcppDbTest, SqliteExecuteTest)

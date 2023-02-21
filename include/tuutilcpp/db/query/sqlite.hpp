@@ -116,18 +116,6 @@ namespace tuutil::db::query
         {};
         template <TableDefinable TableDefinition>
         static constexpr auto make_drop_table_string_t_v = make_drop_table_string<TableDefinition>::type::value;
-
-        /**
-         * @fn
-         * @brief DBテーブルの存在確認
-         * @tparam TableDefinition テーブル定義クラス
-        */
-        template <TableDefinable TableDefinition>
-        struct make_exists_table_string : public std::type_identity<mpl::value_constant<
-            "select count(*) from sqlite_master where TYPE='table' AND name='" + TableDefinition::name + "'"
-        >> {};
-        template <TableDefinable TableDefinition>
-        static constexpr auto make_exists_table_string_t_v = make_exists_table_string<TableDefinition>::type::value;
     };
 }
 
