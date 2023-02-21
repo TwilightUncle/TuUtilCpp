@@ -582,6 +582,7 @@ TEST(TuutilcppStrTest, RegexResultTest)
     // constexpr auto case10 = regex<"^+">("");
 
     // 実行時アクセス違反とならないことのテスト
-    auto case10 = regex<"abcde">(std::string("abcdefg"));
-    EXPECT_EQ(case10.get_match_string_view(), "abcde"sv);
+    auto case10 = regex<"abcde(fghi)">(std::string("abcdefghijkl"));
+    EXPECT_EQ(case10.get_match_string_view(), "abcdefghi"sv);
+    EXPECT_EQ(case10.get_match_string_view(1), "fghi"sv);
 }
