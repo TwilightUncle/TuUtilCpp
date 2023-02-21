@@ -325,10 +325,8 @@ TEST(TuutilcppDbTest, SqliteQueryTest)
     >;
     constexpr auto case7 = sqlite_query::make_create_table_string_t_v<table1>;
     constexpr auto case8 = sqlite_query::make_drop_table_string_t_v<table1>;
-    constexpr auto case9 = sqlite_query::make_exists_table_string_t_v<table1>;
     EXPECT_STREQ(case7.data(), R"(create table "samples"("id" int autoincrement not null, "name" varchar(255)))");
     EXPECT_STREQ(case8.data(), R"(drop table "samples")");
-    EXPECT_STREQ(case9.data(), R"(select count(*) from sqlite_master where TYPE='table' AND name='samples')");
 }
 
 TEST(TuutilcppDbTest, SqliteExecuteTest)
@@ -342,9 +340,17 @@ TEST(TuutilcppDbTest, SqliteExecuteTest)
         mpl::type_list<column_id, column_na>
     >;
 
-    db::sqlite<"test.db", mpl::type_list<table1>> test_db;
-    EXPECT_TRUE(test_db.exists_table<samples>());
-    if (!test_db.exists_table<samples>()) {
+    using test_db_type = db::sqlite<"test.db", mpl::type_list<table1>>;
+
+    // DB生成とかcreateテーブル周りのテスト
+    EXPECT_FALSE(test_db_type::exists_db());
+    {
+        db::sqlite<"test.db", mpl::type_list<table1>> test_db;
+        ASSERT_TRUE(test_db_type::exists_db());
+        ASSERT_FALSE(test_db.exists_table<samples>());
         test_db.create_table_all();
+        EXPECT_TRUE(test_db.exists_table<samples>());
     }
+    test_db_type::drop_db();
+    EXPECT_FALSE(test_db_type::exists_db());
 }
