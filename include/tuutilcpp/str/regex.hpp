@@ -106,26 +106,13 @@ namespace tuutil::str
 
     private:
         // 結果キャプチャリストを格納
-        const capture_store_type capture_list;
+        capture_store_type capture_list;
         // 結果のマッチ範囲を格納
-        const regex_match_result match_result;
+        regex_match_result match_result;
         // テスト対象
         std::string_view test_target;
         // テスト対象文字列のオリジナル(実行時のみ使用)
         std::optional<std::string> test_target_origin;
-
-
-        constexpr regex(std::string_view test_target, const std::pair<capture_store_type, regex_match_result>& run_result)
-            : capture_list(run_result.first)
-            , match_result(run_result.second)
-            , test_target(test_target)
-        {
-            // 実行時のみ、string_viewの参照によるアクセスエラー対策のため、std::stringにテスト対象をコピーする
-            if (!std::is_constant_evaluated()) {
-                this->test_target_origin = std::string(test_target.begin(), test_target.end());
-                this->test_target = std::string_view(this->test_target_origin.value());
-            }
-        }
 
     public:
         /**
@@ -136,8 +123,19 @@ namespace tuutil::str
          * @param is_pos_lock 真の場合パターンマッチの位置をoffsetで固定する。offsetの位置から一致していない場合一致なしとなる
         */
         constexpr regex(std::string_view test_target, std::size_t offset = 0, bool is_pos_lock = false)
-            : regex(test_target, exec(test_target, offset, is_pos_lock))
-        {}
+        {
+            // 実行時のみ、string_viewの参照によるアクセスエラー対策のため、std::stringにテスト対象をコピーする
+            if (!std::is_constant_evaluated()) {
+                this->test_target_origin = std::string(test_target.begin(), test_target.end());
+                this->test_target = std::string_view(this->test_target_origin.value());
+            } else {
+                this->test_target = test_target;
+            }
+
+            const auto [cs, mr] = exec(this->test_target, offset, is_pos_lock);
+            this->capture_list = cs;
+            this->match_result = mr;
+        }
 
         /**
          * @fn
