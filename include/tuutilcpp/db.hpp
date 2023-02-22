@@ -12,5 +12,6 @@
 #include <tuutilcpp/db/constraint.hpp>
 #include <tuutilcpp/db/column.hpp>
 #include <tuutilcpp/db/table.hpp>
+#include <tuutilcpp/db/record.hpp>
 
 #endif // TUUTILCPP_INCLUDE_GUARD_DB_HPP

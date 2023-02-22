@@ -303,6 +303,21 @@ TEST(TuutilcppDbTest, DbTableTest)
     EXPECT_TRUE(case10);
 }
 
+TEST(TuutilcppDbTest, DbRecordTest)
+{
+    using column_id = db::define_column<samples::ID, "id", db::integer, db::pk, db::ai, db::not_null>;
+    using column_id2 = db::define_column<samples::ID2, "id2", db::integer, db::pk, db::fk<samples2::ID>>;
+    using column_ce = db::define_column<samples::CREATE_AT, "create_at", db::integer>;
+    using record_type = db::record<column_id, column_id2, column_ce>;
+
+    auto record_1 = record_type{1, 2, 3};
+    auto record_2 = record_type{4, 2, 6};
+    // db::set内でdb::getも呼ばれているため、getのテストも兼ねる
+    db::set<samples::ID>(record_1, 4);
+    db::set<samples::CREATE_AT>(record_1, 6);
+    EXPECT_EQ(record_1, record_2);
+}
+
 TEST(TuutilcppDbTest, SqliteQueryTest)
 {
     using sqlite_query = db::query::sqlite;
