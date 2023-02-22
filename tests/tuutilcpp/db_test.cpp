@@ -156,8 +156,8 @@ TEST(TuutilcppDbTest, DbColumnTest)
     constexpr auto case11 = db::ColumnListDefinable<mpl::type_list<column_id, column_na, int>>; // リスト内にdefine_column以外を含むNG
     constexpr auto case12 = db::ColumnListDefinable<mpl::type_list<column_id, column_na, column_na>>; // リスト内の型が一意ではないNG
     constexpr auto case13 = db::ColumnListDefinable<mpl::type_list<column_id, db::define_column<samples::ID, "bad_id", db::integer>>>; // ColIDが重複しているのでNG
-    constexpr auto case14 = db::ColumnListDefinable<mpl::type_list<column_id, db::define_column<samples2::ID2, "id2", db::integer, db::pk>>>; // 異なる型のColIDが指定されたカラム定義が含まれるのでNG
-    constexpr auto case15 = db::ColumnListDefinable<mpl::type_list<column_id, db::define_column<samples::ID2, "id", db::integer>>>; // カラム名に重複ありNG
+    constexpr auto case14 = db::ColumnListDefinable<mpl::type_list<column_id, db::define_column<samples2::ID2, "id2", db::integer, db::pk>>>; // 異なる型のColIDが指定されたカラム定義が含まれる
+    constexpr auto case15 = db::ColumnListDefinable<mpl::type_list<column_id, db::define_column<samples::ID2, "id", db::integer>>>; // カラム名に重複あり
     // extract_constraintsテスト
     constexpr auto case16 = std::is_same_v<
         db::extract_constraints_t<column_definition_list>,
@@ -191,14 +191,20 @@ TEST(TuutilcppDbTest, DbColumnTest)
     EXPECT_FALSE(case11);
     EXPECT_FALSE(case12);
     EXPECT_FALSE(case13);
-    EXPECT_FALSE(case14);
-    EXPECT_FALSE(case15);
+    EXPECT_TRUE(case14);
+    EXPECT_TRUE(case15);
     EXPECT_TRUE(case16);
     EXPECT_TRUE(case17);
     EXPECT_TRUE(case18);
     EXPECT_TRUE(case19);
     EXPECT_TRUE(case20);
     EXPECT_TRUE(case21);
+
+    
+    constexpr auto case22 = db::ColumnListDefinableForTable<mpl::type_list<column_id, db::define_column<samples2::ID2, "id2", db::integer, db::pk>>>; // テーブル定義用の制約のため、型が統一されていなければならない
+    constexpr auto case23 = db::ColumnListDefinableForTable<mpl::type_list<column_id, db::define_column<samples::ID2, "id", db::integer>>>; // カラム名に重複ありNG
+    EXPECT_FALSE(case22);
+    EXPECT_FALSE(case23);
 }
 
 TEST(TuutilcppDbTest, DbTableTest)

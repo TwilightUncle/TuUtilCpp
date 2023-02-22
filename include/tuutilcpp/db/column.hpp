@@ -113,9 +113,7 @@ namespace tuutil::db
     concept ColumnListDefinable = mpl::has_type_parameters_v<T>                                             // Tは型のパラメータパックを持つこと
         && mpl::is_unique_v<T>                                                                              // Tが持つパラメータパックは重複がないこと
         && mpl::apply_list_v<mpl::quote<std::conjunction>, mpl::map_t<mpl::quote<is_column_definition>, T>> // Tが持つパラメータパックは全てcolumn_definitionであること
-        && mpl::is_unique_v<mpl::map_t<mpl::quote<get_column_id>, T>>                                       // Tが持つパラメータパック要素のメンバidは全て異なる値であること
-        && mpl::is_same_types_v<mpl::map_t<mpl::quote<get_column_id_t>, T>>                                 // Tが持つパラメータパック要素のメンバidは全て同じ型であること
-        && mpl::is_unique_v<mpl::map_t<mpl::quote<get_column_name>, T>>;                                    // Tが持つパラメータパック要素のメンバnameは全て異なる値であること
+        && mpl::is_unique_v<mpl::map_t<mpl::quote<get_column_id>, T>>;                                      // Tが持つパラメータパック要素のメンバidは全て異なる値であること
 
     /**
      * @fn
@@ -139,7 +137,7 @@ namespace tuutil::db
 
     /**
      * @fn
-     * @brief 指定したColIDに合致するテーブル定義をテーブル定義リストから取得する
+     * @brief 指定したColIDに合致するテーブル定義をテーブル定義リストから取得する。valueには見つかった位置のインデックスが入っている
      * @tparam ColID 定義に該当する列挙体
      * @tparam T カラム定義リスト
     */
