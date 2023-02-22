@@ -26,6 +26,18 @@ namespace tuutil::mpl
      * @brief とりあえず、値のパラメータパックを保持したいときに利用
     */
     template <auto... Values> struct value_list {};
+
+    /**
+     * @fn
+     * @brief テンプレート引数に指定した値または型をそのまま返す
+    */
+    template <class T, auto V>
+    struct type_value_pair : public std::type_identity<T>
+    {
+        static constexpr auto value = V;
+    };
+    template <class T, auto V> using type_value_pair_t = type_value_pair<T, V>::type;
+    template <class T, auto V> constexpr auto type_value_pair_v = type_value_pair<T, V>::value;
 }
 
 #include <tuutilcpp/mpl/concepts.hpp>
