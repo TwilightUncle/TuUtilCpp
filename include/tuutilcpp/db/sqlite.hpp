@@ -55,7 +55,7 @@ namespace tuutil::db
         template <mpl::Enumeration ETableType>
         bool exists_table() const
         {
-            using table_definition_type = get_table_def_t<ETableType ,TableDefinitionList>;
+            using table_definition_type = get_table_def_t<ETableType, TableDefinitionList>;
             static_assert(!std::is_same_v<table_definition_type, mpl::ignore_type>, "Not found database table definition.");
             return this->con.tableExists(table_definition_type::name);
         }
