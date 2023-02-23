@@ -85,7 +85,7 @@ namespace tuutil::mpl
      * @tparam ValueList 非型テンプレートパラメータパックを持つ型
      * @tparam NewList value_constantで包んだ要素を受け取る、型テンプレートパラメータパックを指定可能なテンプレート型
     */
-    template <class ValueList, LiftedList NewList> struct wrap_value_elements;
+    template <class ValueList, LiftedList NewList = lift<type_list>> struct wrap_value_elements;
     template <template <auto...> class List, template <class...> class NewList, auto... ValueElements>
     struct wrap_value_elements<List<ValueElements...>, lift<NewList>>
         : public std::type_identity<NewList<value_constant<ValueElements>...>>
@@ -97,7 +97,7 @@ namespace tuutil::mpl
      * @tparam ValueList 非型テンプレートパラメータパックを持つ型
      * @tparam NewList value_constantで包んだ要素を受け取る、型テンプレートパラメータパックを指定可能なテンプレート型
     */
-    template <class ValueList, LiftedList NewList> using wrap_value_elements_t = wrap_value_elements<ValueList, NewList>::type;
+    template <class ValueList, LiftedList NewList = lift<type_list>> using wrap_value_elements_t = wrap_value_elements<ValueList, NewList>::type;
 
     /**
      * @fn
@@ -105,7 +105,7 @@ namespace tuutil::mpl
      * @tparam TypeList 型テンプレートパラメータパックを持つ型
      * @tparam NewList 値の要素を格納可能なテンプレート型
     */
-    template <class TypeList, LiftedvList NewList> struct unwrap_value_elements;
+    template <class TypeList, LiftedvList NewList = liftv<value_list>> struct unwrap_value_elements;
     template <template <class...> class List, template <auto...> class NewList, class... TypeElements>
     requires (has_constexpr_value_member_v<TypeElements> && ...)
     struct unwrap_value_elements<List<TypeElements...>, liftv<NewList>>
@@ -120,7 +120,7 @@ namespace tuutil::mpl
      * @tparam TypeList 型テンプレートパラメータパックを持つ型
      * @tparam NewList 値の要素を格納可能なテンプレート型
     */
-    template <class TypeList, LiftedvList NewList> using unwrap_value_elements_t = unwrap_value_elements<TypeList, NewList>::type;
+    template <class TypeList, LiftedvList NewList = liftv<value_list>> using unwrap_value_elements_t = unwrap_value_elements<TypeList, NewList>::type;
 
     /**
      * @fn

@@ -89,8 +89,7 @@ namespace tuutil::db::query
                     mpl::map_t<
                         mpl::quote<make_column_define_string>,
                         typename TableDefinition::column_list
-                    >,
-                    mpl::liftv<mpl::value_list>
+                    >
                 >;
                 return "create table \"" + TableDefinition::name + '"'
                     + '(' + str::cstrs_join_v<", ", column_define_strings> + ')';
