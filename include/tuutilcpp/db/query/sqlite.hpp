@@ -75,7 +75,7 @@ namespace tuutil::db::query
             []() {
                 return ('"' + ColumnDefinition::name + "\" "
                     + make_type_name_string_t_v<typename ColumnDefinition::field_type> + ' '
-                    + make_auto_increment_string_t_v<ColumnDefinition::auto_incriment>
+                    + make_auto_increment_string_t_v<ColumnDefinition::auto_increment>
                     + make_not_null_string_t_v<ColumnDefinition::not_null>
                 ).remove_suffix<1>();
             }()
