@@ -8,6 +8,14 @@
 namespace tuutil::db
 {
     /**
+     * テーブルに指定するカラム定義リストであること
+    */
+    template <class T>
+    concept ColumnListDefinableForTable = ColumnListDefinable<T>
+        && mpl::is_unique_v<mpl::map_t<mpl::quote<get_column_name>, T>>         // Tが持つパラメータパック要素のメンバnameは全て異なる値であること
+        && mpl::is_same_types_v<mpl::map_t<mpl::quote<get_column_id_t>, T>>;    // Tが持つパラメータパック要素のメンバidは全て同じ型であること
+
+    /**
      * @fn
      * @brief テーブル定義用メタ関数
      * @tparam ETableType テーブルと列の識別子として定義したスコープ付き列挙型
@@ -18,7 +26,7 @@ namespace tuutil::db
     template <
         mpl::Enumeration ETableType,
         str::cstr Name,
-        ColumnListDefinable ColumnDefinitionList,
+        ColumnListDefinableForTable ColumnDefinitionList,
         ConstraintListDefinable ConstraintDefinitionList = constraint_unspecified
     >
     requires (
@@ -48,7 +56,7 @@ namespace tuutil::db
         mpl::Enumeration auto ColID,
         mpl::Enumeration ETableType,
         str::cstr Name,
-        ColumnListDefinable ColumnDefinitionList,
+        ColumnListDefinableForTable ColumnDefinitionList,
         ConstraintListDefinable ConstraintDefinitionList
     >
     struct get_column_def<ColID, define_table<ETableType, Name, ColumnDefinitionList, ConstraintDefinitionList>>
@@ -62,7 +70,7 @@ namespace tuutil::db
     template <
         mpl::Enumeration ETableType,
         str::cstr Name,
-        ColumnListDefinable ColumnDefinitionList,
+        ColumnListDefinableForTable ColumnDefinitionList,
         ConstraintListDefinable ConstraintDefinitionList
     >
     struct is_table_definition<define_table<ETableType, Name, ColumnDefinitionList, ConstraintDefinitionList>>

@@ -156,8 +156,8 @@ TEST(TuutilcppDbTest, DbColumnTest)
     constexpr auto case11 = db::ColumnListDefinable<mpl::type_list<column_id, column_na, int>>; // リスト内にdefine_column以外を含むNG
     constexpr auto case12 = db::ColumnListDefinable<mpl::type_list<column_id, column_na, column_na>>; // リスト内の型が一意ではないNG
     constexpr auto case13 = db::ColumnListDefinable<mpl::type_list<column_id, db::define_column<samples::ID, "bad_id", db::integer>>>; // ColIDが重複しているのでNG
-    constexpr auto case14 = db::ColumnListDefinable<mpl::type_list<column_id, db::define_column<samples2::ID2, "id2", db::integer, db::pk>>>; // 異なる型のColIDが指定されたカラム定義が含まれるのでNG
-    constexpr auto case15 = db::ColumnListDefinable<mpl::type_list<column_id, db::define_column<samples::ID2, "id", db::integer>>>; // カラム名に重複ありNG
+    constexpr auto case14 = db::ColumnListDefinable<mpl::type_list<column_id, db::define_column<samples2::ID2, "id2", db::integer, db::pk>>>; // 異なる型のColIDが指定されたカラム定義が含まれる
+    constexpr auto case15 = db::ColumnListDefinable<mpl::type_list<column_id, db::define_column<samples::ID2, "id", db::integer>>>; // カラム名に重複あり
     // extract_constraintsテスト
     constexpr auto case16 = std::is_same_v<
         db::extract_constraints_t<column_definition_list>,
@@ -191,14 +191,20 @@ TEST(TuutilcppDbTest, DbColumnTest)
     EXPECT_FALSE(case11);
     EXPECT_FALSE(case12);
     EXPECT_FALSE(case13);
-    EXPECT_FALSE(case14);
-    EXPECT_FALSE(case15);
+    EXPECT_TRUE(case14);
+    EXPECT_TRUE(case15);
     EXPECT_TRUE(case16);
     EXPECT_TRUE(case17);
     EXPECT_TRUE(case18);
     EXPECT_TRUE(case19);
     EXPECT_TRUE(case20);
     EXPECT_TRUE(case21);
+
+    
+    constexpr auto case22 = db::ColumnListDefinableForTable<mpl::type_list<column_id, db::define_column<samples2::ID2, "id2", db::integer, db::pk>>>; // テーブル定義用の制約のため、型が統一されていなければならない
+    constexpr auto case23 = db::ColumnListDefinableForTable<mpl::type_list<column_id, db::define_column<samples::ID2, "id", db::integer>>>; // カラム名に重複ありNG
+    EXPECT_FALSE(case22);
+    EXPECT_FALSE(case23);
 }
 
 TEST(TuutilcppDbTest, DbTableTest)
@@ -227,7 +233,7 @@ TEST(TuutilcppDbTest, DbTableTest)
     //     >
     // >;
 
-    // テーブル制約として直接auto_incrimentを指定してはならない
+    // テーブル制約として直接auto_incrementを指定してはならない
     // using error_samples_def2 = db::define_table<
     //     samples,
     //     "samples",
@@ -297,6 +303,25 @@ TEST(TuutilcppDbTest, DbTableTest)
     EXPECT_TRUE(case10);
 }
 
+TEST(TuutilcppDbTest, DbRecordTest)
+{
+    using column_id = db::define_column<samples::ID, "id", db::integer, db::pk, db::ai, db::not_null>;
+    using column_id2 = db::define_column<samples::ID2, "id2", db::integer, db::pk, db::fk<samples2::ID>>;
+    using column_ce = db::define_column<samples::CREATE_AT, "create_at", db::integer>;
+    using record_type = db::record<column_id, column_id2, column_ce>;
+    using record_type2 = db::record<column_id2, column_ce>;
+
+    EXPECT_TRUE(record_type::has_auto_increment_field);
+    EXPECT_FALSE(record_type2::has_auto_increment_field);
+
+    auto record_1 = record_type{1, 2, 3};
+    auto record_2 = record_type{4, 2, 6};
+    // db::set内でdb::getも呼ばれているため、getのテストも兼ねる
+    db::set<samples::ID>(record_1, 4);
+    db::set<samples::CREATE_AT>(record_1, 6);
+    EXPECT_EQ(record_1, record_2);
+}
+
 TEST(TuutilcppDbTest, SqliteQueryTest)
 {
     using sqlite_query = db::query::sqlite;
@@ -312,8 +337,8 @@ TEST(TuutilcppDbTest, SqliteQueryTest)
 
     using column_id = db::define_column<samples::ID, "id", db::integer, db::pk, db::ai, db::not_null>;
     using column_na = db::define_column<samples::NAME, "name", db::varchar<255>>;
-    constexpr auto case5 = sqlite_query::make_column_define_string_t_v<column_id>;
-    constexpr auto case6 = sqlite_query::make_column_define_string_t_v<column_na>;
+    constexpr auto case5 = sqlite_query::make_column_define_string_v<column_id>;
+    constexpr auto case6 = sqlite_query::make_column_define_string_v<column_na>;
 
     EXPECT_STREQ(case5.data(), R"("id" int autoincrement not null)");
     EXPECT_STREQ(case6.data(), R"("name" varchar(255))");
@@ -323,8 +348,8 @@ TEST(TuutilcppDbTest, SqliteQueryTest)
         "samples",
         mpl::type_list<column_id, column_na>
     >;
-    constexpr auto case7 = sqlite_query::make_create_table_string_t_v<table1>;
-    constexpr auto case8 = sqlite_query::make_drop_table_string_t_v<table1>;
+    constexpr auto case7 = sqlite_query::make_create_table_string_v<table1>;
+    constexpr auto case8 = sqlite_query::make_drop_table_string_v<table1>;
     EXPECT_STREQ(case7.data(), R"(create table "samples"("id" int autoincrement not null, "name" varchar(255)))");
     EXPECT_STREQ(case8.data(), R"(drop table "samples")");
 }
@@ -344,13 +369,18 @@ TEST(TuutilcppDbTest, SqliteExecuteTest)
 
     // DB生成とかcreateテーブル周りのテスト
     EXPECT_FALSE(test_db_type::exists_db());
-    {
-        db::sqlite<"test.db", mpl::type_list<table1>> test_db;
-        ASSERT_TRUE(test_db_type::exists_db());
-        ASSERT_FALSE(test_db.exists_table<samples>());
-        test_db.create_table_all();
-        EXPECT_TRUE(test_db.exists_table<samples>());
-    }
+    EXPECT_TRUE(test_db_type::create_db());
+    EXPECT_TRUE(test_db_type::exists_db());
     test_db_type::drop_db();
     EXPECT_FALSE(test_db_type::exists_db());
+    {
+        test_db_type test_db;
+        // インスタンス化と同時にDB, DB構造も生成される
+        ASSERT_TRUE(test_db_type::exists_db());
+        EXPECT_TRUE(test_db.exists_table<samples>());
+        EXPECT_THROW(test_db_type::drop_db(), std::runtime_error); // 有効な接続が存在する中で実行しないように例外を投げる
+    }
+    // DB, テーブルが存在する際にテーブル生成クエリが再度実行されないことのテスト
+    EXPECT_NO_THROW(test_db_type{});
+    test_db_type::drop_db();
 }

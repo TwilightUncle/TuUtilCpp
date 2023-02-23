@@ -41,14 +41,11 @@ namespace tuutil::db::query
          * @tparam IsAi auto incrementかどうかの真偽値
         */
         template <bool IsAi>
-        struct make_auto_increment_string : public std::type_identity<mpl::value_constant<
-            []() {
-                if constexpr (IsAi) return str::cstr{"autoincrement "};
-                else return str::cstr{""};
-            }()
-        >> {};
-        template <bool IsAi>
-        static constexpr auto make_auto_increment_string_t_v = make_auto_increment_string<IsAi>::type::value;
+        static constexpr auto make_auto_increment_string()
+        {
+            if constexpr (IsAi) return str::cstr{"autoincrement "};
+            else return str::cstr{""};
+        }
 
         /**
          * @fn
@@ -56,14 +53,11 @@ namespace tuutil::db::query
          * @tparam IsNn not nullかどうかの真偽値
         */
         template <bool IsNn>
-        struct make_not_null_string : public std::type_identity<mpl::value_constant<
-            []() {
-                if constexpr (IsNn) return str::cstr{"not null "};
-                else return str::cstr("");
-            }()
-        >> {};
-        template <bool IsNn>
-        static constexpr auto make_not_null_string_t_v = make_not_null_string<IsNn>::type::value;
+        static constexpr auto make_not_null_string()
+        {
+            if constexpr (IsNn) return str::cstr{"not null "};
+            else return str::cstr("");
+        }
 
         /**
          * @fn
@@ -71,17 +65,17 @@ namespace tuutil::db::query
          * @tparam ColumnDefinition カラム定義クラス
         */
         template <ColumnDefinable ColumnDefinition>
-        struct make_column_define_string : public std::type_identity<mpl::value_constant<
+        using make_column_define_string = mpl::value_constant<
             []() {
                 return ('"' + ColumnDefinition::name + "\" "
                     + make_type_name_string_t_v<typename ColumnDefinition::field_type> + ' '
-                    + make_auto_increment_string_t_v<ColumnDefinition::auto_incriment>
-                    + make_not_null_string_t_v<ColumnDefinition::not_null>
+                    + make_auto_increment_string<ColumnDefinition::auto_increment>()
+                    + make_not_null_string<ColumnDefinition::not_null>()
                 ).remove_suffix<1>();
             }()
-        >> {};
+        >;
         template <ColumnDefinable ColumnDefinition>
-        static constexpr auto make_column_define_string_t_v = make_column_define_string<ColumnDefinition>::type::value;
+        static constexpr auto make_column_define_string_v = make_column_define_string<ColumnDefinition>::value;
 
         /**
          * @fn
@@ -89,21 +83,18 @@ namespace tuutil::db::query
          * @tparam TableDefinition テーブル定義クラス
         */
         template <TableDefinable TableDefinition>
-        struct make_create_table_string : public std::type_identity<mpl::value_constant<
+        using make_create_table_string = mpl::value_constant<
             []() {
-                using column_define_strings = mpl::unwrap_value_elements_t<
-                    mpl::map_t<
-                        mpl::quote<make_column_define_string>,
-                        typename TableDefinition::column_list
-                    >,
-                    mpl::liftv<mpl::value_list>
+                using column_define_strings = mpl::t_v_map_t<
+                    mpl::quote<make_column_define_string>,
+                    typename TableDefinition::column_list
                 >;
                 return "create table \"" + TableDefinition::name + '"'
                     + '(' + str::cstrs_join_v<", ", column_define_strings> + ')';
             }()
-        >> {};
+        >;
         template <TableDefinable TableDefinition>
-        static constexpr auto make_create_table_string_t_v = make_create_table_string<TableDefinition>::type::value;
+        static constexpr auto make_create_table_string_v = make_create_table_string<TableDefinition>::value;
 
         /**
          * @fn
@@ -111,11 +102,9 @@ namespace tuutil::db::query
          * @tparam TableDefinition テーブル定義クラス
         */
         template <TableDefinable TableDefinition>
-        struct make_drop_table_string
-            : public std::type_identity<mpl::value_constant<"drop table \"" + TableDefinition::name + '"'>>
-        {};
+        using make_drop_table_string = mpl::value_constant<"drop table \"" + TableDefinition::name + '"'>;
         template <TableDefinable TableDefinition>
-        static constexpr auto make_drop_table_string_t_v = make_drop_table_string<TableDefinition>::type::value;
+        static constexpr auto make_drop_table_string_v = make_drop_table_string<TableDefinition>::value;
     };
 }
 

@@ -216,14 +216,22 @@ TEST(TuutilcppMplTest, ParameterPackTest)
 TEST(TuutilcppMplTest, FindIfTest)
 {
     using type_list = dummy_non_metafunction<double, long long, char, int>;
-    using find_type_int = find_if_t<bind<quote<std::is_same>, int>, type_list>;
-    using not_find_type = find_if_t<bind<quote<std::is_same>, short>, type_list>;
+    using find_type_int = find_if<bind<quote<std::is_same>, int>, type_list>;
+    using not_find_type = find_if<bind<quote<std::is_same>, short>, type_list>;
 
-    constexpr auto case1 = std::is_same_v<find_type_int, int>;
-    constexpr auto case2 = std::is_same_v<not_find_type, ignore_type>;
+    constexpr auto case1 = std::is_same_v<typename find_type_int::type, int>;
+    constexpr auto case2 = std::is_same_v<typename not_find_type::type, ignore_type>;
 
     ASSERT_TRUE(case1);
     ASSERT_TRUE(case2);
+    ASSERT_EQ(find_type_int::value, 3);
+    // å©Ç¬Ç©ÇÁÇ»Ç©Ç¡ÇΩèÍçáÇÕóvëfêîÇÃç≈å„îˆÇÃílÇ™ï‘Ç≥ÇÍÇÈ
+    ASSERT_EQ(not_find_type::value, -1);
+
+    constexpr auto case3 = index_of_v<int, type_list>;
+    constexpr auto case4 = index_of_v<short, type_list>;
+    EXPECT_EQ(case3, 3);
+    EXPECT_EQ(case4, -1);
 }
 
 TEST(TuutilcppMplTest, ArgmentTest)

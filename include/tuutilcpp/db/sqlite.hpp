@@ -11,12 +11,15 @@
 #include <tuutilcpp/db.hpp>
 #include <tuutilcpp/db/connection/sqlite.hpp>
 #include <tuutilcpp/db/query/sqlite.hpp>
+#include <tuutilcpp/db/query/builder.hpp>
 
 namespace tuutil::db
 {
     /**
      * @class
-     * @brief sqliteについて指定したテーブル定義とDB名をもとに接続とクエリ作成をカプセル化したもの
+     * @brief sqliteについて指定したテーブル定義とDB名をもとに接続とクエリ作成をカプセル化したもの。
+     * DB構造については型定義と同時に実施されることを想定しているため、テーブル構造変更などの機能は持たせないものとする。
+     * データベースファイルが存在しない場合、インスタンス化した際に自動的に作成される
      * @tparam DbName データベース名称
      * @tparam TableDefinitionList テーブル定義型
     */
@@ -24,6 +27,22 @@ namespace tuutil::db
     struct sqlite
     {
         static constexpr auto name = DbName;
+
+        sqlite(): con{}
+        {
+            number_of_valid_connections++;
+
+            // 一つでもテーブルが作成されていたら、構造が完成しているものとしてテーブル追加を実施しない
+            if (!exists_table<mpl::get_front_t<TableDefinitionList>>())
+                for (auto s : create_querys_v) this->con.exec(std::string(s));
+        }
+        ~sqlite() { number_of_valid_connections--; }
+
+        /**
+         * @fn
+         * @brief DbNameで指定したファイルに対する現在行われている有効な接続の数をカウント
+        */
+        static int count_valid_connections() { return number_of_valid_connections; }
 
         /**
          * @fn
@@ -33,18 +52,24 @@ namespace tuutil::db
 
         /**
          * @fn
-         * @brief データベースを削除する
-         * TODO: 有効な接続が存在するか確認し、あったら例外を投げるようにすること
+         * @brief データベースを作成する
+         * @return 作成に成功した場合真
         */
-        static void drop_db() { std::filesystem::remove(std::string(DbName)); }
+        static bool create_db()
+        {
+            if (!exists_db()) sqlite{};
+            return exists_db();
+        }
 
         /**
          * @fn
-         * @brief TableDefinitionに含まれる全てのcreate文を発行する
+         * @brief データベースを削除する
         */
-        void create_table_all()
+        static void drop_db()
         {
-            for (auto s : create_querys_v) this->con.exec(std::string(s));
+            if (count_valid_connections() > 0)
+                throw std::runtime_error("Unable to drop database as valid connections exist.");
+            std::filesystem::remove(std::string(DbName));
         }
 
         /**
@@ -55,9 +80,20 @@ namespace tuutil::db
         template <mpl::Enumeration ETableType>
         bool exists_table() const
         {
-            using table_definition_type = get_table_def_t<ETableType ,TableDefinitionList>;
+            using table_definition_type = get_table_def_t<ETableType, TableDefinitionList>;
             static_assert(!std::is_same_v<table_definition_type, mpl::ignore_type>, "Not found database table definition.");
-            return this->con.tableExists(table_definition_type::name);
+            return this->exists_table<table_definition_type>();
+        }
+
+        /**
+         * @fn
+         * @brief 指定した定義のテーブルが存在しているか判定
+         * @tparam テーブル定義型
+        */
+        template <TableDefinable TableDefinition>
+        bool exists_table() const
+        {
+            return this->con.tableExists(TableDefinition::name);
         }
 
         /**
@@ -70,7 +106,8 @@ namespace tuutil::db
         }
 
     private:
-        connection::sqlite<DbName> con{};
+        connection::sqlite<DbName> con;
+        inline static int number_of_valid_connections = 0;
 
         /**
          * @fn
@@ -81,7 +118,7 @@ namespace tuutil::db
         template <template <class...> class List, TableDefinable... TableDefinitions>
         struct expansion_querys<List<TableDefinitions...>>
         {
-            static constexpr auto create_querys = std::array{ query::sqlite::make_create_table_string_t_v<TableDefinitions>.view()... };
+            static constexpr auto create_querys = std::array{ query::sqlite::make_create_table_string_v<TableDefinitions>.view()... };
         };
         static constexpr auto create_querys_v = expansion_querys<TableDefinitionList>::create_querys;
     };
