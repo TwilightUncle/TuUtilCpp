@@ -365,8 +365,13 @@ TEST(TuutilcppDbTest, SqliteExecuteTest)
 
     // DB生成とかcreateテーブル周りのテスト
     EXPECT_FALSE(test_db_type::exists_db());
+    EXPECT_TRUE(test_db_type::create_db());
+    EXPECT_TRUE(test_db_type::exists_db());
+    test_db_type::drop_db();
+    EXPECT_FALSE(test_db_type::exists_db());
     {
         db::sqlite<"test.db", mpl::type_list<table1>> test_db;
+        // インスタンス化と同時にDBも生成される
         ASSERT_TRUE(test_db_type::exists_db());
         ASSERT_FALSE(test_db.exists_table<samples>());
         test_db.create_table_all();

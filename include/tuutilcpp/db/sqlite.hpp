@@ -16,7 +16,9 @@ namespace tuutil::db
 {
     /**
      * @class
-     * @brief sqliteについて指定したテーブル定義とDB名をもとに接続とクエリ作成をカプセル化したもの
+     * @brief sqliteについて指定したテーブル定義とDB名をもとに接続とクエリ作成をカプセル化したもの。
+     * DB構造については型定義と同時に実施されることを想定しているため、テーブル構造変更などの機能は持たせないものとする。
+     * データベースファイルが存在しない場合、インスタンス化した際に自動的に作成される
      * @tparam DbName データベース名称
      * @tparam TableDefinitionList テーブル定義型
     */
@@ -30,6 +32,19 @@ namespace tuutil::db
          * @brief テンプレート引数で指定されたDBファイルが存在委するか判定
         */
         static bool exists_db() { return std::ifstream(std::string(DbName)).is_open(); }
+
+        /**
+         * @fn
+         * @brief データベースを作成する
+         * @return 作成に成功した場合真
+        */
+        static bool create_db()
+        {
+            if (!exists_db()) {
+                connection::sqlite<DbName>{};
+            }
+            return exists_db();
+        }
 
         /**
          * @fn
