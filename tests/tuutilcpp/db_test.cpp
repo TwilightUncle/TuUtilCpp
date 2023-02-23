@@ -233,7 +233,7 @@ TEST(TuutilcppDbTest, DbTableTest)
     //     >
     // >;
 
-    // テーブル制約として直接auto_incrimentを指定してはならない
+    // テーブル制約として直接auto_incrementを指定してはならない
     // using error_samples_def2 = db::define_table<
     //     samples,
     //     "samples",

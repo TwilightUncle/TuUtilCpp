@@ -11,6 +11,7 @@
 #include <tuutilcpp/db.hpp>
 #include <tuutilcpp/db/connection/sqlite.hpp>
 #include <tuutilcpp/db/query/sqlite.hpp>
+#include <tuutilcpp/db/query/builder.hpp>
 
 namespace tuutil::db
 {
@@ -56,9 +57,7 @@ namespace tuutil::db
         */
         static bool create_db()
         {
-            if (!exists_db()) {
-                sqlite{};
-            }
+            if (!exists_db()) sqlite{};
             return exists_db();
         }
 
@@ -68,9 +67,8 @@ namespace tuutil::db
         */
         static void drop_db()
         {
-            if (count_valid_connections() > 0) {
+            if (count_valid_connections() > 0)
                 throw std::runtime_error("Unable to drop database as valid connections exist.");
-            }
             std::filesystem::remove(std::string(DbName));
         }
 
