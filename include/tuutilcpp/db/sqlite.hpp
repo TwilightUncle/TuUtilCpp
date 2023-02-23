@@ -27,6 +27,22 @@ namespace tuutil::db
     {
         static constexpr auto name = DbName;
 
+        sqlite(): con{}
+        {
+            number_of_valid_connections++;
+
+            // 一つでもテーブルが作成されていたら、構造が完成しているものとしてテーブル追加を実施しない
+            if (!exists_table<mpl::get_front_t<TableDefinitionList>>())
+                for (auto s : create_querys_v) this->con.exec(std::string(s));
+        }
+        ~sqlite() { number_of_valid_connections--; }
+
+        /**
+         * @fn
+         * @brief DbNameで指定したファイルに対する現在行われている有効な接続の数をカウント
+        */
+        static int count_valid_connections() { return number_of_valid_connections; }
+
         /**
          * @fn
          * @brief テンプレート引数で指定されたDBファイルが存在委するか判定
@@ -41,7 +57,7 @@ namespace tuutil::db
         static bool create_db()
         {
             if (!exists_db()) {
-                connection::sqlite<DbName>{};
+                sqlite{};
             }
             return exists_db();
         }
@@ -49,17 +65,13 @@ namespace tuutil::db
         /**
          * @fn
          * @brief データベースを削除する
-         * TODO: 有効な接続が存在するか確認し、あったら例外を投げるようにすること
         */
-        static void drop_db() { std::filesystem::remove(std::string(DbName)); }
-
-        /**
-         * @fn
-         * @brief TableDefinitionに含まれる全てのcreate文を発行する
-        */
-        void create_table_all()
+        static void drop_db()
         {
-            for (auto s : create_querys_v) this->con.exec(std::string(s));
+            if (count_valid_connections() > 0) {
+                throw std::runtime_error("Unable to drop database as valid connections exist.");
+            }
+            std::filesystem::remove(std::string(DbName));
         }
 
         /**
@@ -72,7 +84,18 @@ namespace tuutil::db
         {
             using table_definition_type = get_table_def_t<ETableType, TableDefinitionList>;
             static_assert(!std::is_same_v<table_definition_type, mpl::ignore_type>, "Not found database table definition.");
-            return this->con.tableExists(table_definition_type::name);
+            return this->exists_table<table_definition_type>();
+        }
+
+        /**
+         * @fn
+         * @brief 指定した定義のテーブルが存在しているか判定
+         * @tparam テーブル定義型
+        */
+        template <TableDefinable TableDefinition>
+        bool exists_table() const
+        {
+            return this->con.tableExists(TableDefinition::name);
         }
 
         /**
@@ -85,7 +108,8 @@ namespace tuutil::db
         }
 
     private:
-        connection::sqlite<DbName> con{};
+        connection::sqlite<DbName> con;
+        inline static int number_of_valid_connections = 0;
 
         /**
          * @fn

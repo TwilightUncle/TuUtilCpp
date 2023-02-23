@@ -370,13 +370,13 @@ TEST(TuutilcppDbTest, SqliteExecuteTest)
     test_db_type::drop_db();
     EXPECT_FALSE(test_db_type::exists_db());
     {
-        db::sqlite<"test.db", mpl::type_list<table1>> test_db;
-        // インスタンス化と同時にDBも生成される
+        test_db_type test_db;
+        // インスタンス化と同時にDB, DB構造も生成される
         ASSERT_TRUE(test_db_type::exists_db());
-        ASSERT_FALSE(test_db.exists_table<samples>());
-        test_db.create_table_all();
         EXPECT_TRUE(test_db.exists_table<samples>());
+        EXPECT_THROW(test_db_type::drop_db(), std::runtime_error); // 有効な接続が存在する中で実行しないように例外を投げる
     }
+    // DB, テーブルが存在する際にテーブル生成クエリが再度実行されないことのテスト
+    EXPECT_NO_THROW(test_db_type{});
     test_db_type::drop_db();
-    EXPECT_FALSE(test_db_type::exists_db());
 }
