@@ -20,8 +20,32 @@ namespace tuutil::db
         using parent = std::tuple<typename ColumnDefinitions::field_type...>;
     
     public:
+        // 継承コンストラクタ
         using parent::parent;
+
+        // 指定されたカラム定義の中に自動採番が含まれていた場合真
+        static constexpr bool has_auto_increment_field = ((ColumnDefinitions::auto_increment) || ...);
     };
+
+    /**
+     * @fn
+     * @brief record型かどうか判定
+    */
+    template <class T> struct is_record : public std::false_type {};
+    template <ColumnDefinable... ColumnDefinitions>
+    struct is_record<record<ColumnDefinitions...>> : public std::bool_constant<mpl::is_unique_v<record<ColumnDefinitions...>>> {};
+
+    template <class T>
+    concept DbRecordHoldable = is_record<T>::value;
+
+    /**
+     * @brief insert可能なデータ型か判定する
+    */
+    template <class T, class TableDefinition>
+    concept DbRecordInsertable = TableDefinable<TableDefinition>
+        && ColumnListDefinableForTable<T>
+        && DbRecordHoldable<T>
+        && !T::has_auto_increment_field;
 
     /**
      * @fn

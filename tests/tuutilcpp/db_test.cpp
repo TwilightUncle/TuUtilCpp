@@ -309,6 +309,10 @@ TEST(TuutilcppDbTest, DbRecordTest)
     using column_id2 = db::define_column<samples::ID2, "id2", db::integer, db::pk, db::fk<samples2::ID>>;
     using column_ce = db::define_column<samples::CREATE_AT, "create_at", db::integer>;
     using record_type = db::record<column_id, column_id2, column_ce>;
+    using record_type2 = db::record<column_id2, column_ce>;
+
+    EXPECT_TRUE(record_type::has_auto_increment_field);
+    EXPECT_FALSE(record_type2::has_auto_increment_field);
 
     auto record_1 = record_type{1, 2, 3};
     auto record_2 = record_type{4, 2, 6};
