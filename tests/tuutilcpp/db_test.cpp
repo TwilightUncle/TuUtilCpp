@@ -337,8 +337,8 @@ TEST(TuutilcppDbTest, SqliteQueryTest)
 
     using column_id = db::define_column<samples::ID, "id", db::integer, db::pk, db::ai, db::not_null>;
     using column_na = db::define_column<samples::NAME, "name", db::varchar<255>>;
-    constexpr auto case5 = sqlite_query::make_column_define_string_t_v<column_id>;
-    constexpr auto case6 = sqlite_query::make_column_define_string_t_v<column_na>;
+    constexpr auto case5 = sqlite_query::make_column_define_string_v<column_id>;
+    constexpr auto case6 = sqlite_query::make_column_define_string_v<column_na>;
 
     EXPECT_STREQ(case5.data(), R"("id" int autoincrement not null)");
     EXPECT_STREQ(case6.data(), R"("name" varchar(255))");
@@ -348,8 +348,8 @@ TEST(TuutilcppDbTest, SqliteQueryTest)
         "samples",
         mpl::type_list<column_id, column_na>
     >;
-    constexpr auto case7 = sqlite_query::make_create_table_string_t_v<table1>;
-    constexpr auto case8 = sqlite_query::make_drop_table_string_t_v<table1>;
+    constexpr auto case7 = sqlite_query::make_create_table_string_v<table1>;
+    constexpr auto case8 = sqlite_query::make_drop_table_string_v<table1>;
     EXPECT_STREQ(case7.data(), R"(create table "samples"("id" int autoincrement not null, "name" varchar(255)))");
     EXPECT_STREQ(case8.data(), R"(drop table "samples")");
 }

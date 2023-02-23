@@ -118,7 +118,7 @@ namespace tuutil::db
         template <template <class...> class List, TableDefinable... TableDefinitions>
         struct expansion_querys<List<TableDefinitions...>>
         {
-            static constexpr auto create_querys = std::array{ query::sqlite::make_create_table_string_t_v<TableDefinitions>.view()... };
+            static constexpr auto create_querys = std::array{ query::sqlite::make_create_table_string_v<TableDefinitions>.view()... };
         };
         static constexpr auto create_querys_v = expansion_querys<TableDefinitionList>::create_querys;
     };
