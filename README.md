@@ -3,12 +3,12 @@ C++20以降を対象とした、コンパイル時処理関連の汎用ヘッダ
 
 ## 機能
 
-|機能名<br>(リンクは使用例)|概要|名前空間|include|
-|----|----|----|----|
-|[mpl](#mpl)|メタ関数群。<br>高階メタ関数によるパラメータパックの操作がメイン|`tuutil::mpl`|`#include<tuutilcpp/mpl.hpp>`|
-|[cstr](#cstr--regex)|コンパイル時評価のための固定長文字列クラス|`tuutil::str`|`#include<tuutilcpp/str.hpp>`|
-|[regex](#cstr--regex)|コンパイル時評価のための正規表現クラス。<br>ユニコード、制御文字については未対応。<br>特殊文字等は[ECMAScriptの正規表現](https://developer.mozilla.org/ja/docs/Web/JavaScript/Guide/Regular_Expressions)のふるまいを参考に作成|`tuutil::str`|`#include<tuutilcpp/str.hpp>`|
-<!-- |db|コンパイル時に型検査、SQL生成等を行うO/Rマッパー。<br>全くできていない|`tuutil::db`|`#include<tuutilcpp/db.hpp>`| -->
+|機能名<br>(リンクは使用例)|Wikiリンク|概要|名前空間|include|
+|----|----|----|----|----|
+|[mpl](#mpl)|[wiki](Mpl)|メタ関数群。<br>高階メタ関数によるパラメータパックの操作がメイン|`tuutil::mpl`|`#include<tuutilcpp/mpl.hpp>`|
+|[cstr](#cstr--regex)||コンパイル時評価のための固定長文字列クラス|`tuutil::str`|`#include<tuutilcpp/str.hpp>`|
+|[regex](#cstr--regex)||コンパイル時評価のための正規表現クラス。<br>ユニコード、制御文字については未対応。<br>特殊文字等は[ECMAScriptの正規表現](https://developer.mozilla.org/ja/docs/Web/JavaScript/Guide/Regular_Expressions)のふるまいを参考に作成|`tuutil::str`|`#include<tuutilcpp/str.hpp>`|
+<!-- |db||コンパイル時に型検査、SQL生成等を行うO/Rマッパー。<br>全くできていない|`tuutil::db`|`#include<tuutilcpp/db.hpp>`| -->
 
 ※インクルードディレクティブの記載は、`include`ディレクトリをインクルードパスとして追加済みである前提とする。
 
