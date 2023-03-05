@@ -224,6 +224,9 @@ namespace tuutil::mpl
     template <class... Lists>
     requires (sizeof...(Lists) > 0)
     struct concat_list;
+    template <class List>
+    requires(has_type_parameters_v<List> || has_value_parameters_v<List>)
+    struct concat_list<List> : std::type_identity<List> {};
     // “ñ‚Â‚Ìtype_list‚ğŒ‹‡
     template <template <class...> class List, class... Types1, class... Types2>
     struct concat_list<List<Types1...>, List<Types2...>> : std::type_identity<List<Types1..., Types2...>> {};
