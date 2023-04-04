@@ -321,7 +321,7 @@ namespace tuutil::str
      * @brief テンプレート引数で渡した整数値をcstrに変換する。進数を渡すことで、(2,8,16)進数リテラルのような文字列に変換する
     */
     template <auto V, int Hex = 10, bool UsePrefix = false>
-    requires (V >= 0 && Hex >= 2 && (std::integral<decltype(V)> || utility::is_big_int<decltype(V)>::value))
+    requires (V >= 0 && Hex >= 2 && (std::integral<decltype(V)> || std::convertible_to<decltype(V), utility::big_int<2>>))
     constexpr auto to_string()
     {
         // 10進数として桁数を取得
@@ -347,6 +347,7 @@ namespace tuutil::str
     }
     // 負数の場合
     template <std::integral auto V, std::size_t Hex = 10, bool UsePrefix = false>
+    requires (V < 0)
     constexpr auto to_string() { return "-" + to_string<-V, Hex, UsePrefix>(); }
 
     /**
