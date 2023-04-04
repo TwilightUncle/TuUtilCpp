@@ -40,7 +40,7 @@ namespace tuutil::mpl
      * @brief パラメータパックの重複を排除する
      * @tparam List パラメータパックを持つ型
     */
-    template <class List> using unique_t = unique<List>::type;
+    template <class List> using unique_t = typename unique<List>::type;
 
     /**
      * @fn

@@ -139,7 +139,7 @@ namespace tuutil::str::_regex
         using type = tuutil::mpl::quote<apply>;
     };
 
-    template <template <cstr, RegexParseable> class F, cstr Pattern> using bind_regex_pattern_t = bind_regex_pattern<F, Pattern>::type;
+    template <template <cstr, RegexParseable> class F, cstr Pattern> using bind_regex_pattern_t = typename bind_regex_pattern<F, Pattern>::type;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_STR_REGEX_RESOLVE_HPP

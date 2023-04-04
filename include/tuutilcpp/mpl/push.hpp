@@ -23,7 +23,7 @@ namespace tuutil::mpl
      * @tparam TypeList 型のパラメータパックを持つ型
      * @tparam T 追加する型
     */
-    template <class TypeList, class T> using push_back_t = push_back<TypeList, T>::type;
+    template <class TypeList, class T> using push_back_t = typename push_back<TypeList, T>::type;
 
     /**
      * @fn
@@ -41,7 +41,7 @@ namespace tuutil::mpl
      * @tparam TypeList 型のパラメータパックを持つ型
      * @tparam T 追加する型
     */
-    template <class TypeList, class T> using push_front_t = push_front<TypeList, T>::type;
+    template <class TypeList, class T> using push_front_t = typename push_front<TypeList, T>::type;
 
     /**
      * @fn
@@ -58,7 +58,7 @@ namespace tuutil::mpl
      * @tparam TypeList 型のパラメータパックを持つ型
      * @tparam T 追加する型
     */
-    template <MetaCallable Pred, class TypeList, class T> using push_back_if_t = push_back_if<Pred, TypeList, T>::type;
+    template <MetaCallable Pred, class TypeList, class T> using push_back_if_t = typename push_back_if<Pred, TypeList, T>::type;
 
     /**
      * @fn
@@ -75,7 +75,7 @@ namespace tuutil::mpl
      * @tparam TypeList 型のパラメータパックを持つ型
      * @tparam T 追加する型
     */
-    template <MetaCallable Pred, class TypeList, class T> using push_front_if_t = push_front_if<Pred, TypeList, T>::type;
+    template <MetaCallable Pred, class TypeList, class T> using push_front_if_t = typename push_front_if<Pred, TypeList, T>::type;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_MPL_PUSH_HPP

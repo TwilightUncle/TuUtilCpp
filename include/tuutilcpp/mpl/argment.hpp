@@ -23,7 +23,7 @@ namespace tuutil::mpl
      * @tparam Arg2 メタ関数の二つ目に指定したい引数
      * @tparam Arg1 メタ関数の一つ目に指定したい引数
     */
-    template <MetaCallable F, class Arg2, class Arg1> using flip_t = flip<F, Arg2, Arg1>::type;
+    template <MetaCallable F, class Arg2, class Arg1> using flip_t = typename flip<F, Arg2, Arg1>::type;
 
     template <MetaCallable F, class Arg2, class Arg1> constexpr auto flip_v = flip<F, Arg2, Arg1>::value;
 
@@ -43,7 +43,7 @@ namespace tuutil::mpl
      * @tparam Arg 初期値
      * @tparam MetaFuncList メタ関数リスト
     */
-    template <class Arg, class MetaFuncList> using relay_t = relay<Arg, MetaFuncList>::type;
+    template <class Arg, class MetaFuncList> using relay_t = typename relay<Arg, MetaFuncList>::type;
 
     /**
      * @fn
@@ -69,7 +69,7 @@ namespace tuutil::mpl
      * @tparam F メタ関数
      * @tparam ArgList 型のパラメータパックを持つ型
     */
-    template <MetaCallable F, class ArgList> using apply_list_t = apply_list<F, ArgList>::type;
+    template <MetaCallable F, class ArgList> using apply_list_t = typename apply_list<F, ArgList>::type;
 
     /**
      * @fn
@@ -97,7 +97,7 @@ namespace tuutil::mpl
      * @tparam ValueList 非型テンプレートパラメータパックを持つ型
      * @tparam NewList value_constantで包んだ要素を受け取る、型テンプレートパラメータパックを指定可能なテンプレート型
     */
-    template <class ValueList, LiftedList NewList = lift<type_list>> using wrap_value_elements_t = wrap_value_elements<ValueList, NewList>::type;
+    template <class ValueList, LiftedList NewList = lift<type_list>> using wrap_value_elements_t = typename wrap_value_elements<ValueList, NewList>::type;
 
     /**
      * @fn
@@ -120,7 +120,7 @@ namespace tuutil::mpl
      * @tparam TypeList 型テンプレートパラメータパックを持つ型
      * @tparam NewList 値の要素を格納可能なテンプレート型
     */
-    template <class TypeList, LiftedvList NewList = liftv<value_list>> using unwrap_value_elements_t = unwrap_value_elements<TypeList, NewList>::type;
+    template <class TypeList, LiftedvList NewList = liftv<value_list>> using unwrap_value_elements_t = typename unwrap_value_elements<TypeList, NewList>::type;
 
     /**
      * @fn

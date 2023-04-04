@@ -270,9 +270,9 @@ TEST(TuutilcppStrTest, RegexReferenceTest)
 
 TEST(TuutilcppStrTest, RegexAddQuantifierTest)
 {
-    using type1 = _regex::add_quantifier<"abcdef[g", _regex::general<"abcdef[g", 0>>::type;
-    using type2 = _regex::add_quantifier<"abcdef+[g", _regex::general<"abcdef+[g", 0>>::type;
-    using type3 = _regex::add_quantifier<"abcdef+[g", _regex::general<"abcdef+[g", 5>>::type;
+    using type1 = typename _regex::add_quantifier<"abcdef[g", _regex::general<"abcdef[g", 0>>::type;
+    using type2 = typename _regex::add_quantifier<"abcdef+[g", _regex::general<"abcdef+[g", 0>>::type;
+    using type3 = typename _regex::add_quantifier<"abcdef+[g", _regex::general<"abcdef+[g", 5>>::type;
 
     EXPECT_EQ(type1::begin_pos, 0);
     EXPECT_EQ(type1::end_pos, 6);

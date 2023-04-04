@@ -70,7 +70,7 @@ namespace tuutil::db
      * @fn
      * @brief カラム定義からカラムIDを示す列挙体の型を取得
     */
-    template <class T> using get_column_id_t = get_column_id<T>::type;
+    template <class T> using get_column_id_t = typename get_column_id<T>::type;
 
     /**
      * @fn
@@ -104,7 +104,7 @@ namespace tuutil::db
      * @fn
      * @brief define_columnで指定した制約を取り出す。ほかの任意の型を渡した場合は、constraint_unspecifiedを返す
     */
-    template <class T> using get_constraint_list_t = get_constraint_list<T>::type;
+    template <class T> using get_constraint_list_t = typename get_constraint_list<T>::type;
 
     /**
      * カラム定義リストであること
@@ -133,7 +133,7 @@ namespace tuutil::db
      * @fn
      * @brief カラムの定義リストから、各カラムに指定された制約情報を抽出する(一つもなければtype_list<ignore_type>が返る)
     */
-    template <ColumnListDefinable T> using extract_constraints_t = extract_constraints<T>::type;
+    template <ColumnListDefinable T> using extract_constraints_t = typename extract_constraints<T>::type;
 
     /**
      * @fn
@@ -162,7 +162,7 @@ namespace tuutil::db
      * @brief 指定したColIDに合致するテーブル定義をテーブル定義リストから取得する
     */
     template <mpl::Enumeration auto ColID, class T>
-    using get_column_def_t = get_column_def<ColID, T>::type;
+    using get_column_def_t = typename get_column_def<ColID, T>::type;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_DB_COLUMN_HPP

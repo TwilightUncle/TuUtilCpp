@@ -227,7 +227,7 @@ namespace tuutil::db
      * @tparam ColId Constraintを指定している対象のカラムID
     */
     template <ColumnConstraintDefinable Constraint, mpl::Enumeration auto ColId>
-    using to_table_constraint_t = to_table_constraint<Constraint, ColId>::type;
+    using to_table_constraint_t = typename to_table_constraint<Constraint, ColId>::type;
 
     /**
      * テーブルとして制約を未指定であること

@@ -14,7 +14,7 @@ namespace tuutil::db::query
          * @brief Žw’è‚µ‚½sqlŒ^‚ÉŠY“–‚·‚éŒ^–¼‚Ì•¶Žš—ñ‚ð•Ô‚·
         */
         template <class T>
-        struct make_type_name_string : public std::type_identity<mpl::value_constant<
+        using make_type_name_string = mpl::value_constant<
             []() {
                 if constexpr (std::is_same_v<T, bit>)                       return str::cstr{"bit"};
                 else if constexpr (std::is_same_v<T, tinyint>)              return str::cstr{"tinyint"};
@@ -31,9 +31,9 @@ namespace tuutil::db::query
                     return "char(" + str::to_string<get_sql_string_size_v<T>>() + ')';
                 else return str::cstr{""};
             }()
-        >> {};
+        >;
         template <class T>
-        static constexpr auto make_type_name_string_t_v = make_type_name_string<T>::type::value;
+        static constexpr auto make_type_name_string_v = make_type_name_string<T>::value;
 
         /**
          * @fn
@@ -68,7 +68,7 @@ namespace tuutil::db::query
         using make_column_define_string = mpl::value_constant<
             []() {
                 return ('"' + ColumnDefinition::name + "\" "
-                    + make_type_name_string_t_v<typename ColumnDefinition::field_type> + ' '
+                    + make_type_name_string_v<typename ColumnDefinition::field_type> + ' '
                     + make_auto_increment_string<ColumnDefinition::auto_increment>()
                     + make_not_null_string<ColumnDefinition::not_null>()
                 ).remove_suffix<1>();

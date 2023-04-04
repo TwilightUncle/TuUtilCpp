@@ -37,7 +37,7 @@ namespace tuutil::mpl
      * @tparam Pred 判定用メタ関数
      * @tparam TypeList 型のパラメータパックを持つ型
     */
-    template <MetaCallable Pred, class TypeList> using find_if_t = find_if<Pred, TypeList>::type;
+    template <MetaCallable Pred, class TypeList> using find_if_t = typename find_if<Pred, TypeList>::type;
 
     /**
      * @fn

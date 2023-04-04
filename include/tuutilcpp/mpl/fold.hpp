@@ -35,7 +35,7 @@ namespace tuutil::mpl
      * @tparam Init 初期化子
      * @tparam TypeList 型のパラメータパックを持つ型
     */
-    template <MetaCallable F, class Init, class TypeList> using foldl_t = foldl<F, Init, TypeList>::type;
+    template <MetaCallable F, class Init, class TypeList> using foldl_t = typename foldl<F, Init, TypeList>::type;
 
     /**
      * @fn
@@ -65,7 +65,7 @@ namespace tuutil::mpl
      * @tparam Init 初期化子
      * @tparam TypeList 型のパラメータパックを持つ型
     */
-    template <MetaCallable F, class Init, class TypeList> using foldr_t = foldr<F, Init, TypeList>::type;
+    template <MetaCallable F, class Init, class TypeList> using foldr_t = typename foldr<F, Init, TypeList>::type;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_MPL_FOLD_HPP

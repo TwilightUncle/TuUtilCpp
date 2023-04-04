@@ -48,7 +48,7 @@ namespace tuutil::mpl
      * @brief パラメータパックを持つ型のガワの部分を取得する
      * @return lift or liftvで包まれたテンプレート型
     */
-    template <class T> using get_empty_list_t = get_empty_list<T>::type;
+    template <class T> using get_empty_list_t = typename get_empty_list<T>::type;
 
     /**
      * @fn
@@ -71,7 +71,7 @@ namespace tuutil::mpl
      * @brief 型のパラメータパックの並びを反転させる
      * @tparam TypeList 型のパラメータパックを持つ型
     */
-    template <class List> using reverse_t = reverse<List>::type;
+    template <class List> using reverse_t = typename reverse<List>::type;
 
     /**
      * @fn
@@ -87,7 +87,7 @@ namespace tuutil::mpl
      * @brief 型のパラメータパックの並びを左方向に一つずらし、先頭の型を最後尾に移す
      * @tparam TypeList 型のパラメータパックを持つ型
     */
-    template <class TypeList> using rotatel_t = rotatel<TypeList>::type;
+    template <class TypeList> using rotatel_t = typename rotatel<TypeList>::type;
 
     /**
      * @fn
@@ -103,7 +103,7 @@ namespace tuutil::mpl
      * @brief 型のパラメータパックの並びを右方向に一つずらし、先頭の型を最後尾に移す
      * @tparam TypeList 型のパラメータパックを持つ型
     */
-    template <class TypeList> using rotater_t = rotater<TypeList>::type;
+    template <class TypeList> using rotater_t = typename rotater<TypeList>::type;
 
     /**
      * @fn
@@ -153,7 +153,7 @@ namespace tuutil::mpl
      * @tparam Src コピー元の型パラメータパックを持つ型
      * @tparam Dest コピー対象のテンプレートクラス
     */
-    template <class Src, LiftedList Dest> using copy_t = copy<Src, Dest>::type;
+    template <class Src, LiftedList Dest> using copy_t = typename copy<Src, Dest>::type;
 
     /**
      * @fn
@@ -204,7 +204,7 @@ namespace tuutil::mpl
     template <template <auto...> class List, auto Head, auto... Parameters>
     struct get_front<List<Head, Parameters...>> : public value_constant<Head> {};
 
-    template <class List> using get_front_t = get_front<List>::type;
+    template <class List> using get_front_t = typename get_front<List>::type;
     template <class ValueList> constexpr auto get_front_v = get_front<ValueList>::value;
 
     /**
@@ -214,7 +214,7 @@ namespace tuutil::mpl
     */
     template <class List> using get_back = get_front<reverse_t<List>>;
 
-    template <class List> using get_back_t = get_back<List>::type;
+    template <class List> using get_back_t = typename get_back<List>::type;
     template <class ValueList> constexpr auto get_back_v = get_back<ValueList>::value;
 
     /**
@@ -235,7 +235,7 @@ namespace tuutil::mpl
     requires (has_type_parameters_v<Lists> && ...)
     struct concat_list<Head, Lists...> : public foldl<quote<concat_list>, Head, type_list<Lists...>> {};
 
-    template <class... Lists> using concat_list_t = concat_list<Lists...>::type;
+    template <class... Lists> using concat_list_t = typename concat_list<Lists...>::type;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_MPL_REVERSE_HPP

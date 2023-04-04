@@ -100,7 +100,7 @@ namespace tuutil::db
      * @fn
      * @brief テーブル定義からテーブルを識別する列挙型を取得する
     */
-    template <class T> using get_talbe_id_t = get_table_id<T>::type;
+    template <class T> using get_talbe_id_t = typename get_table_id<T>::type;
 
     /**
      * @fn
@@ -143,7 +143,7 @@ namespace tuutil::db
      * @tparam ETableType 定義に該当する列挙型
      * @tparam T テーブル定義リストかDB schema定義
     */
-    template <mpl::Enumeration ETableType, class T> using get_table_def_t = get_table_def<ETableType, T>::type;
+    template <mpl::Enumeration ETableType, class T> using get_table_def_t = typename get_table_def<ETableType, T>::type;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_DB_TABLE_HPP

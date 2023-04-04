@@ -26,7 +26,7 @@ namespace tuutil::mpl
      * @tparam T apply_v<Pred, Arg>‚ª^‚Ìê‡•Ô‹p‚³‚ê‚éŒ^
      * @tparam F apply_v<Pred, Arg>‚ª‹U‚Ìê‡•Ô‹p‚³‚ê‚éŒ^
     */
-    template <MetaCallable Pred, class Arg, class T, class F> using mpl_if_t = mpl_if<Pred, Arg, T, F>::type;
+    template <MetaCallable Pred, class Arg, class T, class F> using mpl_if_t = typename mpl_if<Pred, Arg, T, F>::type;
 
     /**
      * @fn
@@ -45,7 +45,7 @@ namespace tuutil::mpl
      * @tparam F ƒƒ^ŠÖ”
      * @tparam Arg ˆø”
     */
-    template <MetaCallable Pred, MetaCallable F, class Arg> using apply_if_t = apply_if<Pred, F, Arg>::type;
+    template <MetaCallable Pred, MetaCallable F, class Arg> using apply_if_t = typename apply_if<Pred, F, Arg>::type;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_MPL_IF_HPP

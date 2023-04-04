@@ -25,7 +25,7 @@ namespace tuutil::mpl
      * @tparam F 適用するメタ関数
      * @tparam TypeList 型のパラメータパックを持つ型
     */
-    template <MetaCallable F, class TypeList> using map_t = map<F, TypeList>::type;
+    template <MetaCallable F, class TypeList> using map_t = typename map<F, TypeList>::type;
 
     /**
      * @fn
@@ -43,7 +43,7 @@ namespace tuutil::mpl
      * @tparam F 適用するメタ関数
      * @tparam TypeList 型のパラメータパックを持つ型
     */
-    template <MetaCallable Pred, MetaCallable F, class TypeList> using map_if_t = map_if<Pred, F, TypeList>::type;
+    template <MetaCallable Pred, MetaCallable F, class TypeList> using map_if_t = typename map_if<Pred, F, TypeList>::type;
 
     /**
      * @fn
@@ -65,7 +65,7 @@ namespace tuutil::mpl
      * @tparam TypeList 型のパラメータパックを持つ型
      * @tparam NewList 変換後の非型要素を格納するリスト
     */
-    template <MetaCallable F, class TypeList, LiftedvList NewList = liftv<value_list>> using t_v_map_t = t_v_map<F, TypeList, NewList>::type;
+    template <MetaCallable F, class TypeList, LiftedvList NewList = liftv<value_list>> using t_v_map_t = typename t_v_map<F, TypeList, NewList>::type;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_MPL_MAP_HPP

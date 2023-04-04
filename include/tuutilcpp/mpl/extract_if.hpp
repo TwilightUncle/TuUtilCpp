@@ -35,7 +35,7 @@ namespace tuutil::mpl
      * @tparam Pred 判定用メタ関数
      * @tparam List パラメータパックを持つ型
     */
-    template <MetaCallable Pred, class List> using extract_if_t = extract_if<Pred, List>::type;
+    template <MetaCallable Pred, class List> using extract_if_t = typename extract_if<Pred, List>::type;
 
     /**
      * @fn
@@ -51,7 +51,7 @@ namespace tuutil::mpl
      * @tparam Pred 判定用メタ関数
      * @tparam List パラメータパックを持つ型
     */
-    template <MetaCallable Pred, class List> using remove_if_t = remove_if<Pred, List>::type;
+    template <MetaCallable Pred, class List> using remove_if_t = typename remove_if<Pred, List>::type;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_MPL_EXTRACT_IF_HPP

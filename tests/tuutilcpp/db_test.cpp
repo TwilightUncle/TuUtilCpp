@@ -325,10 +325,10 @@ TEST(TuutilcppDbTest, DbRecordTest)
 TEST(TuutilcppDbTest, SqliteQueryTest)
 {
     using sqlite_query = db::query::sqlite;
-    constexpr auto case1 = sqlite_query::make_type_name_string_t_v<db::bit>;
-    constexpr auto case2 = sqlite_query::make_type_name_string_t_v<db::unsigned_bigint>;
-    constexpr auto case3 = sqlite_query::make_type_name_string_t_v<db::varchar<0>>;
-    constexpr auto case4 = sqlite_query::make_type_name_string_t_v<db::character<255>>;
+    constexpr auto case1 = sqlite_query::make_type_name_string_v<db::bit>;
+    constexpr auto case2 = sqlite_query::make_type_name_string_v<db::unsigned_bigint>;
+    constexpr auto case3 = sqlite_query::make_type_name_string_v<db::varchar<0>>;
+    constexpr auto case4 = sqlite_query::make_type_name_string_v<db::character<255>>;
 
     EXPECT_STREQ(case1.data(), "bit");
     EXPECT_STREQ(case2.data(), "bigint unsigned");

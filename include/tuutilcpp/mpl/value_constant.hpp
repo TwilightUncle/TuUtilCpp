@@ -30,7 +30,7 @@ namespace tuutil::mpl
      * @brief decltypeと一緒
      * @tparam V コンパイル時評価可能な任意型の値
     */
-    template <auto V> using value_constant_t = value_constant<V>::type;
+    template <auto V> using value_constant_t = typename value_constant<V>::type;
 
     /**
      * @fn
@@ -79,7 +79,7 @@ namespace tuutil::mpl
      * @fn
      * @brief liftした非型テンプレートに非型テンプレートパラメータを適用する
     */
-    template <class LiftedList, auto... Parameters> using applyv_t = applyv<LiftedList, Parameters...>::type;
+    template <class LiftedList, auto... Parameters> using applyv_t = typename applyv<LiftedList, Parameters...>::type;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_MPL_VALUE_CONSTANT_HPP

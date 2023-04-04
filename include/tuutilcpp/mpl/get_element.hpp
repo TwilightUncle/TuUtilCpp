@@ -37,7 +37,7 @@ namespace tuutil::mpl
      * @tparam N 位置
      * @tparam List パラメータパックを持つ型
     */
-    template <std::size_t N, class List> using get_t = get<N, List>::type;
+    template <std::size_t N, class List> using get_t = typename get<N, List>::type;
 
     /**
      * @fn

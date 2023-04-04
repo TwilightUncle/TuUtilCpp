@@ -94,7 +94,7 @@ namespace tuutil::mpl
     struct apply<bind<QuotedMetaF, PartialArgs...>, Args...> : public apply<QuotedMetaF, PartialArgs..., Args...> {};
 
     template <class T, class... Args>
-    using apply_t = apply<T, Args...>::type;
+    using apply_t = typename apply<T, Args...>::type;
 
     template <MetaCallable F, class... Args>
     requires (ReturenValueMetaFunction<apply<F, Args...>>)

@@ -36,7 +36,7 @@ namespace tuutil::mpl
     {
         static constexpr auto value = V;
     };
-    template <class T, auto V> using type_value_pair_t = type_value_pair<T, V>::type;
+    template <class T, auto V> using type_value_pair_t = typename type_value_pair<T, V>::type;
     template <class T, auto V> constexpr auto type_value_pair_v = type_value_pair<T, V>::value;
 }
 
