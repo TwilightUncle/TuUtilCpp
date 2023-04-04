@@ -149,7 +149,7 @@ namespace tuutil::utility
         constexpr std::pair<big_int, big_int> div(const std::convertible_to<big_int> auto& v) const
         {
             // 引数が0の場合、明示的に0除算を行う(念のため、0/0とn/0を区別する)
-            if (!v) const auto div_0 = (value_type)(bool)(*this) / 0;
+            if (!v) const auto div_0 = (value_type)(bool)(*this) / value_type(v);
 
             constexpr auto value_type_max_digits = std::numeric_limits<value_type>::digits;
             auto rem = big_int{*this};
