@@ -66,7 +66,7 @@ namespace tuutil::str::_regex
         // Å¬ŒJ‚è•Ô‚µ‰ñ”
         static constexpr auto min_count = []()->std::size_t {
             if constexpr (quantifier[0] == '{') {
-                constexpr auto inner_str = quantifier.remove_prefix_suffix<1, 1>();
+                constexpr auto inner_str = quantifier.template remove_prefix_suffix<1, 1>();
                 return to_int<std::size_t>(split<inner_str, ",">()[0]);
             }
             else {
@@ -79,7 +79,7 @@ namespace tuutil::str::_regex
         static constexpr auto max_count = []()->std::size_t {
             if constexpr (quantifier[0] == '?') return 1;
             else if constexpr (quantifier[0] == '{') {
-                constexpr auto devides = split<quantifier.remove_prefix_suffix<1, 1>(), ",">();
+                constexpr auto devides = split<quantifier.template remove_prefix_suffix<1, 1>(), ",">();
                 if (devides.size() == 1) return to_int<std::size_t>(devides[0]);
                 else if (!devides[1].empty()) return to_int<std::size_t>(devides[1]);
             }

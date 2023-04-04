@@ -34,7 +34,7 @@ namespace tuutil::str::_regex
         static constexpr auto make_regex_char_list()
         {
             if constexpr (N >= size) return cstr{""};
-            else return char_range.substr<N, 1>() + make_regex_char_list<N + 1>();
+            else return char_range.template substr<N, 1>() + make_regex_char_list<N + 1>();
         }
         template <int N>
         requires (char_range[N] == '-')

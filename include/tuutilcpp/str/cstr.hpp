@@ -234,10 +234,10 @@ namespace tuutil::str
      * @brief Offset‚©‚çCount‚Ì•¶š”•ª‚ğV‹K•¶š—ñ‚Æ‚µ‚ÄØ‚èo‚·
     */
     template <std::size_t Offset, std::size_t Count, std::size_t N>
-    constexpr auto substr(const cstr<N>& s) { return s.substr<Offset, Count>(); }
+    constexpr auto substr(const cstr<N>& s) { return s.template substr<Offset, Count>(); }
     // Offset‚©‚ç•¶š—ñ‚ÌÅŒã”ö‚Ü‚Å
     template <std::size_t Offset, std::size_t N>
-    constexpr auto substr(const cstr<N>& s) { return s.substr<Offset>(); }
+    constexpr auto substr(const cstr<N>& s) { return s.template substr<Offset>(); }
 
     /**
      * @fn
