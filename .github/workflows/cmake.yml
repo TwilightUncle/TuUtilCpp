@@ -44,6 +44,7 @@ jobs:
 
     - name: Configure CMake
       if: ${{ steps.cache-cmake.outputs.cache-hit != 'true' }}
+      working-directory: ${{github.workspace}}
       shell: bash
       run: >
         cmake -B ${{github.workspace}}/build
