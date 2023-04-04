@@ -14,21 +14,20 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        target: [windows-msvc]
-        # target: [windows-msvc, ubuntu-gpp, ubuntu-clang]
+        target: [windows-msvc, ubuntu-gpp, ubuntu-clang]
         include:
           - target: windows-msvc
             os: windows-latest
             c_compiler: cl
             cpp_compiler: cl
-          # - target: ubuntu-gpp
-          #   os: ubuntu-latest
-          #   c_compiler: gcc
-          #   cpp_compiler: g++
-          # - target: ubuntu-clang
-          #   os: ubuntu-latest
-          #   c_compiler: clang
-          #   cpp_compiler: clang++
+          - target: ubuntu-gpp
+            os: ubuntu-latest
+            c_compiler: gcc
+            cpp_compiler: g++
+          - target: ubuntu-clang
+            os: ubuntu-latest
+            c_compiler: clang
+            cpp_compiler: clang++
 
     steps:
     - uses: actions/checkout@v3
