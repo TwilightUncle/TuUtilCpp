@@ -11,7 +11,7 @@
 #include <tuutilcpp/db.hpp>
 #include <tuutilcpp/db/connection/sqlite.hpp>
 #include <tuutilcpp/db/query/sqlite.hpp>
-#include <tuutilcpp/db/query/builder.hpp>
+// #include <tuutilcpp/db/query/builder.hpp>
 
 namespace tuutil::db
 {
