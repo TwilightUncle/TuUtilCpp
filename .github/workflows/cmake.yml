@@ -19,13 +19,15 @@ jobs:
         include:
           - target: windows-msvc
             os: windows-latest
-            c_compiler: cl.exe
-            cpp_compiler: cl.exe
+            c_compiler: cl
+            cpp_compiler: cl
           # - target: ubuntu-gpp
           #   os: ubuntu-latest
+          #   c_compiler: gcc
           #   cpp_compiler: g++
           # - target: ubuntu-clang
           #   os: ubuntu-latest
+          #   c_compiler: clang
           #   cpp_compiler: clang++
 
     steps:
