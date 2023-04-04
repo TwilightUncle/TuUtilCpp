@@ -82,7 +82,7 @@ namespace tuutil::db
         {
             using table_definition_type = get_table_def_t<ETableType, TableDefinitionList>;
             static_assert(!std::is_same_v<table_definition_type, mpl::ignore_type>, "Not found database table definition.");
-            return this->exists_table<table_definition_type>();
+            return this->template exists_table<table_definition_type>();
         }
 
         /**

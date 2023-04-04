@@ -181,7 +181,7 @@ namespace tuutil::str
         requires (Prefix + Suffix <= max_size)
         constexpr auto remove_prefix_suffix() const
         {
-            return this->substr<Prefix, max_size - Prefix - Suffix>();
+            return this->template substr<Prefix, max_size - Prefix - Suffix>();
         }
 
         /**
@@ -189,14 +189,14 @@ namespace tuutil::str
          * @brief æ“ª‚ÌN•¶š‚ğíœ‚·‚é
         */
         template <std::size_t Prefix>
-        constexpr auto remove_prefix() const { return this->remove_prefix_suffix<Prefix, 0>(); }
+        constexpr auto remove_prefix() const { return this->template remove_prefix_suffix<Prefix, 0>(); }
 
         /**
          * @fn
          * @brief ––”ö‚ÌN•¶š‚ğíœ‚·‚é
         */
         template <std::size_t Suffix>
-        constexpr auto remove_suffix() const { return this->remove_prefix_suffix<0, Suffix>(); }
+        constexpr auto remove_suffix() const { return this->template remove_prefix_suffix<0, Suffix>(); }
     };
 
     /**
