@@ -1,0 +1,83 @@
+name: CMake
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        target: [windows-msvc, ubuntu-gpp, ubuntu-clang]
+        include:
+          - target: windows-msvc
+            os: windows-latest
+            compiler: cl.exe
+          - target: ubuntu-gpp
+            os: ubuntu-latest
+            compiler: g++
+          - target: ubuntu-clang
+            os: ubuntu-latest
+            compiler: clang++
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Add cl.exe to PATH
+      if: matrix.compiler == 'cl.exe'
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Cache Cmake Configure
+      # buildディレクトリ内は依存ライブラリのビルドも行うのでキャッシュしておく
+      id: cache-cmake
+      uses: actions/cache@v3
+      with:
+        path: build
+        key: ${{matrix.target}}-cmake-configure-${{ hashFiles('CMakeLists.txt', 'vcpkg.json') }}
+
+    - name: Configure CMake For Ubuntu
+      if: ${{ steps.cache-cmake.outputs.cache-hit != 'true' }}
+      run: >
+        cmake -B ${{github.workspace}}/build
+          -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
+          -DTUUTILCPP_BUILD_TESTS=ON
+          -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+          -DCMAKE_TOOLCHAIN_FILE=${VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake
+
+    - name: Build
+      id: build-tuutil
+      continue-on-error: true
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} > output_result.txt
+
+    - name: Test
+      if: steps.build-tuutil.outcome == 'success'
+      id: test-tuutil
+      continue-on-error: true
+      working-directory: ${{github.workspace}}/build
+      run: ctest -C ${{env.BUILD_TYPE}}
+    
+    - name: Save Failed Test Output
+      # テストに失敗した場合の詳細をファイルに出力しておく
+      if: steps.test-tuutil.outcome == 'failure'
+      continue-on-error: true
+      working-directory: ${{github.workspace}}/build
+      run: ctest -V -C ${{env.BUILD_TYPE}} --rerun-failed --output-on-failure > ../output_result.txt
+
+    - name: Archive Test Results
+      # テスト失敗時、デバッグ用にテストの実行ファイルをアップロードする
+      if: steps.test-tuutil.outcome == 'failure' || steps.build-tuutil.outcome == 'failure'
+      uses: actions/upload-artifact@v3
+      with:
+        name: output-results
+        path: output_result.txt
+    
+    - name: Exit On Failed
+      if: steps.test-tuutil.outcome == 'failure' || steps.build-tuutil.outcome == 'failure'
+      shell: bash
+      run: exit 1
