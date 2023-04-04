@@ -51,6 +51,7 @@ jobs:
       shell: bash
       run: >
         cmake -B ${{github.workspace}}/build
+        -S ${{github.workspace}}
         -DCMAKE_C_COMPILER="${{matrix.c_compiler}}"
         -DCMAKE_CXX_COMPILER="${{matrix.cpp_compiler}}"
         -DTUUTILCPP_BUILD_TESTS=ON
