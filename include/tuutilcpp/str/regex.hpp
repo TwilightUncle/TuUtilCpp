@@ -71,13 +71,13 @@ namespace tuutil::str
 #include <tuutilcpp/str/regex/common.hpp>
 #include <tuutilcpp/str/regex/bracket.hpp>
 #include <tuutilcpp/str/regex/char_class.hpp>
-#include <tuutilcpp/str/regex/quantifier.hpp>
 #include <tuutilcpp/str/regex/char_set.hpp>
 #include <tuutilcpp/str/regex/capture.hpp>
 #include <tuutilcpp/str/regex/general.hpp>
 #include <tuutilcpp/str/regex/reference.hpp>
 #include <tuutilcpp/str/regex/or.hpp>
 #include <tuutilcpp/str/regex/assertion.hpp>
+#include <tuutilcpp/str/regex/quantifier.hpp>
 #include <tuutilcpp/str/regex/perser.hpp>
 
 namespace tuutil::str
