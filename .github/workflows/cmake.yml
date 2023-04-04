@@ -41,11 +41,11 @@ jobs:
         path: build
         key: ${{matrix.target}}-cmake-configure-${{ hashFiles('CMakeLists.txt', 'vcpkg.json') }}
 
-    - name: Configure CMake For Ubuntu
+    - name: Configure CMake
       if: ${{ steps.cache-cmake.outputs.cache-hit != 'true' }}
       run: >
         cmake -B ${{github.workspace}}/build
-        -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
+        -DCMAKE_CXX_COMPILER="${{matrix.compiler}}"
         -DTUUTILCPP_BUILD_TESTS=ON
         -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
         -DCMAKE_TOOLCHAIN_FILE="${VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake"
