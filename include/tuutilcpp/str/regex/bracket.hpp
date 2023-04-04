@@ -57,7 +57,7 @@ namespace tuutil::str::_regex
     template <cstr Pattern, std::size_t BrancketBeginPos>
     struct bracket_inner
     {
-        using bracket_info = bracket_info<Pattern[BrancketBeginPos], true>;
+        using bracket_info = typename bracket_info<Pattern[BrancketBeginPos], true>;
 
         // ŠJŽnŠ‡ŒÊ‚ÌˆÊ’u
         static constexpr auto begin_pos = BrancketBeginPos;
