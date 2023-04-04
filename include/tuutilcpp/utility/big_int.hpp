@@ -175,6 +175,7 @@ namespace tuutil::utility
 
     template <class T> struct is_big_int : public std::false_type {};
     template <std::size_t N> struct is_big_int<big_int<N>> : public std::true_type {};
+    template <class T> constexpr auto is_big_int_v = is_big_int<T>::value;
 
     /**
      * @fn
