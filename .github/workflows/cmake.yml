@@ -19,19 +19,20 @@ jobs:
         include:
           - target: windows-msvc
             os: windows-latest
-            compiler: cl.exe
+            c_compiler: cl.exe
+            cpp_compiler: cl.exe
           # - target: ubuntu-gpp
           #   os: ubuntu-latest
-          #   compiler: g++
+          #   cpp_compiler: g++
           # - target: ubuntu-clang
           #   os: ubuntu-latest
-          #   compiler: clang++
+          #   cpp_compiler: clang++
 
     steps:
     - uses: actions/checkout@v3
 
     - name: Add cl.exe to PATH
-      if: matrix.compiler == 'cl.exe'
+      if: matrix.cpp_compiler == 'cl.exe'
       uses: ilammy/msvc-dev-cmd@v1
 
     - name: Cache Cmake Configure
@@ -48,7 +49,8 @@ jobs:
       shell: bash
       run: >
         cmake -B ${{github.workspace}}/build
-        -DCMAKE_CXX_COMPILER="${{matrix.compiler}}"
+        -DCMAKE_C_COMPILER="${{matrix.c_compiler}}"
+        -DCMAKE_CXX_COMPILER="${{matrix.cpp_compiler}}"
         -DTUUTILCPP_BUILD_TESTS=ON
         -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
         -DCMAKE_TOOLCHAIN_FILE="${VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake"
