@@ -12,8 +12,8 @@ namespace tuutil::utility
      * @brief テンプレート引数で渡した整数値の桁数を取得する。第二引数は任意の進数を指定する
     */
     template <auto V, std::size_t Hex = 10>
-    requires (Hex >= 2 && std::disjunction_v<is_big_int<decltype(V)>, std::is_integral<decltype(V)>>)
-    constexpr std::size_t get_digit()
+    requires (Hex >= 2 && (std::integral<decltype(V)> || std::convertible_to<decltype(V), big_int<2>>))
+    constexpr auto get_digit()
     {
         std::size_t digit = 1;
         for (auto val = V; val /= static_cast<decltype(V)>(Hex); digit++);
