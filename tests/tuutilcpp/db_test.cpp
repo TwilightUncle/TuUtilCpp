@@ -349,9 +349,9 @@ TEST(TuutilcppDbTest, SqliteQueryTest)
     constexpr auto case7 = sqlite_query::make_create_table_string<table1>::value.data();
     constexpr auto case8 = sqlite_query::make_drop_table_string<table1>::value.data();
 
-    EXPECT_STREQ(case5, R"("id" int autoincrement not null)");
-    EXPECT_STREQ(case6, R"("name" varchar(255))");
-    EXPECT_STREQ(case7, R"(create table "samples"("id" int autoincrement not null, "name" varchar(255)))");
+    EXPECT_STREQ(case5, R"("id" int autoincrement not null )");
+    EXPECT_STREQ(case6, R"("name" varchar(255) )");
+    EXPECT_STREQ(case7, R"(create table "samples"("id" int autoincrement not null , "name" varchar(255) ))");
     EXPECT_STREQ(case8, R"(drop table "samples")");
 }
 

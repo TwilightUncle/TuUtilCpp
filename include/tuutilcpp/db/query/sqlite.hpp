@@ -59,23 +59,18 @@ namespace tuutil::db::query
             else return str::cstr("");
         }
 
-        template <ColumnDefinable ColumnDefinition>
-        static constexpr auto _make_column_define_string()
-        {
-            return ('"' + ColumnDefinition::name + "\" "
-                + make_type_name_string<typename ColumnDefinition::field_type>::value + ' '
-                + make_auto_increment_string<ColumnDefinition::auto_increment>()
-                + make_not_null_string<ColumnDefinition::not_null>()
-            ).template remove_suffix<1>();
-        }
-
         /**
          * @fn
          * @brief DBカラム定義文字列を返す
          * @tparam ColumnDefinition カラム定義クラス
         */
         template <ColumnDefinable ColumnDefinition>
-        using make_column_define_string = mpl::value_constant<sqlite::template _make_column_define_string<ColumnDefinition>()>;
+        using make_column_define_string = mpl::value_constant<
+            '"' + ColumnDefinition::name + "\" "
+            + make_type_name_string<typename ColumnDefinition::field_type>::value + ' '
+            + make_auto_increment_string<ColumnDefinition::auto_increment>()
+            + make_not_null_string<ColumnDefinition::not_null>()
+        >;
         template <ColumnDefinable ColumnDefinition>
         static constexpr auto make_column_define_string_v = make_column_define_string<ColumnDefinition>::value;
 
