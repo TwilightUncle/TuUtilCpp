@@ -63,8 +63,8 @@ namespace tuutil::str::_regex
         static constexpr auto inner_match_pattern = []() {
             if constexpr (assertion_pattern[0] == '(') {
                 if constexpr (exists_in_position("(?=", Pattern, Pos) || exists_in_position("(?!", Pattern, Pos))
-                    return assertion_pattern.remove_prefix_suffix<3, 1>();
-                else return assertion_pattern.remove_prefix_suffix<4, 1>();
+                    return assertion_pattern.template remove_prefix_suffix<3, 1>();
+                else return assertion_pattern.template remove_prefix_suffix<4, 1>();
             }
             else if constexpr (assertion_pattern[0] == 'b' || assertion_pattern[0] == 'B') return cstr{"\\w"};
             else if constexpr (assertion_pattern[0] == '^' || assertion_pattern[0] == '$') return cstr{"\\r|\\n|\\r\\n"};

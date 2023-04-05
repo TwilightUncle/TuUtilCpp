@@ -310,7 +310,7 @@ TEST(TuutilcppStrTest, RegexAssertionTest)
 
     constexpr auto check_func = [](auto t, std::string_view sv, std::size_t offset, bool is_lock_pos) {
         regex_capture_store<0> cs;
-        return t.generated_func<0>(sv, offset, is_lock_pos, cs).get_begin_pos();
+        return t.template generated_func<0>(sv, offset, is_lock_pos, cs).get_begin_pos();
     };
 
     using type1 = _regex::assertion_parser<"^", 0>;

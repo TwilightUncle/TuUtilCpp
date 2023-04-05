@@ -32,7 +32,7 @@ namespace tuutil::str::_regex
             return Pattern.size();
         }();
 
-        static constexpr auto value = Pattern.substr<Pos, end_pos - Pos>();
+        static constexpr auto value = Pattern.template substr<Pos, end_pos - Pos>();
 
         /**
          * @fn

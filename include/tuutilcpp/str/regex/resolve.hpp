@@ -126,20 +126,6 @@ namespace tuutil::str::_regex
     template <cstr Pattern, std::size_t Pos>
     requires (Pattern[Pos] == '\\' && Pattern.size() - 1 > Pos)
     struct resolve_parser<Pattern, Pos> : public bk::resolve_parser<Pattern, Pos + 1> { static constexpr auto begin_pos = Pos; };
-
-    /**
-     * @fn
-     * @brief 先頭の正規表現パターンを適用済みとする
-    */
-    template <template <cstr, RegexParseable> class F, cstr Pattern>
-    struct bind_regex_pattern
-    {
-        template <RegexParseable T>
-        struct apply : public F<Pattern, T> {};
-        using type = tuutil::mpl::quote<apply>;
-    };
-
-    template <template <cstr, RegexParseable> class F, cstr Pattern> using bind_regex_pattern_t = bind_regex_pattern<F, Pattern>::type;
 }
 
 #endif // TUUTILCPP_INCLUDE_GUARD_STR_REGEX_RESOLVE_HPP

@@ -87,7 +87,7 @@ namespace tuutil::str::_regex
         static_assert(!is_error || bracket_info::error != std::regex_constants::error_collate, "An error has occurred. [std::regex_constants::error_collate]");
 
         // 括弧の中身
-        static constexpr auto value = Pattern.substr<begin_pos + 1, end_pos - begin_pos - 2>();
+        static constexpr auto value = Pattern.template substr<begin_pos + 1, end_pos - begin_pos - 2>();
 
         // 開始、閉じ括弧も含めた文字列
         static constexpr auto value_with_bracket = bracket_info::begin + value + bracket_info::end;

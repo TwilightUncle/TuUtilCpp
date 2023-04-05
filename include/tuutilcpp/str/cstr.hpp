@@ -124,7 +124,7 @@ namespace tuutil::str
         {
             std::size_t s_pos = std::string_view::npos, cnt{};
             for (std::size_t i = offset; i < this->size(); i++) {
-                const auto is_find = char_set.find_first_of(this->data()[i]) != std::string_view::npos;
+                const auto is_find = str::find(cstr{{this->at(i), '\0'}}, char_set) != std::string_view::npos;
                 if (is_allow != is_find) break;
                 s_pos = (std::min)(s_pos, i);
                 cnt++;
@@ -181,7 +181,7 @@ namespace tuutil::str
         requires (Prefix + Suffix <= max_size)
         constexpr auto remove_prefix_suffix() const
         {
-            return this->substr<Prefix, max_size - Prefix - Suffix>();
+            return this->template substr<Prefix, max_size - Prefix - Suffix>();
         }
 
         /**
@@ -189,14 +189,14 @@ namespace tuutil::str
          * @brief 先頭のN文字を削除する
         */
         template <std::size_t Prefix>
-        constexpr auto remove_prefix() const { return this->remove_prefix_suffix<Prefix, 0>(); }
+        constexpr auto remove_prefix() const { return this->template remove_prefix_suffix<Prefix, 0>(); }
 
         /**
          * @fn
          * @brief 末尾のN文字を削除する
         */
         template <std::size_t Suffix>
-        constexpr auto remove_suffix() const { return this->remove_prefix_suffix<0, Suffix>(); }
+        constexpr auto remove_suffix() const { return this->template remove_prefix_suffix<0, Suffix>(); }
     };
 
     /**
@@ -234,10 +234,10 @@ namespace tuutil::str
      * @brief OffsetからCountの文字数分を新規文字列として切り出す
     */
     template <std::size_t Offset, std::size_t Count, std::size_t N>
-    constexpr auto substr(const cstr<N>& s) { return s.substr<Offset, Count>(); }
+    constexpr auto substr(const cstr<N>& s) { return s.template substr<Offset, Count>(); }
     // Offsetから文字列の最後尾まで
     template <std::size_t Offset, std::size_t N>
-    constexpr auto substr(const cstr<N>& s) { return s.substr<Offset>(); }
+    constexpr auto substr(const cstr<N>& s) { return s.template substr<Offset>(); }
 
     /**
      * @fn
@@ -321,7 +321,7 @@ namespace tuutil::str
      * @brief テンプレート引数で渡した整数値をcstrに変換する。進数を渡すことで、(2,8,16)進数リテラルのような文字列に変換する
     */
     template <auto V, int Hex = 10, bool UsePrefix = false>
-    requires (V >= 0 && Hex >= 2 && (std::integral<decltype(V)> || utility::is_big_int<decltype(V)>::value))
+    requires (V >= 0 && Hex >= 2 && (std::integral<decltype(V)> || std::convertible_to<decltype(V), utility::big_int<2>>))
     constexpr auto to_string()
     {
         // 10進数として桁数を取得
@@ -347,6 +347,7 @@ namespace tuutil::str
     }
     // 負数の場合
     template <std::integral auto V, std::size_t Hex = 10, bool UsePrefix = false>
+    requires (V < 0)
     constexpr auto to_string() { return "-" + to_string<-V, Hex, UsePrefix>(); }
 
     /**
@@ -354,7 +355,7 @@ namespace tuutil::str
      * @brief 文字列を整数型に変換
     */
     template <std::integral T>
-    constexpr T to_int(const std::string& s)
+    constexpr T to_int(std::string_view s)
     {
         T val{};
         for (const auto c: s) {
@@ -364,8 +365,6 @@ namespace tuutil::str
         }
         return val;
     }
-    template <std::integral T>
-    constexpr T to_int(std::string_view s) { return to_int<T>(std::string(s)); }
 
     /**
      * @fn

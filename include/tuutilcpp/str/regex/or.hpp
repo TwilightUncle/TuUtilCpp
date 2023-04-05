@@ -47,8 +47,8 @@ namespace tuutil::str::_regex
         static constexpr std::size_t end_pos = Pattern.size();
         static constexpr std::size_t min_count = 1;
         static constexpr std::size_t max_count = 1;
-        static constexpr auto pref_str = Pattern.remove_suffix<end_pos - Pos>();
-        static constexpr auto suf_str = Pattern.remove_prefix<Pos + 1>();
+        static constexpr auto pref_str = Pattern.template remove_suffix<end_pos - Pos>();
+        static constexpr auto suf_str = Pattern.template remove_prefix<Pos + 1>();
         using pref_regex = regex<pref_str, regex_parser>;
         using suf_regex = regex<suf_str, regex_parser>;
         using inner_regex = std::conditional_t<

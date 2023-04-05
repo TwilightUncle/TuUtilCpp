@@ -182,8 +182,8 @@ TEST(TuutilcppMplTest, ParameterPackTest)
     constexpr auto case11 = is_same_types_v<tuutil::mpl::value_list<int(1), int(2), int(3)>>;
     constexpr auto case12 = is_same_types_v<tuutil::mpl::value_list<int(1), char(2), int(3)>>;
 
-    using val_list = value_list<double(1), long long(1), char(1), int(1)>;
-    constexpr auto case13 = std::is_same_v<reverse_t<val_list>, value_list<int(1), char(1), long long(1), double(1)>>;
+    using val_list = value_list<double(1), std::int64_t(1), char(1), int(1)>;
+    constexpr auto case13 = std::is_same_v<reverse_t<val_list>, value_list<int(1), char(1), std::int64_t(1), double(1)>>;
     constexpr auto case14 = get_front_v<val_list>;
     constexpr auto case15 = get_back_v<val_list>;
 
@@ -194,7 +194,7 @@ TEST(TuutilcppMplTest, ParameterPackTest)
     using concat_target3 = value_list<nullptr, float(1)>;
     using concat_target4 = value_list<short(1)>;
     using concated_list2 = concat_list_t<val_list, concat_target3, concat_target4>;
-    constexpr auto case17 = std::is_same_v<concated_list2, value_list<double(1), long long(1), char(1), int(1), nullptr, float(1), short(1)>>;
+    constexpr auto case17 = std::is_same_v<concated_list2, value_list<double(1), std::int64_t(1), char(1), int(1), nullptr, float(1), short(1)>>;
 
     EXPECT_TRUE(case1);
     EXPECT_TRUE(case2);
