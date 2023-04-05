@@ -16,7 +16,7 @@ C++20以降を対象とした、コンパイル時処理関連の汎用ヘッダ
 C++20以降の規格に対応したコンパイラを利用すること。  
 Windows11において、Visual Studio 2022に付属のMSVCでビルド及びテスト実施。  
   
-以下、テスト実施環境git
+以下、テスト実施環境
 - Windows 11 Home, MSVC 19.34.31935.0, build type debug
 - Windows 11 Home, MinGW64, GCC 12.2, build type debug
 - Ubuntu 22.04(GitHub Actions), GCC 12.1, build type release
