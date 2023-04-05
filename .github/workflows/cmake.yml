@@ -14,8 +14,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        target: [windows-msvc, ubuntu-gpp]
-        # target: [windows-msvc, ubuntu-gpp, ubuntu-clang]
+        target: [windows-msvc, ubuntu-gcc]
+        # target: [windows-msvc, ubuntu-gcc, ubuntu-clang]
         include:
           - target: windows-msvc
             os: windows-latest
@@ -34,7 +34,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Add cl.exe to PATH
-      if: matrix.cpp_compiler == 'cl.exe'
+      if: matrix.cpp_compiler == 'cl'
       uses: ilammy/msvc-dev-cmd@v1
 
     - name: Cache Cmake Configure
@@ -46,7 +46,7 @@ jobs:
         key: ${{matrix.target}}-cmake-configure-${{ hashFiles('CMakeLists.txt', 'vcpkg.json') }}
 
     - name: Configure CMake
-      if: ${{ steps.cache-cmake.outputs.cache-hit != 'true' }}
+      if: steps.cache-cmake.outputs.cache-hit != 'true'
       working-directory: ${{github.workspace}}
       shell: bash
       run: >
