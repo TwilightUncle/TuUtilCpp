@@ -23,8 +23,8 @@ jobs:
             cpp_compiler: cl
           - target: ubuntu-gcc
             os: ubuntu-latest
-            c_compiler: gcc-12
-            cpp_compiler: g++-12
+            c_compiler: gcc-11
+            cpp_compiler: g++-11
           # - target: ubuntu-clang
           #   os: ubuntu-latest
           #   c_compiler: clang
