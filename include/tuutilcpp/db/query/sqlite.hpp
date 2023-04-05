@@ -66,10 +66,12 @@ namespace tuutil::db::query
         */
         template <ColumnDefinable ColumnDefinition>
         using make_column_define_string = mpl::value_constant<
-            '"' + ColumnDefinition::name + "\" "
-            + make_type_name_string<typename ColumnDefinition::field_type>::value + ' '
-            + make_auto_increment_string<ColumnDefinition::auto_increment>()
-            + make_not_null_string<ColumnDefinition::not_null>()
+            []() {
+                return '"' + ColumnDefinition::name + "\" "
+                    + make_type_name_string<typename ColumnDefinition::field_type>::value + ' '
+                    + make_auto_increment_string<ColumnDefinition::auto_increment>()
+                    + make_not_null_string<ColumnDefinition::not_null>();
+            }()
         >;
         template <ColumnDefinable ColumnDefinition>
         static constexpr auto make_column_define_string_v = make_column_define_string<ColumnDefinition>::value;
