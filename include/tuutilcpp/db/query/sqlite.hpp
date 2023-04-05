@@ -58,6 +58,12 @@ namespace tuutil::db::query
             if constexpr (IsNn) return str::cstr{"not null "};
             else return str::cstr("");
         }
+        
+        template <ColumnDefinable ColumnDefinition>
+        static constexpr auto make_column_define_string_v = '"' + ColumnDefinition::name + "\" "
+            + make_type_name_string<typename ColumnDefinition::field_type>::value + ' '
+            + make_auto_increment_string<ColumnDefinition::auto_increment>()
+            + make_not_null_string<ColumnDefinition::not_null>();
 
         /**
          * @fn
@@ -65,16 +71,7 @@ namespace tuutil::db::query
          * @tparam ColumnDefinition カラム定義クラス
         */
         template <ColumnDefinable ColumnDefinition>
-        using make_column_define_string = mpl::value_constant<
-            []() {
-                return '"' + ColumnDefinition::name + "\" "
-                    + make_type_name_string<typename ColumnDefinition::field_type>::value + ' '
-                    + make_auto_increment_string<ColumnDefinition::auto_increment>()
-                    + make_not_null_string<ColumnDefinition::not_null>();
-            }()
-        >;
-        template <ColumnDefinable ColumnDefinition>
-        static constexpr auto make_column_define_string_v = make_column_define_string<ColumnDefinition>::value;
+        using make_column_define_string = mpl::value_constant<make_column_define_string_v<ColumnDefinition>>;
 
         /**
          * @fn
