@@ -10,21 +10,21 @@ env:
   BUILD_TYPE: Release
 
 jobs:
-  build:
+  test:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        target: [windows-msvc]
+        target: [windows-msvc, ubuntu-gpp]
         # target: [windows-msvc, ubuntu-gpp, ubuntu-clang]
         include:
           - target: windows-msvc
             os: windows-latest
             c_compiler: cl
             cpp_compiler: cl
-          # - target: ubuntu-gpp
-          #   os: ubuntu-latest
-          #   c_compiler: gcc
-          #   cpp_compiler: g++
+          - target: ubuntu-gcc
+            os: ubuntu-latest
+            c_compiler: gcc-12
+            cpp_compiler: g++-12
           # - target: ubuntu-clang
           #   os: ubuntu-latest
           #   c_compiler: clang
