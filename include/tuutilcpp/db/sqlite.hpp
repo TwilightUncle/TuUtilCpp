@@ -114,7 +114,7 @@ namespace tuutil::db
          * @brief 全テーブルに対して一括で実行したいクエリを配列として展開する
          * @tparam TableDefinitionList テーブル定義リスト
         */
-        template <TableListDefinable TableDefinitionList> struct expansion_querys;
+        template <TableListDefinable> struct expansion_querys;
         template <template <class...> class List, TableDefinable... TableDefinitions>
         struct expansion_querys<List<TableDefinitions...>>
         {
