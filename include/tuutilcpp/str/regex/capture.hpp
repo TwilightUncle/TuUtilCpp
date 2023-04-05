@@ -50,7 +50,7 @@ namespace tuutil::str::_regex
         static constexpr auto is_named = name.size() > 0;
 
         // キャプチャの有無、キャプチャ名指定部分を取り除いたパターン
-        static constexpr auto capture_pattern = inner_pattern.remove_prefix<(is_capture ? 0 : 2) + (is_named ? name.size() + 3 : 0)>();
+        static constexpr auto capture_pattern = inner_pattern.template remove_prefix<(is_capture ? 0 : 2) + (is_named ? name.size() + 3 : 0)>();
 
         using inner_regex = regex<capture_pattern, regex_parser>;
 

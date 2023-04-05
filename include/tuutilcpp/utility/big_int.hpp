@@ -113,14 +113,14 @@ namespace tuutil::utility
 
         constexpr bool operator!() const noexcept { return !static_cast<bool>(*this); }
 
-        constexpr big_int& operator+=(const std::convertible_to<big_int> auto& v) { return this->set_with_carry_up<big_int>(plus, v); }
-        constexpr big_int& operator-=(const std::convertible_to<big_int> auto& v) { return this->set_with_carry_up<big_int>(minus, v); }
-        constexpr big_int& operator*=(const std::convertible_to<big_int> auto& v) { return this->set_with_carry_up_all<big_int>(mul, v, plus); }
+        constexpr big_int& operator+=(const std::convertible_to<big_int> auto& v) { return this->template set_with_carry_up<big_int>(plus, v); }
+        constexpr big_int& operator-=(const std::convertible_to<big_int> auto& v) { return this->template set_with_carry_up<big_int>(minus, v); }
+        constexpr big_int& operator*=(const std::convertible_to<big_int> auto& v) { return this->template set_with_carry_up_all<big_int>(mul, v, plus); }
 
         constexpr big_int& operator<<=(std::unsigned_integral auto v)
         {
             constexpr auto value_type_max_digits = std::numeric_limits<value_type>::digits;
-            return this->set_with_carry_up_all<big_int>(
+            return this->template set_with_carry_up_all<big_int>(
                 lshift,
                 v % value_type_max_digits,  // 実際に行うシフト数
                 plus,
@@ -132,7 +132,7 @@ namespace tuutil::utility
         {
             constexpr auto value_type_max_digits = std::numeric_limits<value_type>::digits;
             const auto inverse_shift_value = (v % value_type_max_digits);
-            return this->set_with_carry_up_all<big_int>(
+            return this->template set_with_carry_up_all<big_int>(
                 lshift,
                 // 実際に行うシフト数
                 (value_type_max_digits - inverse_shift_value) % value_type_max_digits,
@@ -149,7 +149,7 @@ namespace tuutil::utility
         constexpr std::pair<big_int, big_int> div(const std::convertible_to<big_int> auto& v) const
         {
             // 引数が0の場合、明示的に0除算を行う(念のため、0/0とn/0を区別する)
-            if (!v) const auto div_0 = (value_type)(bool)(*this) / 0;
+            if (!v) const auto div_0 = (value_type)(bool)(*this) / value_type(v);
 
             constexpr auto value_type_max_digits = std::numeric_limits<value_type>::digits;
             auto rem = big_int{*this};

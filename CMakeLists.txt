@@ -26,7 +26,7 @@ if (TUUTILCPP_BUILD_TESTS)
     include(FetchContent)
         FetchContent_Declare(
         googletest
-        URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.zip
+        URL https://github.com/google/googletest/archive/refs/tags/v1.13.0.zip
     )
     # Google Testの不要なキャッシュ変数をオフにしておく
     set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)

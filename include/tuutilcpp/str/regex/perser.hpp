@@ -54,10 +54,10 @@ namespace tuutil::str
             "Invalied template argment [Pattern, Pos]. Must not specified of '}', ')', ']'."
         );
 
-        using parsed_type = tuutil::mpl::apply_t<
-            _regex::bind_regex_pattern_t<_regex::add_quantifier, Pattern>,
+        using parsed_type = typename _regex::add_quantifier<
+            Pattern,
             _regex::resolve_parser<Pattern, Pos>
-        >;
+        >::type;
 
         // 以降の位置の解析
         using parsed_next_type = regex_parser<Pattern, parsed_type::end_pos>;
@@ -109,7 +109,7 @@ namespace tuutil::str
                 if (++cnt >= parsed_type::min_count) {
                     // 判定が真の時のみ値が更新されるよう、一旦一時変数に更新値を記録
                     auto cs = temp_capture_store;
-                    const auto re = parsed_next_type::exec<MaxCaptureCount>(subject, end_pos, true, cs);
+                    const auto re = parsed_next_type::template exec<MaxCaptureCount>(subject, end_pos, true, cs);
                     if (!re) continue;
                     result.set_begin_pos(begin_pos);
                     result.set_end_pos(re);
@@ -120,7 +120,7 @@ namespace tuutil::str
 
             // 0回マッチでもOKの場合
             if ((!cnt || !parsed_type::greedy) && !parsed_type::min_count)
-                if (const auto re = parsed_next_type::exec<MaxCaptureCount>(subject, offset, is_pos_lock, init_capture_store)) {
+                if (const auto re = parsed_next_type::template exec<MaxCaptureCount>(subject, offset, is_pos_lock, init_capture_store)) {
                     result = re;
                     capture_store = init_capture_store;
                 }

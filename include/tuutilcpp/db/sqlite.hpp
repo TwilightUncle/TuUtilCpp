@@ -10,8 +10,6 @@
 #include <tuutilcpp/str.hpp>
 #include <tuutilcpp/db.hpp>
 #include <tuutilcpp/db/connection/sqlite.hpp>
-#include <tuutilcpp/db/query/sqlite.hpp>
-// #include <tuutilcpp/db/query/builder.hpp>
 
 namespace tuutil::db
 {
@@ -32,9 +30,8 @@ namespace tuutil::db
         {
             number_of_valid_connections++;
 
+            // ここでテーブル生成
             // 一つでもテーブルが作成されていたら、構造が完成しているものとしてテーブル追加を実施しない
-            if (!exists_table<mpl::get_front_t<TableDefinitionList>>())
-                for (auto s : create_querys_v) this->con.exec(std::string(s));
         }
         ~sqlite() { number_of_valid_connections--; }
 
@@ -82,7 +79,7 @@ namespace tuutil::db
         {
             using table_definition_type = get_table_def_t<ETableType, TableDefinitionList>;
             static_assert(!std::is_same_v<table_definition_type, mpl::ignore_type>, "Not found database table definition.");
-            return this->exists_table<table_definition_type>();
+            return this->template exists_table<table_definition_type>();
         }
 
         /**
@@ -108,19 +105,6 @@ namespace tuutil::db
     private:
         connection::sqlite<DbName> con;
         inline static int number_of_valid_connections = 0;
-
-        /**
-         * @fn
-         * @brief 全テーブルに対して一括で実行したいクエリを配列として展開する
-         * @tparam TableDefinitionList テーブル定義リスト
-        */
-        template <TableListDefinable TableDefinitionList> struct expansion_querys;
-        template <template <class...> class List, TableDefinable... TableDefinitions>
-        struct expansion_querys<List<TableDefinitions...>>
-        {
-            static constexpr auto create_querys = std::array{ query::sqlite::make_create_table_string_v<TableDefinitions>.view()... };
-        };
-        static constexpr auto create_querys_v = expansion_querys<TableDefinitionList>::create_querys;
     };
 
 }

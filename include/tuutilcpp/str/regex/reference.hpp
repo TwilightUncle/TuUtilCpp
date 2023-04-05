@@ -17,7 +17,7 @@ namespace tuutil::str::_regex
     {
         static constexpr auto begin_pos = Pos;
         static constexpr auto end_pos = Pos + Pattern.get_charset_match_range("0123456789", Pos)[1];
-        static constexpr auto reference_index = to_int<std::size_t>(Pattern.substr<Pos, end_pos - Pos>().view()) - 1;
+        static constexpr auto reference_index = to_int<std::size_t>(Pattern.template substr<Pos, end_pos - Pos>().view()) - 1;
 
         /**
          * @fn

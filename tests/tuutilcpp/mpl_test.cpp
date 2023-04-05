@@ -125,21 +125,21 @@ template <class T1, class T2> struct get_min_size_type : public std::conditional
 
 TEST(TuutilcppMplTest, FoldTest)
 {
-    using type_list = dummy_non_metafunction<long long, short, unsigned short, unsigned long long, unsigned long>;
-    using l_max_type = foldl_t<quote<get_max_size_type>, long, type_list>;
-    using l_min_type = foldl_t<quote<get_min_size_type>, long, type_list>;
+    using type_list = dummy_non_metafunction<std::int64_t, std::int16_t, std::uint16_t, std::uint64_t, std::uint32_t>;
+    using l_max_type = foldl_t<quote<get_max_size_type>, std::int32_t, type_list>;
+    using l_min_type = foldl_t<quote<get_min_size_type>, std::int32_t, type_list>;
 
-    constexpr auto case1 = std::is_same_v<l_max_type, unsigned long long>;
-    constexpr auto case2 = std::is_same_v<l_min_type, short>;
+    constexpr auto case1 = std::is_same_v<l_max_type, std::uint64_t>;
+    constexpr auto case2 = std::is_same_v<l_min_type, std::int16_t>;
     
     EXPECT_TRUE(case1);
     EXPECT_TRUE(case2);
 
-    using r_max_type = foldr_t<quote<get_max_size_type>, long, type_list>;
-    using r_min_type = foldr_t<quote<get_min_size_type>, long, type_list>;
+    using r_max_type = foldr_t<quote<get_max_size_type>, std::int32_t, type_list>;
+    using r_min_type = foldr_t<quote<get_min_size_type>, std::int32_t, type_list>;
 
-    constexpr auto case3 = std::is_same_v<r_max_type, unsigned long long>;
-    constexpr auto case4 = std::is_same_v<r_min_type, short>;
+    constexpr auto case3 = std::is_same_v<r_max_type, std::uint64_t>;
+    constexpr auto case4 = std::is_same_v<r_min_type, std::int16_t>;
     
     EXPECT_TRUE(case3);
     EXPECT_TRUE(case4);
@@ -182,8 +182,8 @@ TEST(TuutilcppMplTest, ParameterPackTest)
     constexpr auto case11 = is_same_types_v<tuutil::mpl::value_list<int(1), int(2), int(3)>>;
     constexpr auto case12 = is_same_types_v<tuutil::mpl::value_list<int(1), char(2), int(3)>>;
 
-    using val_list = value_list<double(1), long long(1), char(1), int(1)>;
-    constexpr auto case13 = std::is_same_v<reverse_t<val_list>, value_list<int(1), char(1), long long(1), double(1)>>;
+    using val_list = value_list<double(1), std::int64_t(1), char(1), int(1)>;
+    constexpr auto case13 = std::is_same_v<reverse_t<val_list>, value_list<int(1), char(1), std::int64_t(1), double(1)>>;
     constexpr auto case14 = get_front_v<val_list>;
     constexpr auto case15 = get_back_v<val_list>;
 
@@ -194,7 +194,7 @@ TEST(TuutilcppMplTest, ParameterPackTest)
     using concat_target3 = value_list<nullptr, float(1)>;
     using concat_target4 = value_list<short(1)>;
     using concated_list2 = concat_list_t<val_list, concat_target3, concat_target4>;
-    constexpr auto case17 = std::is_same_v<concated_list2, value_list<double(1), long long(1), char(1), int(1), nullptr, float(1), short(1)>>;
+    constexpr auto case17 = std::is_same_v<concated_list2, value_list<double(1), std::int64_t(1), char(1), int(1), nullptr, float(1), short(1)>>;
 
     EXPECT_TRUE(case1);
     EXPECT_TRUE(case2);
