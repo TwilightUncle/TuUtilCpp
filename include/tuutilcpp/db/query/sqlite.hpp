@@ -65,7 +65,7 @@ namespace tuutil::db::query
             + make_type_name_string<typename ColumnDefinition::field_type>::value + ' '
             + make_auto_increment_string<ColumnDefinition::auto_increment>()
             + make_not_null_string<ColumnDefinition::not_null>()
-        ).template remove_suffix<1>();
+        ).remove_suffix<1>();
 
         /**
          * @fn
