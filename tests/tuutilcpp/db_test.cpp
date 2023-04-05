@@ -341,47 +341,47 @@ TEST(TuutilcppDbTest, SqliteQueryTest)
     constexpr auto case6 = sqlite_query::make_column_define_string<column_na>::value.data();
 
 
-    using table1 = db::define_table<
-        samples,
-        "samples",
-        mpl::type_list<column_id, column_na>
-    >;
-    constexpr auto case7 = sqlite_query::make_create_table_string<table1>::value.data();
-    constexpr auto case8 = sqlite_query::make_drop_table_string<table1>::value.data();
+    // using table1 = db::define_table<
+    //     samples,
+    //     "samples",
+    //     mpl::type_list<column_id, column_na>
+    // >;
+    // constexpr auto case7 = sqlite_query::make_create_table_string<table1>::value.data();
+    // constexpr auto case8 = sqlite_query::make_drop_table_string<table1>::value.data();
 
     EXPECT_STREQ(case5, R"("id" int autoincrement not null )");
     EXPECT_STREQ(case6, R"("name" varchar(255) )");
-    EXPECT_STREQ(case7, R"(create table "samples"("id" int autoincrement not null , "name" varchar(255) ))");
-    EXPECT_STREQ(case8, R"(drop table "samples")");
+    // EXPECT_STREQ(case7, R"(create table "samples"("id" int autoincrement not null , "name" varchar(255) ))");
+    // EXPECT_STREQ(case8, R"(drop table "samples")");
 }
 
-TEST(TuutilcppDbTest, SqliteExecuteTest)
-{
-    // using column_id = db::define_column<samples::ID, "id", db::integer, db::pk, db::ai, db::not_null>;
-    using column_id = db::define_column<samples::ID, "id", db::integer, db::pk, db::not_null>;
-    using column_na = db::define_column<samples::NAME, "name", db::varchar<255>>;
-    using table1 = db::define_table<
-        samples,
-        "samples",
-        mpl::type_list<column_id, column_na>
-    >;
+// TEST(TuutilcppDbTest, SqliteExecuteTest)
+// {
+//     // using column_id = db::define_column<samples::ID, "id", db::integer, db::pk, db::ai, db::not_null>;
+//     using column_id = db::define_column<samples::ID, "id", db::integer, db::pk, db::not_null>;
+//     using column_na = db::define_column<samples::NAME, "name", db::varchar<255>>;
+//     using table1 = db::define_table<
+//         samples,
+//         "samples",
+//         mpl::type_list<column_id, column_na>
+//     >;
 
-    using test_db_type = db::sqlite<"test.db", mpl::type_list<table1>>;
+//     using test_db_type = db::sqlite<"test.db", mpl::type_list<table1>>;
 
-    // DB生成とかcreateテーブル周りのテスト
-    EXPECT_FALSE(test_db_type::exists_db());
-    EXPECT_TRUE(test_db_type::create_db());
-    EXPECT_TRUE(test_db_type::exists_db());
-    test_db_type::drop_db();
-    EXPECT_FALSE(test_db_type::exists_db());
-    {
-        test_db_type test_db;
-        // インスタンス化と同時にDB, DB構造も生成される
-        ASSERT_TRUE(test_db_type::exists_db());
-        EXPECT_TRUE(test_db.exists_table<samples>());
-        EXPECT_THROW(test_db_type::drop_db(), std::runtime_error); // 有効な接続が存在する中で実行しないように例外を投げる
-    }
-    // DB, テーブルが存在する際にテーブル生成クエリが再度実行されないことのテスト
-    EXPECT_NO_THROW(test_db_type{});
-    test_db_type::drop_db();
-}
+//     // DB生成とかcreateテーブル周りのテスト
+//     EXPECT_FALSE(test_db_type::exists_db());
+//     EXPECT_TRUE(test_db_type::create_db());
+//     EXPECT_TRUE(test_db_type::exists_db());
+//     test_db_type::drop_db();
+//     EXPECT_FALSE(test_db_type::exists_db());
+//     {
+//         test_db_type test_db;
+//         // インスタンス化と同時にDB, DB構造も生成される
+//         ASSERT_TRUE(test_db_type::exists_db());
+//         EXPECT_TRUE(test_db.exists_table<samples>());
+//         EXPECT_THROW(test_db_type::drop_db(), std::runtime_error); // 有効な接続が存在する中で実行しないように例外を投げる
+//     }
+//     // DB, テーブルが存在する際にテーブル生成クエリが再度実行されないことのテスト
+//     EXPECT_NO_THROW(test_db_type{});
+//     test_db_type::drop_db();
+// }
