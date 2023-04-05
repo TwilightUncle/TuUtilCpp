@@ -41,7 +41,7 @@ namespace tuutil::str::_regex
             static_assert(
                 inner_str[0] != ','
                 && inner_str.match_all_charset("0123456789,")
-                && std::ranges::count(inner_str, ',') <= 1,
+                && inner_str.count(",") <= 1,
                 "An error has occurred. [quantifier_perser]"
             );
 
