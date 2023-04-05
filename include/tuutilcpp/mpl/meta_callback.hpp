@@ -97,7 +97,7 @@ namespace tuutil::mpl
     using apply_t = typename apply<T, Args...>::type;
 
     template <MetaCallable F, class... Args>
-    requires (ReturenValueMetaFunction<apply<F, Args...>>)
+    // requires (ReturenValueMetaFunction<apply<F, Args...>>)
     constexpr auto apply_v = apply<F, Args...>::value;
 }
 
