@@ -125,21 +125,21 @@ template <class T1, class T2> struct get_min_size_type : public std::conditional
 
 TEST(TuutilcppMplTest, FoldTest)
 {
-    using type_list = dummy_non_metafunction<long long, short, unsigned short, unsigned long long, unsigned long>;
-    using l_max_type = foldl_t<quote<get_max_size_type>, long, type_list>;
-    using l_min_type = foldl_t<quote<get_min_size_type>, long, type_list>;
+    using type_list = dummy_non_metafunction<std::int64_t, std::int16_t, std::uint16_t, std::uint64_t, std::uint32_t>;
+    using l_max_type = foldl_t<quote<get_max_size_type>, std::int32_t, type_list>;
+    using l_min_type = foldl_t<quote<get_min_size_type>, std::int32_t, type_list>;
 
-    constexpr auto case1 = std::is_same_v<l_max_type, unsigned long long>;
-    constexpr auto case2 = std::is_same_v<l_min_type, short>;
+    constexpr auto case1 = std::is_same_v<l_max_type, std::uint64_t>;
+    constexpr auto case2 = std::is_same_v<l_min_type, std::int16_t>;
     
     EXPECT_TRUE(case1);
     EXPECT_TRUE(case2);
 
-    using r_max_type = foldr_t<quote<get_max_size_type>, long, type_list>;
-    using r_min_type = foldr_t<quote<get_min_size_type>, long, type_list>;
+    using r_max_type = foldr_t<quote<get_max_size_type>, std::int32_t, type_list>;
+    using r_min_type = foldr_t<quote<get_min_size_type>, std::int32_t, type_list>;
 
-    constexpr auto case3 = std::is_same_v<r_max_type, unsigned long long>;
-    constexpr auto case4 = std::is_same_v<r_min_type, short>;
+    constexpr auto case3 = std::is_same_v<r_max_type, std::uint64_t>;
+    constexpr auto case4 = std::is_same_v<r_min_type, std::int16_t>;
     
     EXPECT_TRUE(case3);
     EXPECT_TRUE(case4);
