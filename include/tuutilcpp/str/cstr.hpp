@@ -9,7 +9,7 @@ namespace tuutil::str
 {
     /**
      * @fn
-     * @brief subjectのposで指定した位置にsearchで指定した文字列が存在委するか判定
+     * @brief subjectのposで指定した位置にsearchで指定した文字列が存在するか判定
      * @param search 検索する文字列
      * @param subject 対象文字列
      * @param pos 判定位置
@@ -124,7 +124,7 @@ namespace tuutil::str
         {
             std::size_t s_pos = std::string_view::npos, cnt{};
             for (std::size_t i = offset; i < this->size(); i++) {
-                const auto is_find = char_set.find_first_of(this->data()[i]) != std::string_view::npos;
+                const auto is_find = str::find(cstr{{this->at(i), '\0'}}, char_set) != std::string_view::npos;
                 if (is_allow != is_find) break;
                 s_pos = (std::min)(s_pos, i);
                 cnt++;

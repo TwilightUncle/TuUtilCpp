@@ -49,8 +49,7 @@ namespace tuutil::str::_regex
 
         // キャプチャ名は一文字以上かつ、半角英数字_のみ指定可能としてそれ以外はコンパイルエラー
         static_assert(
-            reference_name.size() > 0,
-            // reference_name.size() > 0 && reference_name.match_all_charset(char_class::get_const_char_set<'w'>()),
+            reference_name.size() > 0 && reference_name.match_all_charset(char_class::get_const_char_set<'w'>()),
             "An error has occurred. [named reference_parser]"
         );
 
