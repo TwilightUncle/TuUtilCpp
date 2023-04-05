@@ -355,7 +355,7 @@ namespace tuutil::str
      * @brief •¶š—ñ‚ğ®”Œ^‚É•ÏŠ·
     */
     template <std::integral T>
-    constexpr T to_int(const std::string& s)
+    constexpr T to_int(std::string_view s)
     {
         T val{};
         for (const auto c: s) {
@@ -365,8 +365,6 @@ namespace tuutil::str
         }
         return val;
     }
-    template <std::integral T>
-    constexpr T to_int(std::string_view s) { return to_int<T>(std::string(s)); }
 
     /**
      * @fn

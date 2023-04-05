@@ -41,16 +41,16 @@ TEST(TuutilcppStrTest, RegexCaptureStoreTest)
  * @param char_list 許可または拒否文字のリスト。allow_or_denyによって拒否リストか許可リストか制御する
 */
 static constexpr bool is_allowed_string(
-    const std::string& target,
+    std::string_view target,
     bool allow_or_deny,
-    const std::string& char_list,
-    const std::string& bk_char_list,
+    std::string_view char_list,
+    std::string_view bk_char_list,
     bool is_bk_escape = true
 ) {
-    const auto collate_list = [&allow_or_deny](const std::string& list, char ch)->bool {
+    const auto collate_list = [&allow_or_deny](std::string_view list, char ch)->bool {
         // 許可リストの中から未発見のものがあった場合または、
         // 拒否リストの中から発見されたものがあった場合、失敗
-        return (list.find_first_of(ch) == std::string::npos) == allow_or_deny;
+        return (list.find_first_of(ch) == std::string_view::npos) == allow_or_deny;
     };
 
     for (int i = 0; i < target.size(); i++) {
@@ -112,7 +112,7 @@ TEST(TuutilcppStrTest, RegexExtractBrancketTest)
 template <cstr Pattern, std::size_t Pos>
 static constexpr auto get_regex_char_range_matcher()
 {
-    return [](const std::string& comp) -> bool {
+    return [](std::string_view comp) -> bool {
         using range_parser = _regex::char_set_parser<Pattern, Pos>;
         return is_allowed_string(
             comp,
