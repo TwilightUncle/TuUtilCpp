@@ -325,33 +325,33 @@ TEST(TuutilcppDbTest, DbRecordTest)
 TEST(TuutilcppDbTest, SqliteQueryTest)
 {
     using sqlite_query = db::query::sqlite;
-    constexpr auto case1 = sqlite_query::make_type_name_string_v<db::bit>;
-    constexpr auto case2 = sqlite_query::make_type_name_string_v<db::unsigned_bigint>;
-    constexpr auto case3 = sqlite_query::make_type_name_string_v<db::varchar<0>>;
-    constexpr auto case4 = sqlite_query::make_type_name_string_v<db::character<255>>;
+    constexpr auto case1 = sqlite_query::make_type_name_string_v<db::bit>.data();
+    constexpr auto case2 = sqlite_query::make_type_name_string_v<db::unsigned_bigint>.data();
+    constexpr auto case3 = sqlite_query::make_type_name_string_v<db::varchar<0>>.data();
+    constexpr auto case4 = sqlite_query::make_type_name_string_v<db::character<255>>.data();
 
-    EXPECT_STREQ(case1.data(), "bit");
-    EXPECT_STREQ(case2.data(), "bigint unsigned");
-    EXPECT_STREQ(case3.data(), "varchar(0)");
-    EXPECT_STREQ(case4.data(), "char(255)");
+    EXPECT_STREQ(case1, "bit");
+    EXPECT_STREQ(case2, "bigint unsigned");
+    EXPECT_STREQ(case3, "varchar(0)");
+    EXPECT_STREQ(case4, "char(255)");
 
     using column_id = db::define_column<samples::ID, "id", db::integer, db::pk, db::ai, db::not_null>;
     using column_na = db::define_column<samples::NAME, "name", db::varchar<255>>;
-    constexpr auto case5 = sqlite_query::make_column_define_string_v<column_id>;
-    constexpr auto case6 = sqlite_query::make_column_define_string_v<column_na>;
+    constexpr auto case5 = sqlite_query::make_column_define_string_v<column_id>.data();
+    constexpr auto case6 = sqlite_query::make_column_define_string_v<column_na>.data();
 
-    EXPECT_STREQ(case5.data(), R"("id" int autoincrement not null)");
-    EXPECT_STREQ(case6.data(), R"("name" varchar(255))");
+    EXPECT_STREQ(case5, R"("id" int autoincrement not null)");
+    EXPECT_STREQ(case6, R"("name" varchar(255))");
 
     using table1 = db::define_table<
         samples,
         "samples",
         mpl::type_list<column_id, column_na>
     >;
-    constexpr auto case7 = sqlite_query::make_create_table_string_v<table1>;
-    constexpr auto case8 = sqlite_query::make_drop_table_string_v<table1>;
-    EXPECT_STREQ(case7.data(), R"(create table "samples"("id" int autoincrement not null, "name" varchar(255)))");
-    EXPECT_STREQ(case8.data(), R"(drop table "samples")");
+    constexpr auto case7 = sqlite_query::make_create_table_string_v<table1>.data();
+    constexpr auto case8 = sqlite_query::make_drop_table_string_v<table1>.data();
+    EXPECT_STREQ(case7, R"(create table "samples"("id" int autoincrement not null, "name" varchar(255)))");
+    EXPECT_STREQ(case8, R"(drop table "samples")");
 }
 
 TEST(TuutilcppDbTest, SqliteExecuteTest)
