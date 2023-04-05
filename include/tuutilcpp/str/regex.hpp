@@ -100,7 +100,7 @@ namespace tuutil::str
         static constexpr auto exec(std::string_view s, std::size_t offset = 0, bool is_pos_lock = false)
         {
             auto cs = capture_store_type{};
-            auto re = parser::exec<parser::max_capture_count>(s, offset, is_pos_lock, cs);
+            auto re = parser::template exec<parser::max_capture_count>(s, offset, is_pos_lock, cs);
             return std::pair{cs, re};
         }
 
