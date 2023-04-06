@@ -14,7 +14,6 @@ C++20以降を対象とした、コンパイル時処理関連の汎用ヘッダ
 
 ## 環境
 C++20以降の規格に対応したコンパイラを利用すること。  
-Windows11において、Visual Studio 2022に付属のMSVCでビルド及びテスト実施。  
   
 以下、テスト実施環境
 - Windows 11 Home, MSVC 19.34.31935.0, build type debug
@@ -140,7 +139,6 @@ int main()
 ## テストのビルドコマンド
 CMakeをインストールし、パスを通しておくこと。 
 また、vcpkgもインストール済みであること。  
-MSVC以外のコンパイラを利用する場合、CMakeLists.txtの修正が必要かも。
 ```sh
 # 各自のソース展開先ディレクトリへ移動
 cd path/to/dir/TuUtilCpp
@@ -154,11 +152,7 @@ cmake -DTUUTILCPP_BUILD_TESTS=ON -DCMAKE_TOOLCHAIN_FILE=path\to\vcpkg\scripts\bu
 
 # テストソースをビルド
 cmake --build .
-```
-ビルド後、以下のファイルが作成される(Windows環境でMSVCの場合)ので、そのままターミナルに打ち込んで実行することでテストが実施される。
-- path\to\dir\TuUtilCpp\build\Debug\TuUtilCppTest.exe
 
-```sh
-# テスト実行
-path\to\dir\TuUtilCpp\build\Debug\TuUtilCppTest.exe
+# テスト実施
+ctest -C Debug
 ```
