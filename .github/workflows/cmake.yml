@@ -12,17 +12,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        target: [windows-msvc, ubuntu-gcc-11, ubuntu-gcc-12]
-        # target: [windows-msvc, ubuntu-gcc-11, ubuntu-gcc-12, ubuntu-clang]
+        target: [windows-msvc, ubuntu-gcc-12]
+        # target: [windows-msvc, ubuntu-gcc-12, ubuntu-clang]
         include:
           - target: windows-msvc
             os: windows-2022
             c_compiler: cl
             cpp_compiler: cl
-          - target: ubuntu-gcc-11
-            os: ubuntu-22.04
-            c_compiler: gcc-11
-            cpp_compiler: g++-11
           - target: ubuntu-gcc-12
             os: ubuntu-22.04
             c_compiler: gcc-12
